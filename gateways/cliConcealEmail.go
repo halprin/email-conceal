@@ -1,8 +1,8 @@
 package gateways
 
 import (
-	"github.com/halprin/email-conceal/context"
 	"fmt"
+	"github.com/halprin/email-conceal/context"
 )
 
 func CliConcealEmailGateway(cliArguments []string, applicationContext context.ApplicationContext) string {

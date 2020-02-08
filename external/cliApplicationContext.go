@@ -6,7 +6,7 @@ import (
 	"github.com/halprin/email-conceal/usecases"
 )
 
-type CliApplicationContext struct {}
+type CliApplicationContext struct{}
 
 func (cliAppContext CliApplicationContext) ConcealEmailGateway(cliArguments []string) string {
 	return gateways.CliConcealEmailGateway(cliArguments, cliAppContext)
