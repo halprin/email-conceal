@@ -2,11 +2,12 @@ package context
 
 type ApplicationContext interface {
 	//gateways
-	ConcealEmailGateway(cliArguments []string) string
+	ConcealEmailGateway(arguments []string) string
 
 	//usecases
-	ConcealEmailUsecase(email string) string
+	ConcealEmailUsecase(email string) (string, error)
 
 	//libraries
 	GenerateRandomUuid() string
+	Exit(returnCode int)
 }
