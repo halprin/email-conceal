@@ -1,9 +1,9 @@
 package external
 
 import (
-	"email-conceal/external/lib"
-	"email-conceal/gateways"
-	"email-conceal/usecases"
+	"github.com/halprin/email-conceal/external/lib"
+	"github.com/halprin/email-conceal/gateways"
+	"github.com/halprin/email-conceal/usecases"
 )
 
 type CliApplicationContext struct {}

@@ -1,7 +1,7 @@
 package usecases
 
 import (
-	"email-conceal/context"
+	"github.com/halprin/email-conceal/context"
 	"fmt"
 )
 

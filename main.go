@@ -1,7 +1,7 @@
 package main
 
 import (
-	"email-conceal/external"
+	"github.com/halprin/email-conceal/external"
 )
 
 func main() {

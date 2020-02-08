@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"email-conceal/context"
+	"github.com/halprin/email-conceal/context"
 	"github.com/google/uuid"
 )
 
