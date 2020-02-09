@@ -5,7 +5,7 @@ import (
 )
 
 func Cli() {
-	applicationContext := CliApplicationContext{}
+	applicationContext := &CliApplicationContext{}
 
 	applicationContext.ConcealEmailGateway(os.Args)
 }
