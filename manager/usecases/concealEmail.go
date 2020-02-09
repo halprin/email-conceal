@@ -2,8 +2,8 @@ package usecases
 
 import (
 	"fmt"
-	"github.com/halprin/email-conceal/context"
-	"github.com/halprin/email-conceal/entities"
+	"github.com/halprin/email-conceal/manager/context"
+	"github.com/halprin/email-conceal/manager/entities"
 )
 
 func ConcealEmail(sourceEmail string, applicationContext context.ApplicationContext) (string, error) {

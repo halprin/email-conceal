@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"fmt"
-	"github.com/halprin/email-conceal/context"
+	"github.com/halprin/email-conceal/manager/context"
 	"testing"
 )
 

@@ -1,8 +1,8 @@
 package gateways
 
 import (
-	"github.com/halprin/email-conceal/context"
-	"github.com/halprin/email-conceal/entities"
+	"github.com/halprin/email-conceal/manager/context"
+	"github.com/halprin/email-conceal/manager/entities"
 	"testing"
 )
 
