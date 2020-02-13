@@ -5,6 +5,7 @@ type ApplicationContext interface {
 	ForwardEmailGateway(arguments []string) error
 	ReadEmailGateway(url string) ([]byte, error)
 	SendEmailGateway(email []byte) error
+	EnvironmentGateway(key string) string
 
 	//usecases
 	ForwardEmailUsecase(url string) error

@@ -16,8 +16,8 @@ func AwsSesSendEmailGateway(email []byte, applicationContext context.Application
 	sesService := ses.New(session)
 
 	sendRawEmailInput := &ses.SendRawEmailInput{
-		Source:       aws.String("___@_____.___"),
-		Destinations: []*string{aws.String("___@_____.___")},
+		Source:       aws.String(applicationContext.EnvironmentGateway("FORWARDER_EMAIL")),
+		Destinations: []*string{aws.String(applicationContext.EnvironmentGateway("RECEIVING_EMAIL"))},
 		RawMessage:   &ses.RawMessage{
 			Data: email,
 		},

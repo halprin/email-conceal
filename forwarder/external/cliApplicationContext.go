@@ -20,6 +20,10 @@ func (cliAppContext *CliApplicationContext) SendEmailGateway(email []byte) error
 	return gateways.AwsSesSendEmailGateway(email, cliAppContext)
 }
 
+func (cliAppContext *CliApplicationContext) EnvironmentGateway(key string) string {
+	return gateways.OsEnvEnvironmentGateway(key, cliAppContext)
+}
+
 func (cliAppContext *CliApplicationContext) ForwardEmailUsecase(url string) error {
 	return usecases.ForwardEmailUsecase(url, cliAppContext)
 }
