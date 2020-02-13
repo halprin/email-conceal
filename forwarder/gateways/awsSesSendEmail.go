@@ -1,11 +1,11 @@
 package gateways
 
 import (
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/halprin/email-conceal/forwarder/context"
+	"github.com/halprin/email-conceal/forwarder/external/lib/errors"
 )
 
 func AwsSesSendEmailGateway(email []byte, applicationContext context.ApplicationContext) error {
@@ -23,13 +23,7 @@ func AwsSesSendEmailGateway(email []byte, applicationContext context.Application
 		},
 	}
 
-	result, err := sesService.SendRawEmail(sendRawEmailInput)
+	_, err := sesService.SendRawEmail(sendRawEmailInput)
 
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	fmt.Println(result)
-
-	return nil
+	return err
 }

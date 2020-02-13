@@ -46,12 +46,20 @@ func changeHeadersInEmail(email *mail.Message, applicationContext context.Applic
 
 	//get the "From" based header
 	originalFrom := fromAddressOf(email)
-	originalFromString := originalFrom.String()
+	if originalFrom == nil {
+		fmt.Println("E-mail doesn't have any from-based headers")
+		originalFrom = &mail.Address{
+			Name:    "Unknown Sender",
+			Address: applicationContext.EnvironmentGateway("FORWARDER_EMAIL"),
+		}
+	}
+
 	delete(email.Header, "From")
 	delete(email.Header, "Sender")
 	delete(email.Header, "Source")
 
 	//change the From to the service, and the Reply-To to the original sender
+	originalFromString := originalFrom.String()
 	newFrom := mail.Address{
 		Name:    originalFromString,
 		Address: applicationContext.EnvironmentGateway("FORWARDER_EMAIL"),
@@ -69,6 +77,10 @@ func fromAddressOf(email *mail.Message) *mail.Address {
 
 	if originalFrom == nil {
 		originalFrom, _ = email.Header.AddressList("Source")
+	}
+
+	if originalFrom == nil {
+		return nil
 	}
 
 	return originalFrom[0]
