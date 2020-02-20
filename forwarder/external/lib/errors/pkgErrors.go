@@ -6,10 +6,6 @@ func New(message string) error {
 	return errors.New(message)
 }
 
-func Wrap(err error, message string) error {
-	return errors.Wrap(err, message)
-}
-
-func Is(err, target error) bool {
+func Is(err error, target error) bool {
 	return errors.Is(err, target)
 }

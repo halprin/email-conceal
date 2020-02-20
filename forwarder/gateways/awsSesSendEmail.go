@@ -5,7 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/halprin/email-conceal/forwarder/context"
-	"github.com/halprin/email-conceal/forwarder/external/lib/errors"
 )
 
 func AwsSesSendEmailGateway(email []byte, applicationContext context.ApplicationContext) error {

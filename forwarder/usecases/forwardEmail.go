@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/halprin/email-conceal/forwarder/context"
-	"github.com/halprin/email-conceal/forwarder/external/lib/errors"
 	"net/mail"
 	"strings"
 )
@@ -14,13 +13,12 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 	//But maybe not?  I believe I may be passing around a "slice", which internally is a pointer?
 	rawEmail, err := applicationContext.ReadEmailGateway(url)
 	if err != nil {
-		errorMessage := fmt.Sprintf("Unable to read e-mail at %s", url)
-		return errors.Wrap(err, errorMessage)
+		return NewUnableToReadEmailError(url, err)
 	}
 
 	email, err := emailFromRawBytes(rawEmail)
 	if err != nil {
-		return errors.Wrap(err, "Unable to parse raw e-mail")
+		return NewUnableToParseEmailError(err)
 	}
 
 	changeHeadersInEmail(email, applicationContext)
@@ -30,7 +28,7 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 
 	err = applicationContext.SendEmailGateway(modifiedRawEmail)
 	if err != nil {
-		return errors.Wrap(err, "Unable to send e-mail")
+		return NewUnableToSendEmailError(err)
 	}
 
 	return nil
