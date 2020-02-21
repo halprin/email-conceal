@@ -2,20 +2,20 @@ package context
 
 type TestApplicationContext struct {
 	ReceivedForwardEmailGatewayArguments []string
-	ReturnErrorFromForwardEmailGateway        error
+	ReturnErrorFromForwardEmailGateway   error
 
 	ReceivedReadEmailGatewayArguments string
-	ReturnFromReadEmailGateway []byte
-	ReturnErrorFromReadEmailGateway        error
+	ReturnFromReadEmailGateway        []byte
+	ReturnErrorFromReadEmailGateway   error
 
 	ReceivedSendEmailGatewayArguments []byte
-	ReturnErrorFromSendEmailGateway        error
+	ReturnErrorFromSendEmailGateway   error
 
 	ReceivedEnvironmentGatewayArguments string
-	ReturnFromEnvironmentGateway string
+	ReturnFromEnvironmentGateway        string
 
 	ReceivedForwardEmailUsecaseArguments string
-	ReturnErrorForwardEmailUsecase        error
+	ReturnErrorForwardEmailUsecase       error
 
 	ReceivedExitReturnCode int
 }
