@@ -310,3 +310,51 @@ Test e-mail.
 		t.Errorf("The forwarder address name %s is missing from the e-mail and it should have been there", "Unknown Sender")
 	}
 }
+
+func TestForwardEmailUsecaseWithFailingToSendEmail(t *testing.T) {
+	email := `To: jobs@apple.com
+From: moof@apple.com
+Subject: lol
+
+Test e-mail
+`
+	appContext := context.TestApplicationContext{
+		ReturnFromReadEmailGateway: []byte(email),
+		ReturnErrorFromSendEmailGateway: errors.New("sending failed"),
+	}
+
+	err := ForwardEmailUsecase("https://email.com", &appContext)
+
+	if !errors.Is(err, NewUnableToSendEmailError(nil)) {
+		t.Errorf("An NewUnableToSendEmailError should have been returned from ForwardEmailUsecase")
+		t.Errorf("Instead this was returned %+v", err)
+	}
+}
+
+func TestForwardEmailUsecaseEverythingWorks(t *testing.T) {
+	body := "This is the coolest e-mail ever"
+
+	email := fmt.Sprintf(`To: jobs@apple.com
+From: moof@apple.com
+Subject: lol
+
+%s
+`, body)
+
+	appContext := context.TestApplicationContext{
+		ReturnFromReadEmailGateway: []byte(email),
+	}
+
+	err := ForwardEmailUsecase("https://email.com", &appContext)
+
+	if err != nil {
+		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
+		t.Errorf("Instead this was returned %+v", err)
+	}
+
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+
+	if !bytes.Contains(rawForwardedEmail, []byte(body)) {
+		t.Errorf("The e-mail body %s is missing from the e-mail and it should have been there", body)
+	}
+}
