@@ -2,7 +2,7 @@ package lib
 
 import (
 	"github.com/google/uuid"
-	"github.com/halprin/email-conceal/context"
+	"github.com/halprin/email-conceal/manager/context"
 )
 
 func GenerateGoogleRandomUuid(applicationContext context.ApplicationContext) string {

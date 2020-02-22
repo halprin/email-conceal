@@ -1,9 +1,9 @@
 package external
 
 import (
-	"github.com/halprin/email-conceal/external/lib"
-	"github.com/halprin/email-conceal/gateways"
-	"github.com/halprin/email-conceal/usecases"
+	"github.com/halprin/email-conceal/manager/external/lib"
+	"github.com/halprin/email-conceal/manager/gateways"
+	"github.com/halprin/email-conceal/manager/usecases"
 	"os"
 )
 

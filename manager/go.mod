@@ -1,4 +1,4 @@
-module github.com/halprin/email-conceal
+module github.com/halprin/email-conceal/manager
 
 go 1.13
 
