@@ -8,11 +8,11 @@ import (
 )
 
 func AwsSesSendEmailGateway(email []byte, applicationContext context.ApplicationContext) error {
-	config := &aws.Config{
-		Region: aws.String("us-east-1"),
+	awsSession, err := session.NewSession()
+	if err != nil {
+		return err
 	}
-	session, _ := session.NewSession(config)
-	sesService := ses.New(session)
+	sesService := ses.New(awsSession)
 
 	sendRawEmailInput := &ses.SendRawEmailInput{
 		Source:       aws.String(applicationContext.EnvironmentGateway("FORWARDER_EMAIL")),
@@ -22,7 +22,7 @@ func AwsSesSendEmailGateway(email []byte, applicationContext context.Application
 		},
 	}
 
-	_, err := sesService.SendRawEmail(sendRawEmailInput)
+	_, err = sesService.SendRawEmail(sendRawEmailInput)
 
 	return err
 }
