@@ -7,5 +7,5 @@ import (
 func Cli() {
 	applicationContext := &CliApplicationContext{}
 
-	applicationContext.ForwardEmailGateway(os.Args)
+	_ = applicationContext.ForwardEmailGateway(os.Args)
 }
