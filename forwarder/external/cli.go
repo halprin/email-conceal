@@ -7,5 +7,8 @@ import (
 func Cli() {
 	applicationContext := &CliApplicationContext{}
 
-	_ = applicationContext.ForwardEmailGateway(os.Args)
+	arguments := map[string]interface{}{
+		"url": os.Args[1],
+	}
+	_ = applicationContext.ForwardEmailGateway(arguments)
 }

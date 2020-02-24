@@ -1,7 +1,7 @@
 package context
 
 type TestApplicationContext struct {
-	ReceivedForwardEmailGatewayArguments []string
+	ReceivedForwardEmailGatewayArguments map[string]interface{}
 	ReturnErrorFromForwardEmailGateway   error
 
 	ReceivedReadEmailGatewayArguments string
@@ -20,7 +20,7 @@ type TestApplicationContext struct {
 	ReceivedExitReturnCode int
 }
 
-func (appContext *TestApplicationContext) ForwardEmailGateway(arguments []string) error {
+func (appContext *TestApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
 	appContext.ReceivedForwardEmailGatewayArguments = arguments
 	return appContext.ReturnErrorFromForwardEmailGateway
 }

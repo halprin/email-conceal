@@ -5,8 +5,8 @@ import (
 	"github.com/halprin/email-conceal/forwarder/context"
 )
 
-func CliForwardEmail(cliArguments []string, applicationContext context.ApplicationContext) error {
-	url := cliArguments[1]
+func CliForwardEmail(cliArguments map[string]interface{}, applicationContext context.ApplicationContext) error {
+	url := cliArguments["url"].(string)
 	fmt.Println("URL to read e-mail from =", url)
 
 	err := applicationContext.ForwardEmailUsecase(url)
