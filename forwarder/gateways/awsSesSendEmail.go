@@ -7,12 +7,13 @@ import (
 	"github.com/halprin/email-conceal/forwarder/context"
 )
 
+var awsSession, sessionErr = session.NewSession()
+var sesService = ses.New(awsSession)
+
 func AwsSesSendEmailGateway(email []byte, applicationContext context.ApplicationContext) error {
-	awsSession, err := session.NewSession()
-	if err != nil {
-		return err
+	if sessionErr != nil {
+		return sessionErr
 	}
-	sesService := ses.New(awsSession)
 
 	sendRawEmailInput := &ses.SendRawEmailInput{
 		Source:       aws.String(applicationContext.EnvironmentGateway("FORWARDER_EMAIL")),
@@ -22,7 +23,7 @@ func AwsSesSendEmailGateway(email []byte, applicationContext context.Application
 		},
 	}
 
-	_, err = sesService.SendRawEmail(sendRawEmailInput)
+	_, err := sesService.SendRawEmail(sendRawEmailInput)
 
 	return err
 }

@@ -8,7 +8,7 @@ import (
 
 type CliApplicationContext struct{}
 
-func (cliAppContext *CliApplicationContext) ForwardEmailGateway(arguments []string) error {
+func (cliAppContext *CliApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
 	return gateways.CliForwardEmail(arguments, cliAppContext)
 }
 

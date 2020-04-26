@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/halprin/email-conceal/forwarder/context"
+	"log"
 	"net/mail"
 	"strings"
 )
@@ -11,23 +12,31 @@ import (
 func ForwardEmailUsecase(url string, applicationContext context.ApplicationContext) error {
 	//TODO: I may be copying `rawEmail` around, which could be 150 MB or whatever size big of an e-mail.  That would be bad.
 	//But maybe not?  I believe I may be passing around a "slice", which internally is a pointer?
+	log.Println("Reading the e-mail")
 	rawEmail, err := applicationContext.ReadEmailGateway(url)
 	if err != nil {
+		log.Printf("Reading the e-mail failed, %+v\n", err)
 		return NewUnableToReadEmailError(url, err)
 	}
 
+	log.Println("Parsing the e-mail")
 	email, err := emailFromRawBytes(rawEmail)
 	if err != nil {
+		log.Printf("Parsing the e-mail failed, %+v\n", err)
 		return NewUnableToParseEmailError(err)
 	}
 
+	log.Println("Changing the headers in e-mail")
 	changeHeadersInEmail(email, applicationContext)
 
+	log.Println("Reconstruct raw e-mail bytes")
 	myTypeEmail := ByteSliceMessage(*email)
 	modifiedRawEmail := myTypeEmail.ByteSlice()
 
+	log.Println("Sending the e-mail")
 	err = applicationContext.SendEmailGateway(modifiedRawEmail)
 	if err != nil {
+		log.Printf("Sending the e-mail failed, %+v\n", err)
 		return NewUnableToSendEmailError(err)
 	}
 

@@ -10,7 +10,9 @@ func TestCliForwardEmailFails(t *testing.T) {
 	appContext := context.TestApplicationContext{
 		ReturnErrorForwardEmailUsecase: errors.New("forward e-mail usecase failed"),
 	}
-	var arguments = []string{"program_invoked", "/path/to/email.dms"}
+	arguments := map[string]interface{}{
+		"url": "/path/to/email.dms",
+	}
 
 	err := CliForwardEmail(arguments, &appContext)
 
@@ -26,7 +28,9 @@ func TestCliForwardEmailFails(t *testing.T) {
 func TestCliForwardEmailSuccess(t *testing.T) {
 	appContext := context.TestApplicationContext{}
 	emailPath := "/path/to/email.dms"
-	var arguments = []string{"program_invoked", emailPath}
+	arguments := map[string]interface{}{
+		"url": emailPath,
+	}
 
 	err := CliForwardEmail(arguments, &appContext)
 
