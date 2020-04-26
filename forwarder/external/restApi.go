@@ -11,7 +11,7 @@ func RestApi() {
 
 	router.POST("/v1/forward", forwardEmail)
 
-	router.Run(":8080")
+	router.Run(":8000")
 }
 
 func forwardEmail(context *gin.Context) {
