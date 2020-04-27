@@ -1,6 +1,7 @@
 package external
 
 import (
+	"github.com/halprin/email-conceal/forwarder/controllers"
 	"github.com/halprin/email-conceal/forwarder/gateways"
 	"github.com/halprin/email-conceal/forwarder/usecases"
 	"os"
@@ -9,7 +10,7 @@ import (
 type CliApplicationContext struct{}
 
 func (cliAppContext *CliApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
-	return gateways.CliForwardEmail(arguments, cliAppContext)
+	return controllers.CliForwardEmail(arguments, cliAppContext)
 }
 
 func (cliAppContext *CliApplicationContext) ReadEmailGateway(url string) ([]byte, error) {
