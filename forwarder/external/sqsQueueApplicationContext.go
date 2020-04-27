@@ -14,7 +14,7 @@ func (appContext *SqsQueueApplicationContext) ForwardEmailGateway(arguments map[
 }
 
 func (appContext *SqsQueueApplicationContext) ReadEmailGateway(url string) ([]byte, error) {
-	return gateways.FileReadEmailGateway(url, appContext)
+	return gateways.S3ReadEmailGateway(url, appContext)
 }
 
 func (appContext *SqsQueueApplicationContext) SendEmailGateway(email []byte) error {
