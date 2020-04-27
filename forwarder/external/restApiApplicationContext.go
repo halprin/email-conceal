@@ -1,6 +1,7 @@
 package external
 
 import (
+	"github.com/halprin/email-conceal/forwarder/controllers"
 	"github.com/halprin/email-conceal/forwarder/gateways"
 	"github.com/halprin/email-conceal/forwarder/usecases"
 	"os"
@@ -8,26 +9,26 @@ import (
 
 type RestApiApplicationContext struct{}
 
-func (cliAppContext *RestApiApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
-	return gateways.RestApiForwardEmail(arguments, cliAppContext)
+func (appContext *RestApiApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
+	return controllers.RestApiForwardEmail(arguments, appContext)
 }
 
-func (cliAppContext *RestApiApplicationContext) ReadEmailGateway(url string) ([]byte, error) {
-	return gateways.FileReadEmailGateway(url, cliAppContext)
+func (appContext *RestApiApplicationContext) ReadEmailGateway(url string) ([]byte, error) {
+	return gateways.FileReadEmailGateway(url, appContext)
 }
 
-func (cliAppContext *RestApiApplicationContext) SendEmailGateway(email []byte) error {
-	return gateways.AwsSesSendEmailGateway(email, cliAppContext)
+func (appContext *RestApiApplicationContext) SendEmailGateway(email []byte) error {
+	return gateways.AwsSesSendEmailGateway(email, appContext)
 }
 
-func (cliAppContext *RestApiApplicationContext) EnvironmentGateway(key string) string {
-	return gateways.OsEnvEnvironmentGateway(key, cliAppContext)
+func (appContext *RestApiApplicationContext) EnvironmentGateway(key string) string {
+	return gateways.OsEnvEnvironmentGateway(key, appContext)
 }
 
-func (cliAppContext *RestApiApplicationContext) ForwardEmailUsecase(url string) error {
-	return usecases.ForwardEmailUsecase(url, cliAppContext)
+func (appContext *RestApiApplicationContext) ForwardEmailUsecase(url string) error {
+	return usecases.ForwardEmailUsecase(url, appContext)
 }
 
-func (cliAppContext *RestApiApplicationContext) Exit(returnCode int) {
+func (appContext *RestApiApplicationContext) Exit(returnCode int) {
 	os.Exit(returnCode)
 }
