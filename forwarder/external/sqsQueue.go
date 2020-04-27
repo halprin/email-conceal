@@ -7,6 +7,8 @@ import (
 	"log"
 )
 
+var sqsQueueApplicationContext = &SqsQueueApplicationContext{}
+
 func SqsQueueListener() {
 	sqsService := createSqsService()
 
@@ -36,10 +38,20 @@ func listenToQueue(sqsService *sqs.SQS, queueUrl *string) {
 
 func handleQueueMessage(message *sqs.Message, sqsService *sqs.SQS, queueUrl *string) {
 	log.Print("Handling queue message")
-	log.Print(*message.Body)
+
+	arguments := map[string]interface{} {
+		"message": message.Body,
+	}
+
+	err := sqsQueueApplicationContext.ForwardEmailGateway(arguments)
+	if err != nil {
+		//don't delete the message since we weren't able to handle it
+		log.Printf("Failed to handle the message, do not delete it")
+		return
+	}
 
 	//delete the message
-	_, err := sqsService.DeleteMessage(&sqs.DeleteMessageInput{
+	_, err = sqsService.DeleteMessage(&sqs.DeleteMessageInput{
 		QueueUrl:      queueUrl,
 		ReceiptHandle: message.ReceiptHandle,
 	})
@@ -51,7 +63,7 @@ func handleQueueMessage(message *sqs.Message, sqsService *sqs.SQS, queueUrl *str
 
 func getQueueUrl(sqsService *sqs.SQS) *string {
 	queueUrlResult, err := sqsService.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String("email-conceal-forwarder-dev"),
+		QueueName: aws.String(sqsQueueApplicationContext.EnvironmentGateway("SQS_QUEUE_NAME")),
 	})
 
 	if err != nil {

@@ -1,41 +1,51 @@
-package gateways
+package controllers
 
 import (
+	"encoding/json"
 	"github.com/halprin/email-conceal/forwarder/context"
 	"log"
-	"net/http"
+	"strings"
 )
 
-type RestApiRequestBody struct {
-	Url string `json:"url" binding:"required"`
-}
-
-type RestContext interface {
-	String(code int, format string, values ...interface{})
-	BindJSON(obj interface{}) error
-}
-
 func SqsQueueForwardEmail(arguments map[string]interface{}, applicationContext context.ApplicationContext) error {
-	requestContext := arguments["context"].(RestContext)
+	messageJsonString := arguments["message"].(*string)
+	var message map[string]interface{}
 
-	var json RestApiRequestBody
-	err := requestContext.BindJSON(&json)
+	err := json.Unmarshal([]byte(*messageJsonString), &message)
 	if err != nil {
-		log.Printf("Failed to parse JSON, error = %+v\n", err)
-		requestContext.String(http.StatusBadRequest, "Failed to parse JSON, you must provide a 'url' property set to the URL to the e-mail")
+		log.Printf("Unable to unmarshal the JSON message; %+v", err)
 		return err
 	}
 
-	log.Println("URL to read e-mail from =", json.Url)
+	messageRecords := message["Records"].([]interface{})
+	for _, record := range messageRecords {
+		s3 := record.(map[string]interface{})["s3"].(map[string]interface{})
+		bucket := s3["bucket"].(map[string]interface{})["name"].(string)
+		object := s3["object"].(map[string]interface{})["key"].(string)
 
-	err = applicationContext.ForwardEmailUsecase(json.Url)
-	if err != nil {
-		log.Printf("Unable to forward e-mail due to error, %+v\n", err)
-		requestContext.String(http.StatusInternalServerError, "E-mail did not forward.  Reach out to the administrator.")
-		return err
+		url := constructS3Url(bucket, object)
+
+		log.Println("URL to read e-mail from =", url)
+
+		err = applicationContext.ForwardEmailUsecase(url)
+		if err != nil {
+			log.Printf("Unable to forward e-mail at %s due to error, %+v\n", url, err)
+			return err
+		}
+
+		log.Printf("Forwarded e-mail at %s", url)
 	}
 
-	log.Println("Forwarded e-mail")
-	requestContext.String(http.StatusCreated, "E-mail forwarded successfully")
 	return nil
+}
+
+func constructS3Url(bucket string, object string) string {
+	urlBuilder := strings.Builder{}
+
+	urlBuilder.WriteString("s3://")
+	urlBuilder.WriteString(bucket)
+	urlBuilder.WriteString("/")
+	urlBuilder.WriteString(object)
+
+	return urlBuilder.String()
 }

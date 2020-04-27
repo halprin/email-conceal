@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var applicationContext = &RestApiApplicationContext{}
+var restApiApplicationContext = &RestApiApplicationContext{}
 
 func RestApi() {
 	router := gin.Default()
@@ -19,5 +19,5 @@ func forwardEmail(context *gin.Context) {
 		"context": context,
 	}
 
-	_ = applicationContext.ForwardEmailGateway(arguments)
+	_ = restApiApplicationContext.ForwardEmailGateway(arguments)
 }
