@@ -1,4 +1,4 @@
-package gateways
+package controllers
 
 import (
 	"fmt"

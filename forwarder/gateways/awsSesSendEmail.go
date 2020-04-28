@@ -2,12 +2,10 @@ package gateways
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/halprin/email-conceal/forwarder/context"
 )
 
-var awsSession, sessionErr = session.NewSession()
 var sesService = ses.New(awsSession)
 
 func AwsSesSendEmailGateway(email []byte, applicationContext context.ApplicationContext) error {
