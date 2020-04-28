@@ -7,21 +7,34 @@ import (
 	"strings"
 )
 
+type S3FileUploadedEvent struct {
+	Records []struct {
+		S3 struct{
+			Bucket struct{
+				Name string
+			}
+			Object struct{
+				Key string
+			}
+		}
+	}
+}
+
 func SqsQueueForwardEmail(arguments map[string]interface{}, applicationContext context.ApplicationContext) error {
 	messageJsonString := arguments["message"].(*string)
-	var message map[string]interface{}
 
+	var message S3FileUploadedEvent
 	err := json.Unmarshal([]byte(*messageJsonString), &message)
 	if err != nil {
 		log.Printf("Unable to unmarshal the JSON message; %+v", err)
 		return err
 	}
 
-	messageRecords := message["Records"].([]interface{})
+	messageRecords := message.Records
 	for _, record := range messageRecords {
-		s3 := record.(map[string]interface{})["s3"].(map[string]interface{})
-		bucket := s3["bucket"].(map[string]interface{})["name"].(string)
-		object := s3["object"].(map[string]interface{})["key"].(string)
+		s3 := record.S3
+		bucket := s3.Bucket.Name
+		object := s3.Object.Key
 
 		url := constructS3Url(bucket, object)
 
