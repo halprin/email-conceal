@@ -67,7 +67,7 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 
 	bucket := "a_bucket"
 	key := "an_object.txt"
-	message := fmt.Sprintf( //no bucket key
+	message := fmt.Sprintf(
 `{
 	"Records": [{
 		"s3": {
@@ -80,7 +80,7 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 		}
 	}]
 }`, bucket, key)
-	expectedUrl := fmt.Sprintf("s3://%s/%s", bucket, key) // the lack of bucket because the bucket key was not correct in the above JSON
+	expectedUrl := fmt.Sprintf("s3://%s/%s", bucket, key)
 
 	arguments := map[string]interface{}{
 		"message": &message,
@@ -102,7 +102,7 @@ func TestSqsQueueForwardEmailIsSuccess(t *testing.T) {
 
 	bucket := "a_bucket"
 	key := "an_object.txt"
-	message := fmt.Sprintf( //no bucket key
+	message := fmt.Sprintf(
 		`{
 	"Records": [{
 		"s3": {
@@ -115,7 +115,7 @@ func TestSqsQueueForwardEmailIsSuccess(t *testing.T) {
 		}
 	}]
 }`, bucket, key)
-	expectedUrl := fmt.Sprintf("s3://%s/%s", bucket, key) // the lack of bucket because the bucket key was not correct in the above JSON
+	expectedUrl := fmt.Sprintf("s3://%s/%s", bucket, key)
 
 	arguments := map[string]interface{}{
 		"message": &message,
