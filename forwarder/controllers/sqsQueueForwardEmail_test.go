@@ -88,7 +88,7 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 
 	err := SqsQueueForwardEmail(arguments, &appContext)
 
-	if err == expectedErrorFromUsecase {
+	if err != expectedErrorFromUsecase {
 		t.Error("A specific error should have been returned from SqsQueueForwardEmail controller")
 	}
 
