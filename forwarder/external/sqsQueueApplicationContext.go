@@ -9,7 +9,7 @@ import (
 
 type SqsQueueApplicationContext struct{}
 
-func (appContext *SqsQueueApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
+func (appContext *SqsQueueApplicationContext) ForwardEmailController(arguments map[string]interface{}) error {
 	return controllers.SqsQueueForwardEmail(arguments, appContext)
 }
 

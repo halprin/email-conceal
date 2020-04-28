@@ -10,5 +10,5 @@ func Cli() {
 	arguments := map[string]interface{}{
 		"url": os.Args[1],
 	}
-	_ = applicationContext.ForwardEmailGateway(arguments)
+	_ = applicationContext.ForwardEmailController(arguments)
 }

@@ -9,7 +9,7 @@ import (
 
 type RestApiApplicationContext struct{}
 
-func (appContext *RestApiApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
+func (appContext *RestApiApplicationContext) ForwardEmailController(arguments map[string]interface{}) error {
 	return controllers.RestApiForwardEmail(arguments, appContext)
 }
 

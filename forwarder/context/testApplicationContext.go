@@ -20,7 +20,7 @@ type TestApplicationContext struct {
 	ReceivedExitReturnCode int
 }
 
-func (appContext *TestApplicationContext) ForwardEmailGateway(arguments map[string]interface{}) error {
+func (appContext *TestApplicationContext) ForwardEmailController(arguments map[string]interface{}) error {
 	appContext.ReceivedForwardEmailGatewayArguments = arguments
 	return appContext.ReturnErrorFromForwardEmailGateway
 }

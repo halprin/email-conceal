@@ -2,7 +2,7 @@ package context
 
 type ApplicationContext interface {
 	//gateways
-	ForwardEmailGateway(arguments map[string]interface{}) error
+	ForwardEmailController(arguments map[string]interface{}) error
 	ReadEmailGateway(url string) ([]byte, error)
 	SendEmailGateway(email []byte) error
 	EnvironmentGateway(key string) string

@@ -43,7 +43,7 @@ func handleQueueMessage(message *sqs.Message, sqsService *sqs.SQS, queueUrl *str
 		"message": message.Body,
 	}
 
-	err := sqsQueueApplicationContext.ForwardEmailGateway(arguments)
+	err := sqsQueueApplicationContext.ForwardEmailController(arguments)
 	if err != nil {
 		//don't delete the message since we weren't able to handle it
 		log.Printf("Failed to handle the message, do not delete it")

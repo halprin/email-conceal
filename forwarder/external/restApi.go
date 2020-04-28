@@ -19,5 +19,5 @@ func forwardEmail(context *gin.Context) {
 		"context": context,
 	}
 
-	_ = restApiApplicationContext.ForwardEmailGateway(arguments)
+	_ = restApiApplicationContext.ForwardEmailController(arguments)
 }
