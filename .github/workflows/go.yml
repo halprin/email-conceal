@@ -35,7 +35,7 @@ jobs:
     - name: Test Forwarder
       run: |
         cd ./forwarder/
-        go test -v .
+        go test -v ./...
 
     - name: Build Forwarder
       run: |
@@ -45,7 +45,7 @@ jobs:
     - name: Test Manager
       run: |
         cd ./manager/
-        go test -v .
+        go test -v ./...
 
     - name: Build Manager
       run: |
