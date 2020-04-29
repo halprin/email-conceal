@@ -17,4 +17,6 @@ module "forwarder" {
   environment = "dev"
 
   email_lifetime = 4
+  email_address = var.email_address
+  domain = var.domain
 }

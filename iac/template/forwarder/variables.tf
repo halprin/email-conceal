@@ -4,10 +4,15 @@ variable "environment" {
   description = "The dev or prod environment"
 }
 
-//variable "domain" {
-//  type = string
-//  description = "The domain name that should be utilized"
-//}
+variable "email_address" {
+  type = string
+  description = "The email address, but just the part to the left of the domain name and @"
+}
+
+variable "domain" {
+  type = string
+  description = "The domain name that should be utilized"
+}
 
 variable "email_lifetime" {
   type = number

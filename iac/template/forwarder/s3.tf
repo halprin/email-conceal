@@ -36,7 +36,7 @@ resource "aws_s3_bucket_notification" "add_email_notification" {
     events = ["s3:ObjectCreated:*"]
   }
 
-  depends_on = [aws_kms_key.application_key]
+  depends_on = [aws_kms_key.application_key]  //depend on the KMS key, with its policy allowing the S3 bucket to send encrypted messages to the SQS queue
 }
 
 data "aws_caller_identity" "current" {}

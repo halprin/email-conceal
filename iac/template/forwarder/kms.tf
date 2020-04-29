@@ -16,13 +16,24 @@ resource "aws_kms_alias" "application_key_alias" {
 
 data "aws_iam_policy_document" "s3_can_encrypt_for_sqs" {
   statement {
-    sid = "EncryptDataForSqs"
+    sid = "DecryptDataForSqs"
     effect = "Allow"
     principals {
       type = "Service"
       identifiers = ["s3.amazonaws.com"]
     }
     actions = ["kms:GenerateDataKey", "kms:Decrypt"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "EncryptDataForSes"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = ["ses.amazonaws.com"]
+    }
+    actions = ["kms:GenerateDataKey", "kms:Encrypt"]
     resources = ["*"]
   }
 
