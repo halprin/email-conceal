@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "email_storage" {
-  bucket = "email-conceal-${var.environment}"
+  bucket = data.null_data_source.names.outputs.bucket_name
   acl = "private"
 
   policy = data.aws_iam_policy_document.ses_write_to_s3.json
@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "ses_write_to_s3" {
       identifiers = ["ses.amazonaws.com"]
     }
     actions = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::email-conceal-${var.environment}/*"]
+    resources = ["arn:aws:s3:::${data.null_data_source.names.outputs.bucket_name}/*"]
     condition {
       test = "StringEquals"
       variable = "aws:Referer"
