@@ -27,6 +27,18 @@ resource "aws_s3_bucket" "email_storage" {
   }
 }
 
+resource "aws_s3_bucket_notification" "add_email_notification" {
+  bucket = aws_s3_bucket.email_storage.id
+
+  queue {
+    id = "NotifyQueue"
+    queue_arn = aws_sqs_queue.email_storage_add_event_queue.arn
+    events = ["s3:ObjectCreated:*"]
+  }
+
+  depends_on = [aws_kms_key.application_key]
+}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "ses_write_to_s3" {
