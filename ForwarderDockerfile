@@ -1,0 +1,17 @@
+FROM golang:1.14 as builder
+
+ENV GOOS=linux
+ENV GOARCH=amd64
+
+WORKDIR /opt/build/
+
+COPY ./forwarder/ ./
+
+RUN go build -o forwarder .
+
+
+FROM scratch
+
+COPY --from=builder /opt/build/forwarder /usr/local/bin/forwarder
+
+ENTRYPOINT ["/usr/local/bin/forwarder"]
