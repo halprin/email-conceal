@@ -2,12 +2,17 @@ FROM golang:1.14 as builder
 
 ENV GOOS=linux
 ENV GOARCH=amd64
+ENV CGO_ENABLED=0
+
+ENV FORWARDER_EMAIL=""
+ENV RECEIVING_EMAIL=""
+ENV SQS_QUEUE_NAME=""
 
 WORKDIR /opt/build/
 
 COPY ./forwarder/ ./
 
-RUN go build -o forwarder .
+RUN go build -ldflags="-w -s" -o forwarder .
 
 
 FROM scratch
