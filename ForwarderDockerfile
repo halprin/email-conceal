@@ -8,6 +8,8 @@ ENV FORWARDER_EMAIL=""
 ENV RECEIVING_EMAIL=""
 ENV SQS_QUEUE_NAME=""
 
+RUN apt update && apt install -y --no-install-recommends ca-certificates
+
 WORKDIR /opt/build/
 
 COPY ./forwarder/ ./
@@ -17,6 +19,7 @@ RUN go build -ldflags="-w -s" -o forwarder .
 
 FROM scratch
 
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /opt/build/forwarder /usr/local/bin/forwarder
 
 ENTRYPOINT ["/usr/local/bin/forwarder"]
