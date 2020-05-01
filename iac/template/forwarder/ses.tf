@@ -3,7 +3,7 @@ resource "aws_ses_receipt_rule" "send_to_s3" {
   rule_set_name = "INBOUND_MAIL"
   enabled       = true
 
-  recipients = ["${var.email_address}@${var.domain}"]
+  recipients = ["${var.concealed_email_prefix}@${var.domain}"]
 
   scan_enabled = false
   tls_policy   = "Optional"
