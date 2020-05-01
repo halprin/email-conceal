@@ -19,8 +19,8 @@ func SqsQueueListener() {
 }
 
 func listenToQueue(sqsService *sqs.SQS, queueUrl *string) {
+	log.Printf("Starting to listen to queue %s", *queueUrl)
 	for {
-		log.Print("Calling SQS ReceiveMessage")
 		queueMessages, err := sqsService.ReceiveMessage(&sqs.ReceiveMessageInput{
 			QueueUrl: queueUrl,
 			MaxNumberOfMessages: aws.Int64(5),

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "email-conceal-forwarder-${environment}",
+    "image": "${image}",
+    "essential": true,
+    "environment": [
+      {"name":  "FORWARDER_EMAIL", "value": "${forwarderEmail}"},
+      {"name":  "RECEIVING_EMAIL", "value": "${receivingEmail}"},
+      {"name":  "SQS_QUEUE_NAME", "value": "${sqsQueueName}"}
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/email-conceal-forwarder-dev",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "startTimeout": 5,
+    "stopTimeout": 10
+  }
+]

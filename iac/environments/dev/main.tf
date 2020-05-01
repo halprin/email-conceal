@@ -16,7 +16,9 @@ module "forwarder" {
 
   environment = "dev"
 
-  email_lifetime = 4
-  email_address  = var.email_address
-  domain         = var.domain
+  email_lifetime         = 4
+  concealed_email_prefix = var.concealed_email_prefix
+  receiving_email        = var.receiving_email
+  domain                 = var.domain
+  docker_image           = var.docker_image
 }
