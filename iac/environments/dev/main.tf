@@ -20,5 +20,5 @@ module "forwarder" {
   concealed_email_prefix = var.concealed_email_prefix
   receiving_email        = var.receiving_email
   domain                 = var.domain
-  docker_image = var.docker_image
+  docker_image           = var.docker_image
 }
