@@ -66,7 +66,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 	if bytes.Contains(rawForwardedEmail, []byte(dkimHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", dkimHeader)
 	}
@@ -99,7 +99,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 	if bytes.Contains(rawForwardedEmail, []byte(fromHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", fromHeader)
 	}
@@ -136,7 +136,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 	if bytes.Contains(rawForwardedEmail, []byte(fromHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", fromHeader)
 	}
@@ -173,7 +173,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(fromName)) {
 		t.Errorf("The from name %s is missing from the e-mail and it should have been there", fromName)
@@ -207,7 +207,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(fromEmail)) {
 		t.Errorf("The from address %s is missing from the e-mail and it should have been there", fromEmail)
@@ -241,7 +241,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(senderEmail)) {
 		t.Errorf("The sender address %s is missing from the e-mail and it should have been there", senderEmail)
@@ -273,7 +273,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(sourceEmail)) {
 		t.Errorf("The source address %s is missing from the e-mail and it should have been there", sourceEmail)
@@ -301,7 +301,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(forwarderEmail)) {
 		t.Errorf("The forwarder address %s is missing from the e-mail and it should have been there", forwarderEmail)
@@ -352,7 +352,7 @@ Subject: lol
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(body)) {
 		t.Errorf("The e-mail body %s is missing from the e-mail and it should have been there", body)

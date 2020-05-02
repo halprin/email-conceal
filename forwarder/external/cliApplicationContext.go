@@ -17,8 +17,8 @@ func (cliAppContext *CliApplicationContext) ReadEmailGateway(url string) ([]byte
 	return gateways.FileReadEmailGateway(url, cliAppContext)
 }
 
-func (cliAppContext *CliApplicationContext) SendEmailGateway(email []byte) error {
-	return gateways.AwsSesSendEmailGateway(email, cliAppContext)
+func (cliAppContext *CliApplicationContext) SendEmailGateway(email []byte, recipient string) error {
+	return gateways.AwsSesSendEmailGateway(email, recipient, cliAppContext)
 }
 
 func (cliAppContext *CliApplicationContext) EnvironmentGateway(key string) string {

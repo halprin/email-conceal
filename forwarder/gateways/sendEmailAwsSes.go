@@ -8,14 +8,14 @@ import (
 
 var sesService = ses.New(awsSession)
 
-func AwsSesSendEmailGateway(email []byte, applicationContext context.ApplicationContext) error {
+func AwsSesSendEmailGateway(email []byte, recipient string, applicationContext context.ApplicationContext) error {
 	if sessionErr != nil {
 		return sessionErr
 	}
 
 	sendRawEmailInput := &ses.SendRawEmailInput{
 		Source:       aws.String(applicationContext.EnvironmentGateway("FORWARDER_EMAIL")),
-		Destinations: []*string{aws.String(applicationContext.EnvironmentGateway("RECEIVING_EMAIL"))},
+		Destinations: []*string{aws.String(recipient)},
 		RawMessage:   &ses.RawMessage{
 			Data: email,
 		},

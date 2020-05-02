@@ -8,20 +8,21 @@ type TestApplicationContext struct {
 	ReturnFromReadEmailGateway        []byte
 	ReturnErrorFromReadEmailGateway   error
 
-	ReceivedSendEmailGatewayArguments []byte
-	ReturnErrorFromSendEmailGateway   error
+	ReceivedSendEmailGatewayEmailArgument []byte
+	ReceivedSendEmailGatewayRecipientArgument string
+	ReturnErrorFromSendEmailGateway       error
 
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        string
 
 	ReceivedGetRealEmailForConcealPrefixArguments string
-	ReturnFromGetRealEmailForConcealPrefix string
-	ReturnErrorFromGetRealEmailForConcealPrefix error
+	ReturnFromGetRealEmailForConcealPrefix        string
+	ReturnErrorFromGetRealEmailForConcealPrefix   error
 
 	ReceivedForwardEmailUsecaseArguments string
 	ReturnErrorForwardEmailUsecase       error
 
-	ReceivedExitReturnCode int
+	ReceivedExitReturnCode                    int
 }
 
 func (appContext *TestApplicationContext) ForwardEmailController(arguments map[string]interface{}) error {
@@ -34,8 +35,9 @@ func (appContext *TestApplicationContext) ReadEmailGateway(url string) ([]byte, 
 	return appContext.ReturnFromReadEmailGateway, appContext.ReturnErrorFromReadEmailGateway
 }
 
-func (appContext *TestApplicationContext) SendEmailGateway(email []byte) error {
-	appContext.ReceivedSendEmailGatewayArguments = email
+func (appContext *TestApplicationContext) SendEmailGateway(email []byte, recipient string) error {
+	appContext.ReceivedSendEmailGatewayEmailArgument = email
+	appContext.ReceivedSendEmailGatewayRecipientArgument = recipient
 	return appContext.ReturnErrorFromSendEmailGateway
 }
 

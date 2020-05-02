@@ -34,7 +34,8 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 	modifiedRawEmail := myTypeEmail.ByteSlice()
 
 	log.Println("Sending the e-mail")
-	err = applicationContext.SendEmailGateway(modifiedRawEmail)
+	recipient := applicationContext.EnvironmentGateway("RECEIVING_EMAIL")
+	err = applicationContext.SendEmailGateway(modifiedRawEmail, recipient)
 	if err != nil {
 		log.Printf("Sending the e-mail failed, %+v\n", err)
 		return NewUnableToSendEmailError(err)
