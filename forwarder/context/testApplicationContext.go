@@ -14,6 +14,10 @@ type TestApplicationContext struct {
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        string
 
+	ReceivedGetRealEmailForConcealPrefixArguments string
+	ReturnFromGetRealEmailForConcealPrefix string
+	ReturnErrorFromGetRealEmailForConcealPrefix error
+
 	ReceivedForwardEmailUsecaseArguments string
 	ReturnErrorForwardEmailUsecase       error
 
@@ -38,6 +42,11 @@ func (appContext *TestApplicationContext) SendEmailGateway(email []byte) error {
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
 	appContext.ReceivedEnvironmentGatewayArguments = key
 	return appContext.ReturnFromEnvironmentGateway
+}
+
+func (appContext *TestApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {
+	appContext.ReceivedGetRealEmailForConcealPrefixArguments = concealPrefix
+	return appContext.ReturnFromGetRealEmailForConcealPrefix, appContext.ReturnErrorFromGetRealEmailForConcealPrefix
 }
 
 func (appContext *TestApplicationContext) ForwardEmailUsecase(url string) error {

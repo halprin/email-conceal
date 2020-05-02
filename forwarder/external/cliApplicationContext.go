@@ -25,6 +25,10 @@ func (cliAppContext *CliApplicationContext) EnvironmentGateway(key string) strin
 	return gateways.OsEnvEnvironmentGateway(key, cliAppContext)
 }
 
+func (cliAppContext *CliApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {
+	return gateways.GetRealEmailForConcealPrefix(concealPrefix, cliAppContext)
+}
+
 func (cliAppContext *CliApplicationContext) ForwardEmailUsecase(url string) error {
 	return usecases.ForwardEmailUsecase(url, cliAppContext)
 }

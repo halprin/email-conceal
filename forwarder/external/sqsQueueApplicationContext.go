@@ -25,6 +25,10 @@ func (appContext *SqsQueueApplicationContext) EnvironmentGateway(key string) str
 	return gateways.OsEnvEnvironmentGateway(key, appContext)
 }
 
+func (appContext *SqsQueueApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {
+	return gateways.GetRealEmailForConcealPrefix(concealPrefix, appContext)
+}
+
 func (appContext *SqsQueueApplicationContext) ForwardEmailUsecase(url string) error {
 	return usecases.ForwardEmailUsecase(url, appContext)
 }
