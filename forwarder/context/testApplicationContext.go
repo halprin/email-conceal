@@ -13,7 +13,7 @@ type TestApplicationContext struct {
 	ReturnErrorFromSendEmailGateway       error
 
 	ReceivedEnvironmentGatewayArguments string
-	ReturnFromEnvironmentGateway        string
+	ReturnFromEnvironmentGateway        map[string]string
 
 	ReceivedGetRealEmailForConcealPrefixArguments string
 	ReturnFromGetRealEmailForConcealPrefix        string
@@ -43,7 +43,7 @@ func (appContext *TestApplicationContext) SendEmailGateway(email []byte, recipie
 
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
 	appContext.ReceivedEnvironmentGatewayArguments = key
-	return appContext.ReturnFromEnvironmentGateway
+	return appContext.ReturnFromEnvironmentGateway[key]
 }
 
 func (appContext *TestApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {

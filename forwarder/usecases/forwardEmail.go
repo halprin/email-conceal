@@ -32,6 +32,10 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 	log.Println("Looking up actual recipients...")
 	actualRecipients := getActualRecipients(concealedRecipients, domain, applicationContext)
 	log.Printf("Actual recipients are %s", actualRecipients)
+	if len(actualRecipients) == 0 {
+		log.Println("No actual recipients to forward e-mail to")
+		return nil
+	}
 
 	log.Println("Changing the headers in e-mail")
 	changeHeadersInEmail(email, applicationContext)
