@@ -55,6 +55,15 @@ data "aws_iam_policy_document" "permissions" {
     ]
     resources = [aws_sqs_queue.email_storage_add_event_queue.arn]
   }
+
+  statement {
+    sid    = "ReadConfigurationFromDynamo"
+    effect = "Allow"
+    actions = [
+      "dynamodb:Query",
+    ]
+    resources = ["arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${var.configuration_database_name}"]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "attach_permission_to_role" {

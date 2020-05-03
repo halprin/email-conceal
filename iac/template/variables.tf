@@ -25,8 +25,3 @@ variable "docker_image" {
   type        = string
   description = "The Docker image URI to deploy"
 }
-
-variable "configuration_database_name" {
-  type        = string
-  description = "Name to the configuration database"
-}

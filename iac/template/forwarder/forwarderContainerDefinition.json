@@ -4,9 +4,10 @@
     "image": "${image}",
     "essential": true,
     "environment": [
-      {"name":  "FORWARDER_EMAIL", "value": "${forwarderEmail}"},
-      {"name":  "RECEIVING_EMAIL", "value": "${receivingEmail}"},
-      {"name":  "SQS_QUEUE_NAME", "value": "${sqsQueueName}"}
+      {"name":  "DOMAIN", "value": "${domain}"},
+      {"name":  "FORWARDER_EMAIL_PREFIX", "value": "${forwarderEmailPrefix}"},
+      {"name":  "SQS_QUEUE_NAME", "value": "${sqsQueueName}"},
+      {"name":  "TABLE_NAME", "value": "${tableName}"}
     ],
     "logConfiguration": {
       "logDriver": "awslogs",

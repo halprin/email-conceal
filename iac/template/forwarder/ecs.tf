@@ -17,8 +17,9 @@ resource "aws_ecs_task_definition" "forwarder_task" {
   container_definitions = templatefile("${path.module}/forwarderContainerDefinition.json", {
     environment    = var.environment,
     image          = var.docker_image,
-    forwarderEmail = "${var.forward_email_prefix}@${var.domain}",
-    receivingEmail = var.receiving_email,
+    domain         = var.domain,
+    forwarderEmailPrefix = var.forward_email_prefix,
+    tableName = var.configuration_database_name
     sqsQueueName   = aws_sqs_queue.email_storage_add_event_queue.name,
     region         = data.aws_region.current.name
   })
