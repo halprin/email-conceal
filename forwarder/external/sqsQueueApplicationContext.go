@@ -17,8 +17,8 @@ func (appContext *SqsQueueApplicationContext) ReadEmailGateway(url string) ([]by
 	return gateways.S3ReadEmailGateway(url, appContext)
 }
 
-func (appContext *SqsQueueApplicationContext) SendEmailGateway(email []byte, recipient string) error {
-	return gateways.AwsSesSendEmailGateway(email, recipient, appContext)
+func (appContext *SqsQueueApplicationContext) SendEmailGateway(email []byte, recipients []string) error {
+	return gateways.AwsSesSendEmailGateway(email, recipients, appContext)
 }
 
 func (appContext *SqsQueueApplicationContext) EnvironmentGateway(key string) string {

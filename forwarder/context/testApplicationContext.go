@@ -9,7 +9,7 @@ type TestApplicationContext struct {
 	ReturnErrorFromReadEmailGateway   error
 
 	ReceivedSendEmailGatewayEmailArgument []byte
-	ReceivedSendEmailGatewayRecipientArgument string
+	ReceivedSendEmailGatewayRecipientArgument []string
 	ReturnErrorFromSendEmailGateway       error
 
 	ReceivedEnvironmentGatewayArguments string
@@ -35,9 +35,9 @@ func (appContext *TestApplicationContext) ReadEmailGateway(url string) ([]byte, 
 	return appContext.ReturnFromReadEmailGateway, appContext.ReturnErrorFromReadEmailGateway
 }
 
-func (appContext *TestApplicationContext) SendEmailGateway(email []byte, recipient string) error {
+func (appContext *TestApplicationContext) SendEmailGateway(email []byte, recipients []string) error {
 	appContext.ReceivedSendEmailGatewayEmailArgument = email
-	appContext.ReceivedSendEmailGatewayRecipientArgument = recipient
+	appContext.ReceivedSendEmailGatewayRecipientArgument = recipients
 	return appContext.ReturnErrorFromSendEmailGateway
 }
 

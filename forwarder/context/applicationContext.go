@@ -7,7 +7,7 @@ type ApplicationContext interface {
 	//gateways
 	ReadEmailGateway(url string) ([]byte, error)
 
-	SendEmailGateway(email []byte, recipient string) error
+	SendEmailGateway(email []byte, recipients []string) error
 
 	EnvironmentGateway(key string) string
 
