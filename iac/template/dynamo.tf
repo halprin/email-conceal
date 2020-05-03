@@ -17,6 +17,11 @@ resource "aws_dynamodb_table" "configuration" {
     type = "S"
   }
 
+  server_side_encryption {
+    enabled = true
+    kms_key_arn = aws_kms_key.application_key.arn
+  }
+
   tags = {
     environment = var.environment
   }

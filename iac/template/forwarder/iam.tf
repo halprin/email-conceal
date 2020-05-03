@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "permissions" {
       "kms:Decrypt",
       "kms:DescribeKey",
     ]
-    resources = [aws_kms_key.application_key.arn]
+    resources = [var.application_key_arn]
   }
 
   statement {
