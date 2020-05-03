@@ -93,13 +93,18 @@ func changeHeadersInEmail(email *mail.Message, applicationContext context.Applic
 	delete(email.Header, "Dkim-Signature")  //the signature is handled by the forwarding service, not us
 	delete(email.Header, "Return-Path")  //don't continue on the return path, especially because it's probably not from a verified domain
 
+	//construct the complete forwarder e-mail address
+	forwarderEmailPrefix := applicationContext.EnvironmentGateway("FORWARDER_EMAIL_PREFIX")
+	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	forwarderEmailAddress := fmt.Sprintf("%s@%s", forwarderEmailPrefix, domain)
+
 	//get the "From" based header
 	originalFrom := fromAddressOf(email)
 	if originalFrom == nil {
 		log.Println("E-mail doesn't have any from-based headers")
 		originalFrom = &mail.Address{
 			Name:    "Unknown Sender",
-			Address: applicationContext.EnvironmentGateway("FORWARDER_EMAIL"),
+			Address: forwarderEmailAddress,
 		}
 	}
 
@@ -111,7 +116,7 @@ func changeHeadersInEmail(email *mail.Message, applicationContext context.Applic
 	originalFromString := originalFrom.String()
 	newFrom := mail.Address{
 		Name:    originalFromString,
-		Address: applicationContext.EnvironmentGateway("FORWARDER_EMAIL"),
+		Address: forwarderEmailAddress,
 	}
 	email.Header["From"] = []string{newFrom.String()}
 	email.Header["Reply-To"] = []string{originalFromString}

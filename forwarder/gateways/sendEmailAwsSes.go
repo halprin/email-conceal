@@ -15,17 +15,18 @@ func AwsSesSendEmailGateway(email []byte, recipients []string, applicationContex
 		return sessionErr
 	}
 
-	forwarderEmailPrefix := applicationContext.EnvironmentGateway("FORWARDER_EMAIL_PREFIX")
-	domain := applicationContext.EnvironmentGateway("DOMAIN")
-
 	recipientsPointers := make([]*string, 0, len(recipients))
 	for _, recipient := range recipients {
 		recipientsPointers = append(recipientsPointers, aws.String(recipient))
 	}
 
-	log.Printf("Fowarding email from e-mail %s@%s", forwarderEmailPrefix, domain)
+	forwarderEmailPrefix := applicationContext.EnvironmentGateway("FORWARDER_EMAIL_PREFIX")
+	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	forwarderEmailAddress := fmt.Sprintf("%s@%s", forwarderEmailPrefix, domain)
+
+	log.Printf("Fowarding mail from %s", forwarderEmailAddress)
 	sendRawEmailInput := &ses.SendRawEmailInput{
-		Source:       aws.String(fmt.Sprintf("%s@%s", forwarderEmailPrefix, domain)),
+		Source:       aws.String(forwarderEmailAddress),
 		Destinations: recipientsPointers,
 		RawMessage: &ses.RawMessage{
 			Data: email,
