@@ -17,12 +17,16 @@ func (cliAppContext *CliApplicationContext) ReadEmailGateway(url string) ([]byte
 	return gateways.FileReadEmailGateway(url, cliAppContext)
 }
 
-func (cliAppContext *CliApplicationContext) SendEmailGateway(email []byte) error {
-	return gateways.AwsSesSendEmailGateway(email, cliAppContext)
+func (cliAppContext *CliApplicationContext) SendEmailGateway(email []byte, recipients []string) error {
+	return gateways.AwsSesSendEmailGateway(email, recipients, cliAppContext)
 }
 
 func (cliAppContext *CliApplicationContext) EnvironmentGateway(key string) string {
 	return gateways.OsEnvEnvironmentGateway(key, cliAppContext)
+}
+
+func (cliAppContext *CliApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {
+	return gateways.GetRealEmailForConcealPrefix(concealPrefix, cliAppContext)
 }
 
 func (cliAppContext *CliApplicationContext) ForwardEmailUsecase(url string) error {

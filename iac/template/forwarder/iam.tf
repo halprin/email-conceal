@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "permissions" {
       "kms:Decrypt",
       "kms:DescribeKey",
     ]
-    resources = [aws_kms_key.application_key.arn]
+    resources = [var.application_key_arn]
   }
 
   statement {
@@ -54,6 +54,15 @@ data "aws_iam_policy_document" "permissions" {
       "sqs:DeleteMessage",
     ]
     resources = [aws_sqs_queue.email_storage_add_event_queue.arn]
+  }
+
+  statement {
+    sid    = "ReadConfigurationFromDynamo"
+    effect = "Allow"
+    actions = [
+      "dynamodb:Query",
+    ]
+    resources = ["arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${var.configuration_database_name}"]
   }
 }
 

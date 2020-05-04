@@ -1,11 +1,17 @@
 package context
 
 type ApplicationContext interface {
-	//gateways
+	//controllers
 	ForwardEmailController(arguments map[string]interface{}) error
+
+	//gateways
 	ReadEmailGateway(url string) ([]byte, error)
-	SendEmailGateway(email []byte) error
+
+	SendEmailGateway(email []byte, recipients []string) error
+
 	EnvironmentGateway(key string) string
+
+	GetRealEmailForConcealPrefix(concealPrefix string) (string, error)
 
 	//usecases
 	ForwardEmailUsecase(url string) error

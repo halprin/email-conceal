@@ -17,12 +17,16 @@ func (appContext *SqsQueueApplicationContext) ReadEmailGateway(url string) ([]by
 	return gateways.S3ReadEmailGateway(url, appContext)
 }
 
-func (appContext *SqsQueueApplicationContext) SendEmailGateway(email []byte) error {
-	return gateways.AwsSesSendEmailGateway(email, appContext)
+func (appContext *SqsQueueApplicationContext) SendEmailGateway(email []byte, recipients []string) error {
+	return gateways.AwsSesSendEmailGateway(email, recipients, appContext)
 }
 
 func (appContext *SqsQueueApplicationContext) EnvironmentGateway(key string) string {
 	return gateways.OsEnvEnvironmentGateway(key, appContext)
+}
+
+func (appContext *SqsQueueApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {
+	return gateways.GetRealEmailForConcealPrefix(concealPrefix, appContext)
 }
 
 func (appContext *SqsQueueApplicationContext) ForwardEmailUsecase(url string) error {

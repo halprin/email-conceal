@@ -3,7 +3,7 @@ resource "aws_ses_receipt_rule" "send_to_s3" {
   rule_set_name = "INBOUND_MAIL"
   enabled       = true
 
-  recipients = ["${var.concealed_email_prefix}@${var.domain}"]
+  recipients = [var.domain]
 
   scan_enabled = false
   tls_policy   = "Optional"
@@ -12,6 +12,4 @@ resource "aws_ses_receipt_rule" "send_to_s3" {
     position    = 1
     bucket_name = aws_s3_bucket.email_storage.id
   }
-
-  depends_on = [aws_kms_key.application_key] //depend on the KMS key, with its policy allowing the SES rule to send encrypted messages to the S3 bucket
 }

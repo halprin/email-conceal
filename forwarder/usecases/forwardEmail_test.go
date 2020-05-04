@@ -66,7 +66,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 	if bytes.Contains(rawForwardedEmail, []byte(dkimHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", dkimHeader)
 	}
@@ -99,7 +99,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 	if bytes.Contains(rawForwardedEmail, []byte(fromHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", fromHeader)
 	}
@@ -136,7 +136,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 	if bytes.Contains(rawForwardedEmail, []byte(fromHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", fromHeader)
 	}
@@ -173,7 +173,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(fromName)) {
 		t.Errorf("The from name %s is missing from the e-mail and it should have been there", fromName)
@@ -207,7 +207,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(fromEmail)) {
 		t.Errorf("The from address %s is missing from the e-mail and it should have been there", fromEmail)
@@ -241,7 +241,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(senderEmail)) {
 		t.Errorf("The sender address %s is missing from the e-mail and it should have been there", senderEmail)
@@ -273,7 +273,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(sourceEmail)) {
 		t.Errorf("The source address %s is missing from the e-mail and it should have been there", sourceEmail)
@@ -281,7 +281,9 @@ Test e-mail.
 }
 
 func TestForwardEmailUsecaseWithNoAddress(t *testing.T) {
-	forwarderEmail := "moof@apple.com"
+	forwarderPrefix := "moof"
+	domain := "apple.com"
+	forwarderEmail := fmt.Sprintf("%s@%s", forwarderPrefix, domain)
 
 	email := `To: jobs@apple.com
 Subject: lol
@@ -291,7 +293,11 @@ Test e-mail.
 
 	appContext := context.TestApplicationContext{
 		ReturnFromReadEmailGateway: []byte(email),
-		ReturnFromEnvironmentGateway: forwarderEmail,
+		ReturnFromEnvironmentGateway: map[string]string{
+			"FORWARDER_EMAIL_PREFIX": forwarderPrefix,
+			"DOMAIN": domain,
+		},
+		ReturnFromGetRealEmailForConcealPrefix: "actual@apple.com",
 	}
 
 	err := ForwardEmailUsecase("https://email.com", &appContext)
@@ -301,7 +307,7 @@ Test e-mail.
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(forwarderEmail)) {
 		t.Errorf("The forwarder address %s is missing from the e-mail and it should have been there", forwarderEmail)
@@ -352,9 +358,77 @@ Subject: lol
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayArguments
+	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
 
 	if !bytes.Contains(rawForwardedEmail, []byte(body)) {
 		t.Errorf("The e-mail body %s is missing from the e-mail and it should have been there", body)
 	}
+}
+
+func TestForwardEmailUsecaseThatConvertsKnownConcealAddressesToActualAddresses(t *testing.T) {
+	knownConcealedEmail := "known@apple.com"
+	knownConcealedEmail2 := "known2@apple.com"
+	actualEmail := "moof@dogcow.com"
+
+	email := fmt.Sprintf(`To: %s, %s
+From: moof@apple.com
+Subject: lol
+
+This is the coolest e-mail ever
+`, knownConcealedEmail, knownConcealedEmail2)
+
+	appContext := context.TestApplicationContext{
+		ReturnFromReadEmailGateway: []byte(email),
+		ReturnFromGetRealEmailForConcealPrefix: actualEmail,
+	}
+
+	err := ForwardEmailUsecase("https://email.com", &appContext)
+
+	if err != nil {
+		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
+		t.Errorf("Instead this was returned %+v", err)
+	}
+
+	forwardedEmailRecipients := appContext.ReceivedSendEmailGatewayRecipientArgument
+	if !contains(forwardedEmailRecipients, actualEmail) {
+		t.Errorf("Should have converted the concealed e-mail to the actual e-mails")
+	}
+}
+
+func TestForwardEmailUsecaseThatDoesNotConvertsUnknownConcealAddresses(t *testing.T) {
+	unknownConcealedEmail := "known@apple.com"
+	unknownConcealedEmail2 := "known2@apple.com"
+
+	email := fmt.Sprintf(`To: %s, %s
+From: moof@apple.com
+Subject: lol
+
+This is the coolest e-mail ever
+`, unknownConcealedEmail, unknownConcealedEmail2)
+
+	appContext := context.TestApplicationContext{
+		ReturnFromReadEmailGateway: []byte(email),
+		ReturnErrorFromGetRealEmailForConcealPrefix: errors.New("can't find the actual e-mail"),
+	}
+
+	err := ForwardEmailUsecase("https://email.com", &appContext)
+
+	if err != nil {
+		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
+		t.Errorf("Instead this was returned %+v", err)
+	}
+
+	if len(appContext.ReceivedSendEmailGatewayEmailArgument) !=0 && len(appContext.ReceivedSendEmailGatewayRecipientArgument) != 0 {
+		t.Errorf("The passed in recipients had some items, instead there shouldn't have been any; passed in recipients = %s", appContext.ReceivedSendEmailGatewayRecipientArgument)
+	}
+}
+
+func contains(slice []string, item string) bool {
+	for _, currentItem := range slice {
+		if currentItem == item {
+			return true
+		}
+	}
+
+	return false
 }

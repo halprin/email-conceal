@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "email_storage" {
     rule {
       apply_server_side_encryption_by_default {
         sse_algorithm     = "aws:kms"
-        kms_master_key_id = aws_kms_key.application_key.arn
+        kms_master_key_id = var.application_key_arn
       }
     }
   }
@@ -35,8 +35,6 @@ resource "aws_s3_bucket_notification" "add_email_notification" {
     queue_arn = aws_sqs_queue.email_storage_add_event_queue.arn
     events    = ["s3:ObjectCreated:*"]
   }
-
-  depends_on = [aws_kms_key.application_key] //depend on the KMS key, with its policy allowing the S3 bucket to send encrypted messages to the SQS queue
 }
 
 data "aws_caller_identity" "current" {}

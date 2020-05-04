@@ -11,14 +11,12 @@ terraform {
   }
 }
 
-module "forwarder" {
-  source = "../../template/forwarder/"
+module "template" {
+  source = "../../template/"
 
   environment = "dev"
 
-  email_lifetime         = 4
-  concealed_email_prefix = var.concealed_email_prefix
-  receiving_email        = var.receiving_email
-  domain                 = var.domain
-  docker_image           = var.docker_image
+  email_lifetime = 4
+  domain         = var.domain
+  docker_image   = var.docker_image
 }

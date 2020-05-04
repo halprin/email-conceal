@@ -8,16 +8,21 @@ type TestApplicationContext struct {
 	ReturnFromReadEmailGateway        []byte
 	ReturnErrorFromReadEmailGateway   error
 
-	ReceivedSendEmailGatewayArguments []byte
-	ReturnErrorFromSendEmailGateway   error
+	ReceivedSendEmailGatewayEmailArgument []byte
+	ReceivedSendEmailGatewayRecipientArgument []string
+	ReturnErrorFromSendEmailGateway       error
 
 	ReceivedEnvironmentGatewayArguments string
-	ReturnFromEnvironmentGateway        string
+	ReturnFromEnvironmentGateway        map[string]string
+
+	ReceivedGetRealEmailForConcealPrefixArguments string
+	ReturnFromGetRealEmailForConcealPrefix        string
+	ReturnErrorFromGetRealEmailForConcealPrefix   error
 
 	ReceivedForwardEmailUsecaseArguments string
 	ReturnErrorForwardEmailUsecase       error
 
-	ReceivedExitReturnCode int
+	ReceivedExitReturnCode                    int
 }
 
 func (appContext *TestApplicationContext) ForwardEmailController(arguments map[string]interface{}) error {
@@ -30,14 +35,20 @@ func (appContext *TestApplicationContext) ReadEmailGateway(url string) ([]byte, 
 	return appContext.ReturnFromReadEmailGateway, appContext.ReturnErrorFromReadEmailGateway
 }
 
-func (appContext *TestApplicationContext) SendEmailGateway(email []byte) error {
-	appContext.ReceivedSendEmailGatewayArguments = email
+func (appContext *TestApplicationContext) SendEmailGateway(email []byte, recipients []string) error {
+	appContext.ReceivedSendEmailGatewayEmailArgument = email
+	appContext.ReceivedSendEmailGatewayRecipientArgument = recipients
 	return appContext.ReturnErrorFromSendEmailGateway
 }
 
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
 	appContext.ReceivedEnvironmentGatewayArguments = key
-	return appContext.ReturnFromEnvironmentGateway
+	return appContext.ReturnFromEnvironmentGateway[key]
+}
+
+func (appContext *TestApplicationContext) GetRealEmailForConcealPrefix(concealPrefix string) (string, error) {
+	appContext.ReceivedGetRealEmailForConcealPrefixArguments = concealPrefix
+	return appContext.ReturnFromGetRealEmailForConcealPrefix, appContext.ReturnErrorFromGetRealEmailForConcealPrefix
 }
 
 func (appContext *TestApplicationContext) ForwardEmailUsecase(url string) error {

@@ -4,7 +4,7 @@ resource "aws_sqs_queue" "email_storage_add_event_queue" {
   message_retention_seconds  = var.email_lifetime * 24 * 60 * 60
   visibility_timeout_seconds = 30
 
-  kms_master_key_id                 = aws_kms_key.application_key.arn
+  kms_master_key_id                 = var.application_key_arn
   kms_data_key_reuse_period_seconds = 43200 //half a day
 
   policy = data.aws_iam_policy_document.s3_write_to_sqs.json

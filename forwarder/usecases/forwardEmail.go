@@ -26,6 +26,17 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 		return NewUnableToParseEmailError(err)
 	}
 
+	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	concealedRecipients := getConcealedRecipients(email, domain)
+	log.Printf("Concealed recipients are %s", concealedRecipients)
+	log.Println("Looking up actual recipients...")
+	actualRecipients := getActualRecipients(concealedRecipients, domain, applicationContext)
+	log.Printf("Actual recipients are %s", actualRecipients)
+	if len(actualRecipients) == 0 {
+		log.Println("No actual recipients to forward e-mail to")
+		return nil
+	}
+
 	log.Println("Changing the headers in e-mail")
 	changeHeadersInEmail(email, applicationContext)
 
@@ -34,13 +45,48 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 	modifiedRawEmail := myTypeEmail.ByteSlice()
 
 	log.Println("Sending the e-mail")
-	err = applicationContext.SendEmailGateway(modifiedRawEmail)
+	err = applicationContext.SendEmailGateway(modifiedRawEmail, actualRecipients)
 	if err != nil {
 		log.Printf("Sending the e-mail failed, %+v\n", err)
 		return NewUnableToSendEmailError(err)
 	}
 
 	return nil
+}
+
+func getActualRecipients(concealedRecipients []string, domain string, applicationContext context.ApplicationContext) []string {
+	recipientsStrings := make([]string, 0, len(concealedRecipients))
+
+	for _, concealedRecipient := range concealedRecipients {
+		concealedRecipientPrefix := strings.TrimSuffix(concealedRecipient, fmt.Sprintf("@%s", domain))
+
+		actualRecipient, err := applicationContext.GetRealEmailForConcealPrefix(concealedRecipientPrefix)
+
+		if err != nil {
+			log.Printf("Unable to get actual recipient for concealed recipient %s due to error %+v", concealedRecipient, err)
+			log.Println("Ignoring recipient")
+			continue
+		}
+
+		recipientsStrings = append(recipientsStrings, actualRecipient)
+	}
+
+	return recipientsStrings
+}
+
+func getConcealedRecipients(email *mail.Message, domain string) []string {
+	recipientsAddresses, _ := email.Header.AddressList("To")
+
+	recipientsStrings := make([]string, 0, len(recipientsAddresses))
+
+	for _, recipientAddress := range recipientsAddresses {
+		if strings.HasSuffix(recipientAddress.Address, domain) {
+			//it's our domain so we need to forward
+			recipientsStrings = append(recipientsStrings, recipientAddress.Address)
+		}
+	}
+
+	return recipientsStrings
 }
 
 func emailFromRawBytes(rawEmail []byte) (*mail.Message, error) {
@@ -51,13 +97,18 @@ func changeHeadersInEmail(email *mail.Message, applicationContext context.Applic
 	delete(email.Header, "Dkim-Signature")  //the signature is handled by the forwarding service, not us
 	delete(email.Header, "Return-Path")  //don't continue on the return path, especially because it's probably not from a verified domain
 
+	//construct the complete forwarder e-mail address
+	forwarderEmailPrefix := applicationContext.EnvironmentGateway("FORWARDER_EMAIL_PREFIX")
+	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	forwarderEmailAddress := fmt.Sprintf("%s@%s", forwarderEmailPrefix, domain)
+
 	//get the "From" based header
 	originalFrom := fromAddressOf(email)
 	if originalFrom == nil {
-		fmt.Println("E-mail doesn't have any from-based headers")
+		log.Println("E-mail doesn't have any from-based headers")
 		originalFrom = &mail.Address{
 			Name:    "Unknown Sender",
-			Address: applicationContext.EnvironmentGateway("FORWARDER_EMAIL"),
+			Address: forwarderEmailAddress,
 		}
 	}
 
@@ -69,7 +120,7 @@ func changeHeadersInEmail(email *mail.Message, applicationContext context.Applic
 	originalFromString := originalFrom.String()
 	newFrom := mail.Address{
 		Name:    originalFromString,
-		Address: applicationContext.EnvironmentGateway("FORWARDER_EMAIL"),
+		Address: forwarderEmailAddress,
 	}
 	email.Header["From"] = []string{newFrom.String()}
 	email.Header["Reply-To"] = []string{originalFromString}
