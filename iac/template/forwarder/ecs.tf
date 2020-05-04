@@ -15,13 +15,13 @@ resource "aws_ecs_task_definition" "forwarder_task" {
   requires_compatibilities = ["FARGATE"]
 
   container_definitions = templatefile("${path.module}/forwarderContainerDefinition.json", {
-    environment    = var.environment,
-    image          = var.docker_image,
-    domain         = var.domain,
+    environment          = var.environment,
+    image                = var.docker_image,
+    domain               = var.domain,
     forwarderEmailPrefix = var.forward_email_prefix,
-    tableName = var.configuration_database_name
-    sqsQueueName   = aws_sqs_queue.email_storage_add_event_queue.name,
-    region         = data.aws_region.current.name
+    tableName            = var.configuration_database_name
+    sqsQueueName         = aws_sqs_queue.email_storage_add_event_queue.name,
+    region               = data.aws_region.current.name
   })
 
   network_mode = "awsvpc"

@@ -32,6 +32,6 @@ variable "configuration_database_name" {
 }
 
 variable "application_key_arn" {
-  type = string
+  type        = string
   description = "The KMS key to encrypt things with"
 }
