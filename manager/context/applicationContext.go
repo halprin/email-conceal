@@ -5,7 +5,7 @@ type ApplicationContext interface {
 	ConcealEmailController(arguments []string) string
 
 	//usecases
-	ConcealEmailUsecase(email string) (string, error)
+	AddConcealEmailUsecase(email string) (string, error)
 
 	//libraries
 	GenerateRandomUuid() string

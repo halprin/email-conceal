@@ -6,7 +6,7 @@ import (
 	"github.com/halprin/email-conceal/manager/entities"
 )
 
-func ConcealEmail(sourceEmail string, applicationContext context.ApplicationContext) (string, error) {
+func AddConcealEmailUsecase(sourceEmail string, applicationContext context.ApplicationContext) (string, error) {
 	err := entities.ValidateEmail(sourceEmail)
 	if err != nil {
 		return "", err

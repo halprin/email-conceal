@@ -18,7 +18,7 @@ func (appContext *TestApplicationContext) ConcealEmailController(arguments []str
 	return appContext.ReturnFromConcealEmailController
 }
 
-func (appContext *TestApplicationContext) ConcealEmailUsecase(email string) (string, error) {
+func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
 	appContext.ReceivedConcealEmailUsecaseEmail = email
 	return appContext.ReturnFromConcealEmailUsecase, appContext.ReturnErrorFromConcealEmailUsecase
 }
