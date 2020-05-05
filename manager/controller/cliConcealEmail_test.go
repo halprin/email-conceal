@@ -13,7 +13,7 @@ func TestCliConcealEmailGateway(t *testing.T) {
 
 	sourceEmail := "dogcow@apple.com"
 	var arguments = []string{"program_invoked", sourceEmail}
-	actualConcealedEmail := CliConcealEmailGateway(arguments, testApplicationContext)
+	actualConcealedEmail := CliConcealEmailController(arguments, testApplicationContext)
 
 	if testApplicationContext.ReceivedConcealEmailUsecaseEmail != sourceEmail {
 		t.Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testApplicationContext.ReceivedConcealEmailUsecaseEmail, sourceEmail)
@@ -30,7 +30,7 @@ func TestCliConcealEmailGatewayNegative(t *testing.T) {
 	}
 
 	var arguments = []string{"program_invoked", "dogcow@apple.com"}
-	CliConcealEmailGateway(arguments, testApplicationContext)
+	CliConcealEmailController(arguments, testApplicationContext)
 
 	const expectedReturnCode = 1
 	if testApplicationContext.ReceivedExitReturnCode != expectedReturnCode {

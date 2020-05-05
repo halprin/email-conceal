@@ -7,5 +7,5 @@ import (
 func Cli() {
 	applicationContext := &CliApplicationContext{}
 
-	applicationContext.ConcealEmailGateway(os.Args)
+	applicationContext.ConcealEmailController(os.Args)
 }

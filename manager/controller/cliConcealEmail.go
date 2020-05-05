@@ -7,7 +7,7 @@ import (
 	"github.com/halprin/email-conceal/manager/external/lib/errors"
 )
 
-func CliConcealEmailGateway(cliArguments []string, applicationContext context.ApplicationContext) string {
+func CliConcealEmailController(cliArguments []string, applicationContext context.ApplicationContext) string {
 	sourceEmail := cliArguments[1]
 	fmt.Println("E-mail to conceal =", sourceEmail)
 

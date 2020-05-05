@@ -2,7 +2,7 @@ package context
 
 type ApplicationContext interface {
 	//controller
-	ConcealEmailGateway(arguments []string) string
+	ConcealEmailController(arguments []string) string
 
 	//usecases
 	ConcealEmailUsecase(email string) (string, error)

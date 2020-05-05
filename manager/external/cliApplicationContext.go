@@ -9,8 +9,8 @@ import (
 
 type CliApplicationContext struct{}
 
-func (cliAppContext *CliApplicationContext) ConcealEmailGateway(cliArguments []string) string {
-	return controller.CliConcealEmailGateway(cliArguments, cliAppContext)
+func (cliAppContext *CliApplicationContext) ConcealEmailController(cliArguments []string) string {
+	return controller.CliConcealEmailController(cliArguments, cliAppContext)
 }
 
 func (cliAppContext *CliApplicationContext) ConcealEmailUsecase(email string) (string, error) {
