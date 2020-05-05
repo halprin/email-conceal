@@ -4,6 +4,9 @@ type TestApplicationContext struct {
 	ReceivedConcealEmailControllerArguments []string
 	ReturnFromConcealEmailController        string
 
+	ReceivedEnvironmentGatewayArguments string
+	ReturnFromEnvironmentGateway        map[string]string
+
 	ReceivedConcealEmailUsecaseEmail   string
 	ReturnFromConcealEmailUsecase      string
 	ReturnErrorFromConcealEmailUsecase error
@@ -16,6 +19,11 @@ type TestApplicationContext struct {
 func (appContext *TestApplicationContext) ConcealEmailController(arguments []string) string {
 	appContext.ReceivedConcealEmailControllerArguments = arguments
 	return appContext.ReturnFromConcealEmailController
+}
+
+func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
+	appContext.ReceivedEnvironmentGatewayArguments = key
+	return appContext.ReturnFromEnvironmentGateway[key]
 }
 
 func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
