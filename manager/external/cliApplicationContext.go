@@ -2,7 +2,7 @@ package external
 
 import (
 	"github.com/halprin/email-conceal/manager/external/lib"
-	"github.com/halprin/email-conceal/manager/gateways"
+	"github.com/halprin/email-conceal/manager/controller"
 	"github.com/halprin/email-conceal/manager/usecases"
 	"os"
 )
@@ -10,7 +10,7 @@ import (
 type CliApplicationContext struct{}
 
 func (cliAppContext *CliApplicationContext) ConcealEmailGateway(cliArguments []string) string {
-	return gateways.CliConcealEmailGateway(cliArguments, cliAppContext)
+	return controller.CliConcealEmailGateway(cliArguments, cliAppContext)
 }
 
 func (cliAppContext *CliApplicationContext) ConcealEmailUsecase(email string) (string, error) {

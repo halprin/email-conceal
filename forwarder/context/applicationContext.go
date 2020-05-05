@@ -4,7 +4,7 @@ type ApplicationContext interface {
 	//controllers
 	ForwardEmailController(arguments map[string]interface{}) error
 
-	//gateways
+	//controller
 	ReadEmailGateway(url string) ([]byte, error)
 
 	SendEmailGateway(email []byte, recipients []string) error

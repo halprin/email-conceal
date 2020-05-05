@@ -1,7 +1,7 @@
 package context
 
 type ApplicationContext interface {
-	//gateways
+	//controller
 	ConcealEmailGateway(arguments []string) string
 
 	//usecases

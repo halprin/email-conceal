@@ -1,4 +1,4 @@
-package gateways
+package controller
 
 import (
 	"github.com/halprin/email-conceal/manager/context"
