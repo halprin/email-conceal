@@ -5,7 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/external/lib/errors"
 	"strings"
@@ -18,25 +17,18 @@ type ConcealEmailMapping struct {
 	Secondary string
 }
 
-func GetRealEmailForConcealPrefix(concealPrefix string, applicationContext context.ApplicationContext) (string, error) {
+func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, applicationContext context.ApplicationContext) (string, error) {
 	if sessionErr != nil {
 		return "", sessionErr
 	}
 
-	keyCondition := expression.Key("primary").Equal(expression.Value(fmt.Sprintf("conceal-%s", concealPrefix))).And(expression.Key("secondary").BeginsWith("email-"))
-	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
-	expressionBuilder, err := keyBuilder.Build()
-	if err != nil {
-		return "", err
-	}
-
-	queryInput := &dynamodb.QueryInput{
+	putItemInput := &dynamodb.PutItemInput{
 		TableName:                 aws.String(applicationContext.EnvironmentGateway("TABLE_NAME")),
 		KeyConditionExpression:    expressionBuilder.KeyCondition(),
 		ExpressionAttributeNames:  expressionBuilder.Names(),
 		ExpressionAttributeValues: expressionBuilder.Values(),
 	}
-	queryOutput, err := dynamoService.Query(queryInput)
+	queryOutput, err := dynamoService.PutItem(putItemInput)
 	if err != nil {
 		return "", err
 	}
