@@ -1,12 +1,13 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"github.com/halprin/email-conceal/manager/context"
 	"testing"
 )
 
-func TestConcealEmail(t *testing.T) {
+func TestConcealEmailSuccess(t *testing.T) {
 	uuid := "moof-uuid"
 	domain := "dogcow.com"
 	testApplicationContext := &context.TestApplicationContext{
@@ -35,5 +36,27 @@ func TestConcealEmailNegative(t *testing.T) {
 
 	if err == nil {
 		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
+	}
+}
+
+func TestDeleteConcealEmailSuccess(t *testing.T) {
+	testApplicationContext := &context.TestApplicationContext{}
+
+	err := DeleteConcealEmailMappingUsecase("some_prefix", testApplicationContext)
+
+	if err != nil {
+		t.Error("Expected no error to be returned from the delete conceal usecase, but there was one")
+	}
+}
+
+func TestDeleteConcealEmailNegative(t *testing.T) {
+	testApplicationContext := &context.TestApplicationContext{
+		ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway: errors.New("it failed"),
+	}
+
+	err := DeleteConcealEmailMappingUsecase("some_prefix", testApplicationContext)
+
+	if err == nil {
+		t.Error("Expected an error to be returned from the delete conceal usecase, but there wasn't one")
 	}
 }
