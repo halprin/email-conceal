@@ -7,9 +7,19 @@ type TestApplicationContext struct {
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        map[string]string
 
+	ReceivedAddConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument string
+	ReceivedAddConcealedEmailToActualEmailMappingGatewayEmailArgument         string
+	ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway               error
+
+	ReceivedDeleteConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument string
+	ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway               error
+
 	ReceivedConcealEmailUsecaseEmail   string
 	ReturnFromConcealEmailUsecase      string
 	ReturnErrorFromConcealEmailUsecase error
+
+	ReceivedDeleteConcealEmailUsecaseConcealPrefixArgument string
+	ReturnErrorFromDeleteConcealEmailUsecase               error
 
 	ReturnFromGenerateRandomUuid string
 
@@ -27,13 +37,14 @@ func (appContext *TestApplicationContext) EnvironmentGateway(key string) string 
 }
 
 func (appContext *TestApplicationContext) AddConcealedEmailToActualEmailMappingGateway(concealPrefix string, actualEmail string) error {
-	//TODO: fill in
-	return nil
+	appContext.ReceivedAddConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument = concealPrefix
+	appContext.ReceivedAddConcealedEmailToActualEmailMappingGatewayEmailArgument = actualEmail
+	return appContext.ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway
 }
 
 func (appContext *TestApplicationContext) DeleteConcealedEmailToActualEmailMappingGateway(concealPrefix string) error {
-	//TODO: fill in
-	return nil
+	appContext.ReceivedDeleteConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument = concealPrefix
+	return appContext.ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway
 }
 
 func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
@@ -42,8 +53,8 @@ func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (
 }
 
 func (appContext *TestApplicationContext) DeleteConcealEmailUsecase(concealPrefix string) error {
-	//TODO: fill in
-	return nil
+	appContext.ReceivedDeleteConcealEmailUsecaseConcealPrefixArgument = concealPrefix
+	return appContext.ReturnErrorFromDeleteConcealEmailUsecase
 }
 
 func (appContext *TestApplicationContext) GenerateRandomUuid() string {
