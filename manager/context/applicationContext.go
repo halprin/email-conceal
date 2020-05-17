@@ -6,6 +6,8 @@ type ApplicationContext interface {
 
 	//gateways
 	EnvironmentGateway(key string) string
+	AddConcealEmailMappingGateway(concealPrefix string, actualEmail string) error
+	DeleteConcealEmailMappingGateway(concealPrefix string, actualEmail string) error
 
 	//usecases
 	AddConcealEmailUsecase(email string) (string, error)

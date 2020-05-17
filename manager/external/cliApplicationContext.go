@@ -18,6 +18,14 @@ func (cliAppContext *CliApplicationContext) EnvironmentGateway(key string) strin
 	return gateways.OsEnvEnvironmentGateway(key, cliAppContext)
 }
 
+func (cliAppContext *CliApplicationContext) AddConcealEmailMappingGateway(concealPrefix string, actualEmail string) error {
+	return gateways.AddConcealedEmailToActualEmailMapping(concealPrefix, actualEmail, cliAppContext)
+}
+
+func (cliAppContext *CliApplicationContext) DeleteConcealEmailMappingGateway(concealPrefix string, actualEmail string) error {
+	return gateways.DeleteConcealEmailToActualEmailMapping(concealPrefix, actualEmail, cliAppContext)
+}
+
 func (cliAppContext *CliApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
 	return usecases.AddConcealEmailUsecase(email, cliAppContext)
 }

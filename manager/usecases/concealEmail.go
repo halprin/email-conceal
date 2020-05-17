@@ -13,5 +13,12 @@ func AddConcealEmailUsecase(sourceEmail string, applicationContext context.Appli
 	}
 
 	concealedEmailPrefix := applicationContext.GenerateRandomUuid()
-	return fmt.Sprintf("%s@asdf.net", concealedEmailPrefix), nil
+
+	err = applicationContext.AddConcealEmailMappingGateway(concealedEmailPrefix, sourceEmail)
+	if err != nil {
+		return "", err
+	}
+
+	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	return fmt.Sprintf("%s@%s", concealedEmailPrefix, domain), nil
 }
