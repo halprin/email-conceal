@@ -6,8 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/halprin/email-conceal/manager/context"
-	"github.com/halprin/email-conceal/manager/external/lib/errors"
-	"strings"
 )
 
 var dynamoService = dynamodb.New(awsSession)
@@ -17,32 +15,56 @@ type ConcealEmailMapping struct {
 	Secondary string
 }
 
-func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, applicationContext context.ApplicationContext) (string, error) {
+func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, applicationContext context.ApplicationContext) error {
 	if sessionErr != nil {
-		return "", sessionErr
+		return sessionErr
+	}
+
+	goItem := ConcealEmailMapping{
+		Primary:   fmt.Sprintf("conceal-%s", concealPrefix),
+		Secondary: fmt.Sprintf("email-%s", actualEmail),
+	}
+
+	dynamoItem, err := dynamodbattribute.MarshalMap(goItem)
+	if err != nil {
+		return err
 	}
 
 	putItemInput := &dynamodb.PutItemInput{
-		TableName:                 aws.String(applicationContext.EnvironmentGateway("TABLE_NAME")),
-		KeyConditionExpression:    expressionBuilder.KeyCondition(),
-		ExpressionAttributeNames:  expressionBuilder.Names(),
-		ExpressionAttributeValues: expressionBuilder.Values(),
+		TableName: aws.String(applicationContext.EnvironmentGateway("TABLE_NAME")),
+		Item:      dynamoItem,
 	}
-	queryOutput, err := dynamoService.PutItem(putItemInput)
+	_, err = dynamoService.PutItem(putItemInput)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	if *queryOutput.Count < 1 {
-		return "", errors.New(fmt.Sprintf("No real e-mail for conceal prefix %s", concealPrefix))
+	return nil
+}
+
+func DeleteConcealEmailToActualEmailMapping(concealPrefix string, actualEmail string, applicationContext context.ApplicationContext) error {
+	if sessionErr != nil {
+		return sessionErr
 	}
 
-	firstItem := queryOutput.Items[0]
-	item := ConcealEmailMapping{}
-	err = dynamodbattribute.UnmarshalMap(firstItem, &item)
+	goItem := ConcealEmailMapping{
+		Primary:   fmt.Sprintf("conceal-%s", concealPrefix),
+		Secondary: fmt.Sprintf("email-%s", actualEmail),
+	}
+
+	dynamoItem, err := dynamodbattribute.MarshalMap(goItem)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return strings.TrimPrefix(item.Secondary, "email-"), nil
+	deleteItemInput := &dynamodb.DeleteItemInput{
+		TableName: aws.String(applicationContext.EnvironmentGateway("TABLE_NAME")),
+		Key:       dynamoItem,
+	}
+	_, err = dynamoService.DeleteItem(deleteItemInput)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
