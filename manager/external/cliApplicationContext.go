@@ -30,6 +30,10 @@ func (appContext *CliApplicationContext) AddConcealEmailUsecase(email string) (s
 	return usecases.AddConcealEmailUsecase(email, appContext)
 }
 
+func (appContext *CliApplicationContext) DeleteConcealEmailUsecase(concealPrefix string) error {
+	return usecases.DeleteConcealEmailMappingUsecase(concealPrefix, appContext)
+}
+
 func (appContext *CliApplicationContext) GenerateRandomUuid() string {
 	return lib.GenerateGoogleRandomUuid(appContext)
 }

@@ -41,6 +41,11 @@ func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (
 	return appContext.ReturnFromConcealEmailUsecase, appContext.ReturnErrorFromConcealEmailUsecase
 }
 
+func (appContext *TestApplicationContext) DeleteConcealEmailUsecase(concealPrefix string) error {
+	//TODO: fill in
+	return nil
+}
+
 func (appContext *TestApplicationContext) GenerateRandomUuid() string {
 	return appContext.ReturnFromGenerateRandomUuid
 }
