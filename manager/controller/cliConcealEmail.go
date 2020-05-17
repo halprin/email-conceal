@@ -11,7 +11,7 @@ func CliConcealEmailController(cliArguments []string, applicationContext context
 	sourceEmail := cliArguments[1]
 	log.Println("E-mail to conceal =", sourceEmail)
 
-	concealedEmail, err := applicationContext.DeleteConcealEmailMapping(sourceEmail)
+	concealedEmail, err := applicationContext.AddConcealEmailUsecase(sourceEmail)
 	if errors.Is(err, entities.InvalidEmailAddressError) {
 		log.Printf("E-mail %s is invalid\n", sourceEmail)
 		defer applicationContext.Exit(1) //allows for any other deferred actions before Exit is called
