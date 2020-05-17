@@ -10,22 +10,30 @@ import (
 
 type CliApplicationContext struct{}
 
-func (cliAppContext *CliApplicationContext) ConcealEmailController(cliArguments []string) string {
-	return controller.CliConcealEmailController(cliArguments, cliAppContext)
+func (appContext *CliApplicationContext) ConcealEmailController(cliArguments []string) string {
+	return controller.CliConcealEmailController(cliArguments, appContext)
 }
 
-func (cliAppContext *CliApplicationContext) EnvironmentGateway(key string) string {
-	return gateways.OsEnvEnvironmentGateway(key, cliAppContext)
+func (appContext *CliApplicationContext) EnvironmentGateway(key string) string {
+	return gateways.OsEnvEnvironmentGateway(key, appContext)
 }
 
-func (cliAppContext *CliApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
-	return usecases.AddConcealEmailUsecase(email, cliAppContext)
+func (appContext *CliApplicationContext) AddConcealedEmailToActualEmailMappingGateway(concealPrefix string, actualEmail string) error {
+	return gateways.AddConcealedEmailToActualEmailMapping(concealPrefix, actualEmail, appContext)
 }
 
-func (cliAppContext *CliApplicationContext) GenerateRandomUuid() string {
-	return lib.GenerateGoogleRandomUuid(cliAppContext)
+func (appContext *CliApplicationContext) DeleteConcealedEmailToActualEmailMappingGateway(concealPrefix string) error {
+	return gateways.DeleteConcealedEmailToActualEmailMapping(concealPrefix, appContext)
 }
 
-func (cliAppContext *CliApplicationContext) Exit(returnCode int) {
+func (appContext *CliApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
+	return usecases.AddConcealEmailUsecase(email, appContext)
+}
+
+func (appContext *CliApplicationContext) GenerateRandomUuid() string {
+	return lib.GenerateGoogleRandomUuid(appContext)
+}
+
+func (appContext *CliApplicationContext) Exit(returnCode int) {
 	os.Exit(returnCode)
 }

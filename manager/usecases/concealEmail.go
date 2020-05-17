@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/entities"
+	"github.com/halprin/email-conceal/manager/external/lib/errors"
 )
 
 func AddConcealEmailUsecase(sourceEmail string, applicationContext context.ApplicationContext) (string, error) {
@@ -13,5 +14,21 @@ func AddConcealEmailUsecase(sourceEmail string, applicationContext context.Appli
 	}
 
 	concealedEmailPrefix := applicationContext.GenerateRandomUuid()
-	return fmt.Sprintf("%s@asdf.net", concealedEmailPrefix), nil
+	err = applicationContext.AddConcealedEmailToActualEmailMappingGateway(concealedEmailPrefix, sourceEmail)
+	if err != nil {
+		return "", errors.Wrap(err, "Unable to add conceal e-mail to actual e-mail mapping")
+	}
+
+	domain := applicationContext.EnvironmentGateway("DOMAIN")
+
+	return fmt.Sprintf("%s@%s", concealedEmailPrefix, domain), nil
+}
+
+func DeleteConcealEmailMappingUsecase(concealedEmailPrefix string, applicationContext context.ApplicationContext) error {
+	err := applicationContext.DeleteConcealedEmailToActualEmailMappingGateway(concealedEmailPrefix)
+	if err != nil {
+		return errors.Wrap(err, "Unable to delete conceal e-mail to actual e-mail mapping")
+	}
+
+	return nil
 }

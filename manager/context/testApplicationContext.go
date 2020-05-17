@@ -26,6 +26,16 @@ func (appContext *TestApplicationContext) EnvironmentGateway(key string) string 
 	return appContext.ReturnFromEnvironmentGateway[key]
 }
 
+func (appContext *TestApplicationContext) AddConcealedEmailToActualEmailMappingGateway(concealPrefix string, actualEmail string) error {
+	//TODO: fill in
+	return nil
+}
+
+func (appContext *TestApplicationContext) DeleteConcealedEmailToActualEmailMappingGateway(concealPrefix string) error {
+	//TODO: fill in
+	return nil
+}
+
 func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
 	appContext.ReceivedConcealEmailUsecaseEmail = email
 	return appContext.ReturnFromConcealEmailUsecase, appContext.ReturnErrorFromConcealEmailUsecase
