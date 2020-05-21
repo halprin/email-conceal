@@ -18,7 +18,7 @@ func TestSqsQueueForwardEmailFailsJsonParsing(t *testing.T) {
 	err := SqsQueueForwardEmail(arguments, &appContext)
 
 	if err == nil {
-		t.Error("An error should have been returned from SqsQueueForwardEmail controller")
+		t.Error("An error should have been returned from SqsQueueForwardEmail controllers")
 	}
 
 	if appContext.ReceivedForwardEmailUsecaseArguments != "" {
@@ -52,7 +52,7 @@ func TestSqsQueueForwardEmailFailsJsonNotBeingAsExpected(t *testing.T) {
 	err := SqsQueueForwardEmail(arguments, &appContext)
 
 	if err != nil {
-		t.Error("An error shouldn't have been returned from SqsQueueForwardEmail controller")
+		t.Error("An error shouldn't have been returned from SqsQueueForwardEmail controllers")
 	}
 
 	if appContext.ReceivedForwardEmailUsecaseArguments != expectedUrl {
@@ -89,7 +89,7 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 	err := SqsQueueForwardEmail(arguments, &appContext)
 
 	if err != expectedErrorFromUsecase {
-		t.Error("A specific error should have been returned from SqsQueueForwardEmail controller")
+		t.Error("A specific error should have been returned from SqsQueueForwardEmail controllers")
 	}
 
 	if appContext.ReceivedForwardEmailUsecaseArguments != expectedUrl {
@@ -124,7 +124,7 @@ func TestSqsQueueForwardEmailIsSuccess(t *testing.T) {
 	err := SqsQueueForwardEmail(arguments, &appContext)
 
 	if err != nil {
-		t.Error("An  error shouldn't have been returned from SqsQueueForwardEmail controller")
+		t.Error("An  error shouldn't have been returned from SqsQueueForwardEmail controllers")
 	}
 
 	if appContext.ReceivedForwardEmailUsecaseArguments != expectedUrl {

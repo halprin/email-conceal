@@ -1,8 +1,9 @@
 package context
 
 type TestApplicationContext struct {
-	ReceivedConcealEmailControllerArguments []string
-	ReturnFromConcealEmailController        string
+	ReceivedConcealEmailControllerArguments map[string]interface{}
+	ReturnStatusFromConcealEmailController  int
+	ReturnBodyFromConcealEmailController    map[string]string
 
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        map[string]string
@@ -26,9 +27,9 @@ type TestApplicationContext struct {
 	ReceivedExitReturnCode int
 }
 
-func (appContext *TestApplicationContext) ConcealEmailController(arguments []string) string {
+func (appContext *TestApplicationContext) ConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
 	appContext.ReceivedConcealEmailControllerArguments = arguments
-	return appContext.ReturnFromConcealEmailController
+	return appContext.ReturnStatusFromConcealEmailController, appContext.ReturnBodyFromConcealEmailController
 }
 
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
