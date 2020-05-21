@@ -9,24 +9,6 @@ import (
 	"net/http"
 )
 
-func CliConcealEmailController(cliArguments []string, applicationContext context.ApplicationContext) string {
-	sourceEmail := cliArguments[1]
-	log.Println("E-mail to conceal =", sourceEmail)
-
-	concealedEmail, err := applicationContext.AddConcealEmailUsecase(sourceEmail)
-	if errors.Is(err, entities.InvalidEmailAddressError) {
-		log.Printf("E-mail %s is invalid\n", sourceEmail)
-		defer applicationContext.Exit(1) //allows for any other deferred actions before Exit is called
-		return ""
-	} else if err != nil {
-		log.Printf("Another error occured, %+v", err)
-		defer applicationContext.Exit(2)
-		return ""
-	}
-
-	log.Println("Concealed e-mail address =", concealedEmail)
-	return concealedEmail
-}
 
 func JsonConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
 	sourceEmail, valid := arguments["email"].(string)
