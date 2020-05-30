@@ -2,8 +2,7 @@ package context
 
 type ApplicationContext interface {
 	//controllers
-	ConcealEmailController(arguments map[string]interface{}) (int, map[string]string)
-	DeleteConcealEmailController(arguments map[string]interface{}) (int, map[string]string)
+	Controllers() ApplicationContextControllers
 
 	//gateways
 	EnvironmentGateway(key string) string

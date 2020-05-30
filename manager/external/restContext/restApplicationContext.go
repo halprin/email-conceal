@@ -1,21 +1,28 @@
-package external
+package restContext
 
 import (
-	"github.com/halprin/email-conceal/manager/controllers"
+	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/external/lib"
 	"github.com/halprin/email-conceal/manager/gateways"
 	"github.com/halprin/email-conceal/manager/usecases"
 	"os"
 )
 
-type RestApplicationContext struct{}
-
-func (appContext *RestApplicationContext) ConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
-	return controllers.HttpConcealEmailController(arguments, appContext)
+type RestApplicationContext struct{
+	ControllerSet RestApplicationContextControllers
 }
 
-func (appContext *RestApplicationContext) DeleteConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
-	return controllers.HttpDeleteConcealEmailController(arguments, appContext)
+func NewRestApplicationContext() *RestApplicationContext {
+	appContext := &RestApplicationContext{}
+	appContext.ControllerSet = RestApplicationContextControllers{
+		ParentContext: appContext,
+	}
+
+	return appContext
+}
+
+func (appContext *RestApplicationContext) Controllers() context.ApplicationContextControllers {
+	return &appContext.ControllerSet
 }
 
 func (appContext *RestApplicationContext) EnvironmentGateway(key string) string {
