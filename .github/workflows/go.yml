@@ -26,11 +26,12 @@ jobs:
 
     - name: Get dependencies
       run: |
-        go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
+        pushd ./forwarder/
+        go get -v -t -d ./
+        popd
+        pushd ./manager/
+        go get -v -t -d ./
+        popd
         
     - name: Test Forwarder
       run: |
@@ -40,7 +41,7 @@ jobs:
     - name: Build Forwarder
       run: |
         cd ./forwarder/
-        go build -v .
+        go build -v ./
 
     - name: Test Manager
       run: |
@@ -50,7 +51,7 @@ jobs:
     - name: Build Manager
       run: |
         cd ./manager/
-        go build -v .
+        go build -v ./
 
     - name: Terraform has correct formatting
       run: terraform fmt -check -recursive ./iac/
