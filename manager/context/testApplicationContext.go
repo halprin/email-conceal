@@ -5,6 +5,10 @@ type TestApplicationContext struct {
 	ReturnStatusFromConcealEmailController  int
 	ReturnBodyFromConcealEmailController    map[string]string
 
+	ReceivedDeleteConcealEmailControllerArguments map[string]interface{}
+	ReturnStatusFromDeleteConcealEmailController  int
+	ReturnBodyFromDeleteConcealEmailController    map[string]string
+
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        map[string]string
 
@@ -30,6 +34,11 @@ type TestApplicationContext struct {
 func (appContext *TestApplicationContext) ConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
 	appContext.ReceivedConcealEmailControllerArguments = arguments
 	return appContext.ReturnStatusFromConcealEmailController, appContext.ReturnBodyFromConcealEmailController
+}
+
+func (appContext *TestApplicationContext) DeleteConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
+	appContext.ReceivedDeleteConcealEmailControllerArguments = arguments
+	return appContext.ReturnStatusFromDeleteConcealEmailController, appContext.ReturnBodyFromDeleteConcealEmailController
 }
 
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {

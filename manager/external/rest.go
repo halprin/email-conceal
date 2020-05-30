@@ -11,6 +11,7 @@ func Rest() {
 
 	v1 := router.Group("/v1")
 	v1.POST("/concealEmail", createConcealEmail)
+	v1.DELETE("/concealEmail/:concealEmailId", deleteConcealEmail)
 
 	_ = router.Run(":8000")
 }
@@ -23,6 +24,18 @@ func createConcealEmail(context *gin.Context) {
 		return
 	}
 	httpStatus, jsonMap := applicationContext.ConcealEmailController(genericMap)
+
+	context.JSON(httpStatus, jsonMap)
+}
+
+func deleteConcealEmail(context *gin.Context) {
+	concealEmailId := context.Param("concealEmailId")
+
+	requestMap := map[string]interface{} {
+		"concealEmailId": concealEmailId,
+	}
+
+	httpStatus, jsonMap := applicationContext.DeleteConcealEmailController(requestMap)
 
 	context.JSON(httpStatus, jsonMap)
 }

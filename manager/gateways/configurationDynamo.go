@@ -50,7 +50,7 @@ func DeleteConcealedEmailToActualEmailMapping(concealPrefix string, applicationC
 
 	tableName := applicationContext.EnvironmentGateway("TABLE_NAME")
 
-	items, err := getAllItemsForHashKey(concealPrefix, tableName)
+	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to get all the items for the hash key %s", concealPrefix))
 	}

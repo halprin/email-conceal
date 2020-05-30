@@ -10,7 +10,7 @@ import (
 )
 
 
-func JsonConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
+func HttpConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
 	sourceEmail, valid := arguments["email"].(string)
 	if !valid {
 		errorString := "E-mail was not supplied or was not a string"
@@ -47,4 +47,31 @@ func JsonConcealEmailController(arguments map[string]interface{}, applicationCon
 	}
 
 	return http.StatusCreated, jsonMap
+}
+
+func HttpDeleteConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
+	concealEmailId, valid := arguments["concealEmailId"].(string)
+
+	if !valid {
+		errorString := "Conceal e-mail ID was not supplied or was not a string"
+		log.Printf(errorString)
+		jsonMap := map[string]string{
+			"error": errorString,
+		}
+		return http.StatusBadRequest, jsonMap
+	}
+
+	log.Println("Conceal E-mail ID to delete =", concealEmailId)
+
+	err := applicationContext.DeleteConcealEmailUsecase(concealEmailId)
+	if err != nil {
+		log.Printf("Some error occured while trying to delete the conceal e-mail, %+v", err)
+		jsonMap := map[string]string{
+			"error": "An unknown error occurred",
+		}
+		return http.StatusInternalServerError, jsonMap
+	}
+
+	jsonMap := map[string]string{}
+	return http.StatusNoContent, jsonMap
 }

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestCliConcealEmailGateway(t *testing.T) {
+func TestConcealEmailGateway(t *testing.T) {
 	concealedEmail := "concealed@asdf.com"
 	testApplicationContext := &context.TestApplicationContext{
 		ReturnFromConcealEmailUsecase: concealedEmail,
@@ -19,7 +19,7 @@ func TestCliConcealEmailGateway(t *testing.T) {
 		"email": sourceEmail,
 	}
 
-	status, body := JsonConcealEmailController(arguments, testApplicationContext)
+	status, body := HttpConcealEmailController(arguments, testApplicationContext)
 	actualConcealedEmail := body["concealedEmail"]
 
 	if testApplicationContext.ReceivedConcealEmailUsecaseEmail != sourceEmail {
@@ -42,7 +42,7 @@ func TestConcealEmailGatewayBadEmailType(t *testing.T) {
 		"email": 3,
 	}
 
-	status, _ := JsonConcealEmailController(arguments, testApplicationContext)
+	status, _ := HttpConcealEmailController(arguments, testApplicationContext)
 
 	if testApplicationContext.ReceivedConcealEmailUsecaseEmail != "" {
 		t.Errorf("The usecase was called, but it shouldn't have been")
@@ -63,7 +63,7 @@ func TestConcealEmailGatewayInvalidEmail(t *testing.T) {
 		"email": sourceEmail,
 	}
 
-	status, _ := JsonConcealEmailController(arguments, testApplicationContext)
+	status, _ := HttpConcealEmailController(arguments, testApplicationContext)
 
 	if testApplicationContext.ReceivedConcealEmailUsecaseEmail != sourceEmail {
 		t.Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testApplicationContext.ReceivedConcealEmailUsecaseEmail, sourceEmail)
@@ -84,7 +84,7 @@ func TestConcealEmailGatewayUnknownError(t *testing.T) {
 		"email": sourceEmail,
 	}
 
-	status, _ := JsonConcealEmailController(arguments, testApplicationContext)
+	status, _ := HttpConcealEmailController(arguments, testApplicationContext)
 
 	if testApplicationContext.ReceivedConcealEmailUsecaseEmail != sourceEmail {
 		t.Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testApplicationContext.ReceivedConcealEmailUsecaseEmail, sourceEmail)
@@ -92,5 +92,63 @@ func TestConcealEmailGatewayUnknownError(t *testing.T) {
 
 	if status != http.StatusInternalServerError {
 		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
+	}
+}
+
+func TestDeleteConcealEmailGateway(t *testing.T) {
+	testApplicationContext := &context.TestApplicationContext{}
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "dogcow",
+	}
+
+	status, body := HttpDeleteConcealEmailController(arguments, testApplicationContext)
+
+	if status != http.StatusNoContent {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusNoContent)
+	}
+
+	if len(body) != 0 {
+		t.Errorf("The returned status response body wasn't empty; it should've been")
+	}
+}
+
+func TestDeleteConcealEmailGatewayBadInput(t *testing.T) {
+	testApplicationContext := &context.TestApplicationContext{}
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": 3,
+	}
+
+	status, body := HttpDeleteConcealEmailController(arguments, testApplicationContext)
+
+	if status != http.StatusBadRequest {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
+	}
+
+	_, exists := body["error"]
+	if !exists {
+		t.Errorf("An error is missing from the response body; it should've been there")
+	}
+}
+
+func TestDeleteConcealEmailGatewayFailedDelete(t *testing.T) {
+	testApplicationContext := &context.TestApplicationContext{
+		ReturnErrorFromDeleteConcealEmailUsecase: errors.New("moof! go boom"),
+	}
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "dogcow",
+	}
+
+	status, body := HttpDeleteConcealEmailController(arguments, testApplicationContext)
+
+	if status != http.StatusInternalServerError {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
+	}
+
+	_, exists := body["error"]
+	if !exists {
+		t.Errorf("An error is missing from the response body; it should've been there")
 	}
 }

@@ -29,10 +29,22 @@ func TestConcealEmailSuccess(t *testing.T) {
 	}
 }
 
-func TestConcealEmailNegative(t *testing.T) {
+func TestConcealEmailBadEmail(t *testing.T) {
 	testApplicationContext := &context.TestApplicationContext{}
 
 	_, err := AddConcealEmailUsecase("in[valid-email@dogcow.com", testApplicationContext)
+
+	if err == nil {
+		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
+	}
+}
+
+func TestConcealEmailGatewayFailed(t *testing.T) {
+	testApplicationContext := &context.TestApplicationContext{
+		ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway: errors.New("oops"),
+	}
+
+	_, err := AddConcealEmailUsecase("moof@dogcow.com", testApplicationContext)
 
 	if err == nil {
 		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")

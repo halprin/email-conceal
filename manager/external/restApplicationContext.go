@@ -11,7 +11,11 @@ import (
 type RestApplicationContext struct{}
 
 func (appContext *RestApplicationContext) ConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
-	return controllers.JsonConcealEmailController(arguments, appContext)
+	return controllers.HttpConcealEmailController(arguments, appContext)
+}
+
+func (appContext *RestApplicationContext) DeleteConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
+	return controllers.HttpDeleteConcealEmailController(arguments, appContext)
 }
 
 func (appContext *RestApplicationContext) EnvironmentGateway(key string) string {
