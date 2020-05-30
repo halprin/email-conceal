@@ -17,7 +17,7 @@ func TestCliForwardEmailFails(t *testing.T) {
 	err := CliForwardEmail(arguments, &appContext)
 
 	if err == nil {
-		t.Error("An error should have been returned from CliForwardEmail controllers")
+		t.Error("An error should have been returned from CliForwardEmail controller")
 	}
 
 	if appContext.ReceivedExitReturnCode != 1 {
