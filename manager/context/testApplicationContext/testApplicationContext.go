@@ -1,13 +1,9 @@
-package context
+package testApplicationContext
+
+import "github.com/halprin/email-conceal/manager/context"
 
 type TestApplicationContext struct {
-	ReceivedConcealEmailControllerArguments map[string]interface{}
-	ReturnStatusFromConcealEmailController  int
-	ReturnBodyFromConcealEmailController    map[string]string
-
-	ReceivedDeleteConcealEmailControllerArguments map[string]interface{}
-	ReturnStatusFromDeleteConcealEmailController  int
-	ReturnBodyFromDeleteConcealEmailController    map[string]string
+	ControllerSet TestApplicationContextControllers
 
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        map[string]string
@@ -31,14 +27,8 @@ type TestApplicationContext struct {
 	ReceivedExitReturnCode int
 }
 
-func (appContext *TestApplicationContext) ConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
-	appContext.ReceivedConcealEmailControllerArguments = arguments
-	return appContext.ReturnStatusFromConcealEmailController, appContext.ReturnBodyFromConcealEmailController
-}
-
-func (appContext *TestApplicationContext) DeleteConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
-	appContext.ReceivedDeleteConcealEmailControllerArguments = arguments
-	return appContext.ReturnStatusFromDeleteConcealEmailController, appContext.ReturnBodyFromDeleteConcealEmailController
+func (appContext *TestApplicationContext) Controllers() context.ApplicationContextControllers {
+	return &appContext.ControllerSet
 }
 
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
