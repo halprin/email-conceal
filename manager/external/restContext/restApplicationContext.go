@@ -9,12 +9,12 @@ import (
 )
 
 type RestApplicationContext struct{
-	ControllerSet RestApplicationContextControllers
+	controllerSet RestApplicationContextControllers
 }
 
 func NewRestApplicationContext() *RestApplicationContext {
 	appContext := &RestApplicationContext{}
-	appContext.ControllerSet = RestApplicationContextControllers{
+	appContext.controllerSet = RestApplicationContextControllers{
 		ParentContext: appContext,
 	}
 
@@ -22,7 +22,7 @@ func NewRestApplicationContext() *RestApplicationContext {
 }
 
 func (appContext *RestApplicationContext) Controllers() context.ApplicationContextControllers {
-	return &appContext.ControllerSet
+	return &appContext.controllerSet
 }
 
 func (appContext *RestApplicationContext) EnvironmentGateway(key string) string {

@@ -3,7 +3,7 @@ package testApplicationContext
 import "github.com/halprin/email-conceal/manager/context"
 
 type TestApplicationContext struct {
-	ControllerSet TestApplicationContextControllers
+	controllerSet TestApplicationContextControllers
 
 	ReceivedEnvironmentGatewayArguments string
 	ReturnFromEnvironmentGateway        map[string]string
@@ -28,7 +28,7 @@ type TestApplicationContext struct {
 }
 
 func (appContext *TestApplicationContext) Controllers() context.ApplicationContextControllers {
-	return &appContext.ControllerSet
+	return &appContext.controllerSet
 }
 
 func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
