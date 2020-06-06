@@ -3,14 +3,13 @@ package restContext
 import (
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/external/lib"
-	"github.com/halprin/email-conceal/manager/gateways"
-	"github.com/halprin/email-conceal/manager/usecases"
 	"os"
 )
 
 type RestApplicationContext struct{
 	controllerSet RestApplicationContextControllers
 	gatewaySet    RestApplicationContextGateways
+	usecaseSet    RestApplicationContextUsecases
 }
 
 func NewRestApplicationContext() *RestApplicationContext {
@@ -20,6 +19,9 @@ func NewRestApplicationContext() *RestApplicationContext {
 		ParentContext: appContext,
 	}
 	appContext.gatewaySet = RestApplicationContextGateways{
+		ParentContext: appContext,
+	}
+	appContext.usecaseSet = RestApplicationContextUsecases{
 		ParentContext: appContext,
 	}
 
@@ -34,24 +36,8 @@ func (appContext *RestApplicationContext) Gateways() context.ApplicationContextG
 	return &appContext.gatewaySet
 }
 
-func (appContext *RestApplicationContext) EnvironmentGateway(key string) string {
-	return gateways.OsEnvEnvironmentGateway(key, appContext)
-}
-
-func (appContext *RestApplicationContext) AddConcealedEmailToActualEmailMappingGateway(concealPrefix string, actualEmail string) error {
-	return gateways.AddConcealedEmailToActualEmailMapping(concealPrefix, actualEmail, appContext)
-}
-
-func (appContext *RestApplicationContext) DeleteConcealedEmailToActualEmailMappingGateway(concealPrefix string) error {
-	return gateways.DeleteConcealedEmailToActualEmailMapping(concealPrefix, appContext)
-}
-
-func (appContext *RestApplicationContext) AddConcealEmailUsecase(email string) (string, error) {
-	return usecases.AddConcealEmailUsecase(email, appContext)
-}
-
-func (appContext *RestApplicationContext) DeleteConcealEmailUsecase(concealPrefix string) error {
-	return usecases.DeleteConcealEmailMappingUsecase(concealPrefix, appContext)
+func (appContext *RestApplicationContext) Usecases() context.ApplicationContextUsecases {
+	return &appContext.usecaseSet
 }
 
 func (appContext *RestApplicationContext) GenerateRandomUuid() string {

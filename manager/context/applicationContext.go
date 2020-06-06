@@ -8,8 +8,7 @@ type ApplicationContext interface {
 	Gateways() ApplicationContextGateways
 
 	//usecases
-	AddConcealEmailUsecase(email string) (string, error)
-	DeleteConcealEmailUsecase(concealPrefix string) error
+	Usecases() ApplicationContextUsecases
 
 	//libraries
 	GenerateRandomUuid() string
