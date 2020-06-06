@@ -3,17 +3,8 @@ package testApplicationContext
 import "github.com/halprin/email-conceal/manager/context"
 
 type TestApplicationContext struct {
-	controllerSet TestApplicationContextControllers
-
-	ReceivedEnvironmentGatewayArguments string
-	ReturnFromEnvironmentGateway        map[string]string
-
-	ReceivedAddConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument string
-	ReceivedAddConcealedEmailToActualEmailMappingGatewayEmailArgument         string
-	ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway               error
-
-	ReceivedDeleteConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument string
-	ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway               error
+	ControllerSet TestApplicationContextControllers
+	GatewaySet    TestApplicationContextGateways
 
 	ReceivedConcealEmailUsecaseEmail   string
 	ReturnFromConcealEmailUsecase      string
@@ -28,23 +19,11 @@ type TestApplicationContext struct {
 }
 
 func (appContext *TestApplicationContext) Controllers() context.ApplicationContextControllers {
-	return &appContext.controllerSet
+	return &appContext.ControllerSet
 }
 
-func (appContext *TestApplicationContext) EnvironmentGateway(key string) string {
-	appContext.ReceivedEnvironmentGatewayArguments = key
-	return appContext.ReturnFromEnvironmentGateway[key]
-}
-
-func (appContext *TestApplicationContext) AddConcealedEmailToActualEmailMappingGateway(concealPrefix string, actualEmail string) error {
-	appContext.ReceivedAddConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument = concealPrefix
-	appContext.ReceivedAddConcealedEmailToActualEmailMappingGatewayEmailArgument = actualEmail
-	return appContext.ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway
-}
-
-func (appContext *TestApplicationContext) DeleteConcealedEmailToActualEmailMappingGateway(concealPrefix string) error {
-	appContext.ReceivedDeleteConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument = concealPrefix
-	return appContext.ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway
+func (appContext *TestApplicationContext) Gateways() context.ApplicationContextGateways {
+	return &appContext.GatewaySet
 }
 
 func (appContext *TestApplicationContext) AddConcealEmailUsecase(email string) (string, error) {

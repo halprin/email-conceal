@@ -5,9 +5,7 @@ type ApplicationContext interface {
 	Controllers() ApplicationContextControllers
 
 	//gateways
-	EnvironmentGateway(key string) string
-	AddConcealedEmailToActualEmailMappingGateway(concealPrefix string, actualEmail string) error
-	DeleteConcealedEmailToActualEmailMappingGateway(concealPrefix string) error
+	Gateways() ApplicationContextGateways
 
 	//usecases
 	AddConcealEmailUsecase(email string) (string, error)
