@@ -16,7 +16,9 @@ func TestConcealEmailSuccess(t *testing.T) {
 				"DOMAIN": domain,
 			},
 		},
-		ReturnFromGenerateRandomUuid: uuid,
+		LibrarySet: testApplicationContext.TestApplicationContextLibraries{
+			ReturnFromGenerateRandomUuid: uuid,
+		},
 	}
 
 	actualConcealedEmail, err := AddConcealEmailUsecase("valid-email@dogcow.com", testApplicationContext)

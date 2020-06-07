@@ -6,10 +6,7 @@ type TestApplicationContext struct {
 	ControllerSet TestApplicationContextControllers
 	GatewaySet    TestApplicationContextGateways
 	UsecaseSet    TestApplicationContextUsecases
-
-	ReturnFromGenerateRandomUuid string
-
-	ReceivedExitReturnCode int
+	LibrarySet    TestApplicationContextLibraries
 }
 
 func (appContext *TestApplicationContext) Controllers() context.ApplicationContextControllers {
@@ -28,10 +25,6 @@ func (appContext *TestApplicationContext) TestUsecases() TestApplicationContextU
 	return appContext.UsecaseSet
 }
 
-func (appContext *TestApplicationContext) GenerateRandomUuid() string {
-	return appContext.ReturnFromGenerateRandomUuid
-}
-
-func (appContext *TestApplicationContext) Exit(returnCode int) {
-	appContext.ReceivedExitReturnCode = returnCode
+func (appContext *TestApplicationContext) Libraries() context.ApplicationContextLibraries {
+	return &appContext.LibrarySet
 }

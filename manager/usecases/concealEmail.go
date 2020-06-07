@@ -13,7 +13,7 @@ func AddConcealEmailUsecase(sourceEmail string, applicationContext context.Appli
 		return "", err
 	}
 
-	concealedEmailPrefix := applicationContext.GenerateRandomUuid()
+	concealedEmailPrefix := applicationContext.Libraries().GenerateRandomUuid()
 	err = applicationContext.Gateways().AddConcealedEmailToActualEmailMappingGateway(concealedEmailPrefix, sourceEmail)
 	if err != nil {
 		return "", errors.Wrap(err, "Unable to add conceal e-mail to actual e-mail mapping")

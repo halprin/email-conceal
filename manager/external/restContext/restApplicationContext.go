@@ -2,14 +2,13 @@ package restContext
 
 import (
 	"github.com/halprin/email-conceal/manager/context"
-	"github.com/halprin/email-conceal/manager/external/lib"
-	"os"
 )
 
 type RestApplicationContext struct{
 	controllerSet RestApplicationContextControllers
 	gatewaySet    RestApplicationContextGateways
 	usecaseSet    RestApplicationContextUsecases
+	librarySet    RestApplicationContextLibraries
 }
 
 func NewRestApplicationContext() *RestApplicationContext {
@@ -22,6 +21,9 @@ func NewRestApplicationContext() *RestApplicationContext {
 		ParentContext: appContext,
 	}
 	appContext.usecaseSet = RestApplicationContextUsecases{
+		ParentContext: appContext,
+	}
+	appContext.librarySet = RestApplicationContextLibraries{
 		ParentContext: appContext,
 	}
 
@@ -40,10 +42,6 @@ func (appContext *RestApplicationContext) Usecases() context.ApplicationContextU
 	return &appContext.usecaseSet
 }
 
-func (appContext *RestApplicationContext) GenerateRandomUuid() string {
-	return lib.GenerateGoogleRandomUuid(appContext)
-}
-
-func (appContext *RestApplicationContext) Exit(returnCode int) {
-	os.Exit(returnCode)
+func (appContext *RestApplicationContext) Libraries() context.ApplicationContextLibraries {
+	return &appContext.librarySet
 }

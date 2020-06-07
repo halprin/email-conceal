@@ -11,6 +11,5 @@ type ApplicationContext interface {
 	Usecases() ApplicationContextUsecases
 
 	//libraries
-	GenerateRandomUuid() string
-	Exit(returnCode int)
+	Libraries() ApplicationContextLibraries
 }
