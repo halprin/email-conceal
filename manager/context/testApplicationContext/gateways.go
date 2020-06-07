@@ -18,7 +18,7 @@ func (appContextGateways *TestApplicationContextGateways) GetEnvironmentValue(ke
 	return appContextGateways.ReturnFromEnvironmentGateway[key]
 }
 
-func (appContextGateways *TestApplicationContextGateways) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string) error {
+func (appContextGateways *TestApplicationContextGateways) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {
 	appContextGateways.ReceivedAddConcealedEmailToActualEmailMappingGatewayConcealPrefixArgument = concealPrefix
 	appContextGateways.ReceivedAddConcealedEmailToActualEmailMappingGatewayEmailArgument = actualEmail
 	return appContextGateways.ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway

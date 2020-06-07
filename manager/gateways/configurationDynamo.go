@@ -13,15 +13,45 @@ import (
 var dynamoService = dynamodb.New(awsSession)
 
 type ConcealEmailMapping struct {
-	Primary string   `dynamodbav:"primary"`
+	Primary   string  `dynamodbav:"primary"`
 	Secondary string `dynamodbav:"secondary"`
 }
 
-func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, applicationContext context.ApplicationContext) error {
+type ConcealEmailEntity struct {
+	Primary     string `dynamodbav:"primary"`
+	Secondary   string `dynamodbav:"secondary"`
+	Description *string `dynamodbav:"description"`
+}
+
+func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string, applicationContext context.ApplicationContext) error {
 	if sessionErr != nil {
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
 
+	tableName := aws.String(applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME"))
+
+	//write the primary entity
+
+	entity := ConcealEmailEntity{
+		Primary:   fmt.Sprintf("conceal-%s", concealPrefix),
+		Secondary: fmt.Sprintf("conceal-%s", concealPrefix),
+		Description: description,
+	}
+	dynamoEntity, err := dynamodbattribute.MarshalMap(entity)
+	if err != nil {
+		return errors.Wrap(err, "Failed to marshal struct into a DynamoDB item")
+	}
+
+	putItemInput := &dynamodb.PutItemInput{
+		TableName: tableName,
+		Item:      dynamoEntity,
+	}
+	_, err = dynamoService.PutItem(putItemInput)
+	if err != nil {
+		return errors.Wrap(err, "Failed to put entity in DynamoDB")
+	}
+
+	//write the mapping data for the conceal entity
 	mapping := ConcealEmailMapping{
 		Primary:   fmt.Sprintf("conceal-%s", concealPrefix),
 		Secondary: fmt.Sprintf("email-%s", actualEmail),
@@ -31,8 +61,8 @@ func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail str
 		return errors.Wrap(err, "Failed to marshal struct into a DynamoDB item")
 	}
 
-	putItemInput := &dynamodb.PutItemInput{
-		TableName: aws.String(applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")),
+	putItemInput = &dynamodb.PutItemInput{
+		TableName: tableName,
 		Item:      dynamoMapping,
 	}
 	_, err = dynamoService.PutItem(putItemInput)
