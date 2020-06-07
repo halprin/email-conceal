@@ -32,7 +32,7 @@ func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail str
 	}
 
 	putItemInput := &dynamodb.PutItemInput{
-		TableName: aws.String(applicationContext.EnvironmentGateway("TABLE_NAME")),
+		TableName: aws.String(applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")),
 		Item:      dynamoMapping,
 	}
 	_, err = dynamoService.PutItem(putItemInput)
@@ -48,7 +48,7 @@ func DeleteConcealedEmailToActualEmailMapping(concealPrefix string, applicationC
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
 
-	tableName := applicationContext.EnvironmentGateway("TABLE_NAME")
+	tableName := applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")
 
 	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
 	if err != nil {

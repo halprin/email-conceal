@@ -3,17 +3,21 @@ package usecases
 import (
 	"errors"
 	"fmt"
-	"github.com/halprin/email-conceal/manager/context"
+	"github.com/halprin/email-conceal/manager/context/testApplicationContext"
 	"testing"
 )
 
 func TestConcealEmailSuccess(t *testing.T) {
 	uuid := "moof-uuid"
 	domain := "dogcow.com"
-	testApplicationContext := &context.TestApplicationContext{
-		ReturnFromGenerateRandomUuid: uuid,
-		ReturnFromEnvironmentGateway: map[string]string{
-			"DOMAIN": domain,
+	testApplicationContext := &testApplicationContext.TestApplicationContext{
+		GatewaySet: testApplicationContext.TestApplicationContextGateways{
+			ReturnFromEnvironmentGateway: map[string]string{
+				"DOMAIN": domain,
+			},
+		},
+		LibrarySet: testApplicationContext.TestApplicationContextLibraries{
+			ReturnFromGenerateRandomUuid: uuid,
 		},
 	}
 
@@ -30,7 +34,7 @@ func TestConcealEmailSuccess(t *testing.T) {
 }
 
 func TestConcealEmailBadEmail(t *testing.T) {
-	testApplicationContext := &context.TestApplicationContext{}
+	testApplicationContext := &testApplicationContext.TestApplicationContext{}
 
 	_, err := AddConcealEmailUsecase("in[valid-email@dogcow.com", testApplicationContext)
 
@@ -40,8 +44,10 @@ func TestConcealEmailBadEmail(t *testing.T) {
 }
 
 func TestConcealEmailGatewayFailed(t *testing.T) {
-	testApplicationContext := &context.TestApplicationContext{
-		ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway: errors.New("oops"),
+	testApplicationContext := &testApplicationContext.TestApplicationContext{
+		GatewaySet: testApplicationContext.TestApplicationContextGateways{
+			ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway: errors.New("oops"),
+		},
 	}
 
 	_, err := AddConcealEmailUsecase("moof@dogcow.com", testApplicationContext)
@@ -52,7 +58,7 @@ func TestConcealEmailGatewayFailed(t *testing.T) {
 }
 
 func TestDeleteConcealEmailSuccess(t *testing.T) {
-	testApplicationContext := &context.TestApplicationContext{}
+	testApplicationContext := &testApplicationContext.TestApplicationContext{}
 
 	err := DeleteConcealEmailMappingUsecase("some_prefix", testApplicationContext)
 
@@ -62,8 +68,10 @@ func TestDeleteConcealEmailSuccess(t *testing.T) {
 }
 
 func TestDeleteConcealEmailNegative(t *testing.T) {
-	testApplicationContext := &context.TestApplicationContext{
-		ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway: errors.New("it failed"),
+	testApplicationContext := &testApplicationContext.TestApplicationContext{
+		GatewaySet: testApplicationContext.TestApplicationContextGateways{
+			ReturnErrorFromDeleteConcealedEmailToActualEmailMappingGateway: errors.New("it failed"),
+		},
 	}
 
 	err := DeleteConcealEmailMappingUsecase("some_prefix", testApplicationContext)

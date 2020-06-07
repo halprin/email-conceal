@@ -23,7 +23,7 @@ func HttpConcealEmailController(arguments map[string]interface{}, applicationCon
 
 	log.Println("E-mail to conceal =", sourceEmail)
 
-	concealedEmail, err := applicationContext.AddConcealEmailUsecase(sourceEmail)
+	concealedEmail, err := applicationContext.Usecases().AddConcealEmail(sourceEmail)
 
 	if errors.Is(err, entities.InvalidEmailAddressError) {
 		errorString := fmt.Sprintf("E-mail %s is invalid", sourceEmail)
@@ -63,7 +63,7 @@ func HttpDeleteConcealEmailController(arguments map[string]interface{}, applicat
 
 	log.Println("Conceal E-mail ID to delete =", concealEmailId)
 
-	err := applicationContext.DeleteConcealEmailUsecase(concealEmailId)
+	err := applicationContext.Usecases().DeleteConcealEmail(concealEmailId)
 	if err != nil {
 		log.Printf("Some error occured while trying to delete the conceal e-mail, %+v", err)
 		jsonMap := map[string]string{
