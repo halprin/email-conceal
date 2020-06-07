@@ -11,12 +11,12 @@ type TestApplicationContextControllers struct{
 	ReturnBodyFromDeleteConcealEmailController    map[string]string
 }
 
-func (appContextControllers *TestApplicationContextControllers) ConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
+func (appContextControllers *TestApplicationContextControllers) ConcealEmail(arguments map[string]interface{}) (int, map[string]string) {
 	appContextControllers.ReceivedConcealEmailControllerArguments = arguments
 	return appContextControllers.ReturnStatusFromConcealEmailController, appContextControllers.ReturnBodyFromConcealEmailController
 }
 
-func (appContextControllers *TestApplicationContextControllers) DeleteConcealEmailController(arguments map[string]interface{}) (int, map[string]string) {
+func (appContextControllers *TestApplicationContextControllers) DeleteConcealEmail(arguments map[string]interface{}) (int, map[string]string) {
 	appContextControllers.ReceivedDeleteConcealEmailControllerArguments = arguments
 	return appContextControllers.ReturnStatusFromDeleteConcealEmailController, appContextControllers.ReturnBodyFromDeleteConcealEmailController
 }

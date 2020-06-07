@@ -24,7 +24,7 @@ func createConcealEmail(context *gin.Context) {
 	if err != nil {
 		return
 	}
-	httpStatus, jsonMap := applicationContext.Controllers().ConcealEmailController(genericMap)
+	httpStatus, jsonMap := applicationContext.Controllers().ConcealEmail(genericMap)
 
 	context.JSON(httpStatus, jsonMap)
 }
@@ -36,7 +36,7 @@ func deleteConcealEmail(context *gin.Context) {
 		"concealEmailId": concealEmailId,
 	}
 
-	httpStatus, jsonMap := applicationContext.Controllers().DeleteConcealEmailController(requestMap)
+	httpStatus, jsonMap := applicationContext.Controllers().DeleteConcealEmail(requestMap)
 
 	context.JSON(httpStatus, jsonMap)
 }
