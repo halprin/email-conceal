@@ -10,12 +10,12 @@ type TestApplicationContextUsecases struct{
 	ReturnErrorFromDeleteConcealEmailUsecase               error
 }
 
-func (appContextUsecases *TestApplicationContextUsecases) AddConcealEmailUsecase(email string) (string, error) {
+func (appContextUsecases *TestApplicationContextUsecases) AddConcealEmail(email string) (string, error) {
 	appContextUsecases.ReceivedConcealEmailUsecaseEmail = email
 	return appContextUsecases.ReturnFromConcealEmailUsecase, appContextUsecases.ReturnErrorFromConcealEmailUsecase
 }
 
-func (appContextUsecases *TestApplicationContextUsecases) DeleteConcealEmailUsecase(concealPrefix string) error {
+func (appContextUsecases *TestApplicationContextUsecases) DeleteConcealEmail(concealPrefix string) error {
 	appContextUsecases.ReceivedDeleteConcealEmailUsecaseConcealPrefixArgument = concealPrefix
 	return appContextUsecases.ReturnErrorFromDeleteConcealEmailUsecase
 }
