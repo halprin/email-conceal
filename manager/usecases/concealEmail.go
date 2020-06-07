@@ -7,10 +7,18 @@ import (
 	"github.com/halprin/email-conceal/manager/external/lib/errors"
 )
 
-func AddConcealEmailUsecase(sourceEmail string, applicationContext context.ApplicationContext) (string, error) {
+func AddConcealEmailUsecase(sourceEmail string, description *string, applicationContext context.ApplicationContext) (string, error) {
 	err := entities.ValidateEmail(sourceEmail)
 	if err != nil {
 		return "", err
+	}
+
+	if description != nil {
+		//the description exists, so validate it
+		err := entities.ValidateDescription(*description)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	concealedEmailPrefix := applicationContext.Libraries().GenerateRandomUuid()

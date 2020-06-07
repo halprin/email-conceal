@@ -11,8 +11,8 @@ import (
 
 
 func HttpConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
-	sourceEmail, valid := arguments["email"].(string)
-	if !valid {
+	sourceEmail, sourceEmailValid := arguments["email"].(string)
+	if !sourceEmailValid {
 		errorString := "E-mail was not supplied or was not a string"
 		log.Printf(errorString)
 		jsonMap := map[string]string{
@@ -21,12 +21,38 @@ func HttpConcealEmailController(arguments map[string]interface{}, applicationCon
 		return http.StatusBadRequest, jsonMap
 	}
 
-	log.Println("E-mail to conceal =", sourceEmail)
+	var description *string = nil
+	descriptionRaw, descriptionExists := arguments["description"]
+	if descriptionExists {
+		localDescription, descriptionValid := descriptionRaw.(string)
+		description = &localDescription
+		if !descriptionValid {
+			errorString := "Description was not a string"
+			log.Printf(errorString)
+			jsonMap := map[string]string{
+				"error": errorString,
+			}
+			return http.StatusBadRequest, jsonMap
+		}
+	}
 
-	concealedEmail, err := applicationContext.Usecases().AddConcealEmail(sourceEmail)
+	if description != nil {
+		log.Printf("E-mail to conceal and description = %s, %s", sourceEmail, *description)
+	} else {
+		log.Printf("E-mail to conceal with no description = %s", sourceEmail)
+	}
+
+	concealedEmail, err := applicationContext.Usecases().AddConcealEmail(sourceEmail, description)
 
 	if errors.Is(err, entities.InvalidEmailAddressError) {
 		errorString := fmt.Sprintf("E-mail %s is invalid", sourceEmail)
+		log.Printf(errorString)
+		jsonMap := map[string]string{
+			"error": errorString,
+		}
+		return http.StatusBadRequest, jsonMap
+	} else if errors.Is(err, entities.DescriptionTooShortError) || errors.Is(err, entities.DescriptionTooLongError) {
+		errorString := err.Error()
 		log.Printf(errorString)
 		jsonMap := map[string]string{
 			"error": errorString,

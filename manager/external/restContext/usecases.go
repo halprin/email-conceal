@@ -9,8 +9,8 @@ type RestApplicationContextUsecases struct{
 	ParentContext context.ApplicationContext
 }
 
-func (appContextUsecases *RestApplicationContextUsecases) AddConcealEmail(email string) (string, error) {
-	return usecases.AddConcealEmailUsecase(email, appContextUsecases.ParentContext)
+func (appContextUsecases *RestApplicationContextUsecases) AddConcealEmail(email string, description *string) (string, error) {
+	return usecases.AddConcealEmailUsecase(email, description, appContextUsecases.ParentContext)
 }
 
 func (appContextUsecases *RestApplicationContextUsecases) DeleteConcealEmail(concealPrefix string) error {
