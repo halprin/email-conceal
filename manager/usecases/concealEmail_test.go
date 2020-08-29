@@ -20,8 +20,35 @@ func TestConcealEmailSuccess(t *testing.T) {
 			ReturnFromGenerateRandomUuid: uuid,
 		},
 	}
+	description := "description"
 
-	actualConcealedEmail, err := AddConcealEmailUsecase("valid-email@dogcow.com", testApplicationContext)
+	actualConcealedEmail, err := AddConcealEmailUsecase("valid-email@dogcow.com", &description, testApplicationContext)
+
+	if err != nil {
+		t.Error("Expected no error to be returned from concealing the e-mail usecase, but there was one")
+	}
+
+	expectedConcealedEmail := fmt.Sprintf("%s@%s", uuid, domain)
+	if actualConcealedEmail != expectedConcealedEmail {
+		t.Errorf("The generated concealed e-mail %s was supposed to be %s", actualConcealedEmail, expectedConcealedEmail)
+	}
+}
+
+func TestConcealEmailSuccessWithNoDescription(t *testing.T) {
+	uuid := "moof-uuid"
+	domain := "dogcow.com"
+	testApplicationContext := &testApplicationContext.TestApplicationContext{
+		GatewaySet: testApplicationContext.TestApplicationContextGateways{
+			ReturnFromEnvironmentGateway: map[string]string{
+				"DOMAIN": domain,
+			},
+		},
+		LibrarySet: testApplicationContext.TestApplicationContextLibraries{
+			ReturnFromGenerateRandomUuid: uuid,
+		},
+	}
+
+	actualConcealedEmail, err := AddConcealEmailUsecase("valid-email@dogcow.com", nil, testApplicationContext)
 
 	if err != nil {
 		t.Error("Expected no error to be returned from concealing the e-mail usecase, but there was one")
@@ -35,8 +62,9 @@ func TestConcealEmailSuccess(t *testing.T) {
 
 func TestConcealEmailBadEmail(t *testing.T) {
 	testApplicationContext := &testApplicationContext.TestApplicationContext{}
+	description := "description"
 
-	_, err := AddConcealEmailUsecase("in[valid-email@dogcow.com", testApplicationContext)
+	_, err := AddConcealEmailUsecase("in[valid-email@dogcow.com", &description, testApplicationContext)
 
 	if err == nil {
 		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
@@ -49,8 +77,24 @@ func TestConcealEmailGatewayFailed(t *testing.T) {
 			ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway: errors.New("oops"),
 		},
 	}
+	description := "description"
 
-	_, err := AddConcealEmailUsecase("moof@dogcow.com", testApplicationContext)
+	_, err := AddConcealEmailUsecase("moof@dogcow.com", &description, testApplicationContext)
+
+	if err == nil {
+		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
+	}
+}
+
+func TestConcealEmailBadDescription(t *testing.T) {
+	testApplicationContext := &testApplicationContext.TestApplicationContext{
+		GatewaySet: testApplicationContext.TestApplicationContextGateways{
+			ReturnErrorFromAddConcealedEmailToActualEmailMappingGateway: errors.New("oops"),
+		},
+	}
+	description := ""
+
+	_, err := AddConcealEmailUsecase("moof@dogcow.com", &description, testApplicationContext)
 
 	if err == nil {
 		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
