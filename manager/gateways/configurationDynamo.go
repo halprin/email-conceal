@@ -78,6 +78,30 @@ func DeleteConcealedEmailToActualEmailMapping(concealPrefix string, applicationC
 	return nil
 }
 
+func UpdateConcealedEmail(concealPrefix string, description *string, applicationContext context.ApplicationContext) error {
+	if sessionErr != nil {
+		return errors.Wrap(sessionErr, "Error with the AWS session")
+	}
+
+	tableName := applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")
+
+	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
+	if err != nil || len(items) == 0 {
+		return errors.Wrap(err, fmt.Sprintf("Conceal e-mail %s doesn't exist", concealPrefix))
+	}
+
+	//TODO: fill in update item input
+	updateItemInput := dynamodb.UpdateItemInput{}
+
+	log.Println("Updating conceal e-mail to DynamoDB")
+	_, err = dynamoService.UpdateItem(&updateItemInput)
+	if err != nil {
+		return errors.Wrap(err, "Failed to update item in DynamoDB")
+	}
+
+	return nil
+}
+
 func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dynamodb.AttributeValue, error) {
 	keyCondition := expression.Key("primary").Equal(expression.Value(hashKey))
 	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)

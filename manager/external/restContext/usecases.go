@@ -16,3 +16,7 @@ func (appContextUsecases *RestApplicationContextUsecases) AddConcealEmail(email 
 func (appContextUsecases *RestApplicationContextUsecases) DeleteConcealEmail(concealPrefix string) error {
 	return usecases.DeleteConcealEmailMappingUsecase(concealPrefix, appContextUsecases.ParentContext)
 }
+
+func (appContextUsecases *RestApplicationContextUsecases) AddDescriptionToExistingEmail(concealPrefix string, description string) error {
+	return usecases.AddDescriptionToExistingEmail(concealPrefix, description, appContextUsecases.ParentContext)
+}

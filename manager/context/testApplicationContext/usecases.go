@@ -8,6 +8,10 @@ type TestApplicationContextUsecases struct{
 
 	ReceivedDeleteConcealEmailUsecaseConcealPrefixArgument string
 	ReturnErrorFromDeleteConcealEmailUsecase               error
+
+	ReceivedAddDescriptionUsecaseConcealPrefixArgument string
+	ReceivedAddDescriptionUsecaseDescriptionArgument string
+	ReturnErrorFromAddDescriptionUsecase               error
 }
 
 func (appContextUsecases *TestApplicationContextUsecases) AddConcealEmail(email string, description *string) (string, error) {
@@ -18,4 +22,10 @@ func (appContextUsecases *TestApplicationContextUsecases) AddConcealEmail(email 
 func (appContextUsecases *TestApplicationContextUsecases) DeleteConcealEmail(concealPrefix string) error {
 	appContextUsecases.ReceivedDeleteConcealEmailUsecaseConcealPrefixArgument = concealPrefix
 	return appContextUsecases.ReturnErrorFromDeleteConcealEmailUsecase
+}
+
+func (appContextUsecases *TestApplicationContextUsecases) AddDescriptionToExistingEmail(concealPrefix string, description string) error {
+	appContextUsecases.ReceivedAddDescriptionUsecaseConcealPrefixArgument = concealPrefix
+	appContextUsecases.ReceivedAddDescriptionUsecaseDescriptionArgument = description
+	return appContextUsecases.ReturnErrorFromAddDescriptionUsecase
 }

@@ -40,3 +40,13 @@ func DeleteConcealEmailMappingUsecase(concealedEmailPrefix string, applicationCo
 
 	return nil
 }
+
+func AddDescriptionToExistingEmail(concealedEmailPrefix string, description string, applicationContext context.ApplicationContext) error {
+	err := entities.ValidateDescription(description)
+	if err != nil {
+		return err
+	}
+
+
+	return nil
+}
