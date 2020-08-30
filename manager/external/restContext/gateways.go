@@ -13,8 +13,8 @@ func (appContextGateways *RestApplicationContextGateways) GetEnvironmentValue(ke
 	return gateways.OsEnvEnvironmentGateway(key, appContextGateways.ParentContext)
 }
 
-func (appContextGateways *RestApplicationContextGateways) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string) error {
-	return gateways.AddConcealedEmailToActualEmailMapping(concealPrefix, actualEmail, appContextGateways.ParentContext)
+func (appContextGateways *RestApplicationContextGateways) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {
+	return gateways.AddConcealedEmailToActualEmailMapping(concealPrefix, actualEmail, description, appContextGateways.ParentContext)
 }
 
 func (appContextGateways *RestApplicationContextGateways) DeleteConcealedEmailToActualEmailMapping(concealPrefix string) error {
