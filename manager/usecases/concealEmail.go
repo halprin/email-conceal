@@ -7,7 +7,10 @@ import (
 	"github.com/halprin/email-conceal/manager/external/lib/errors"
 )
 
-func AddConcealEmailUsecase(sourceEmail string, description *string, applicationContext context.ApplicationContext) (string, error) {
+
+type ConcealEmailUsecase struct {}
+
+func (receiver ConcealEmailUsecase) Add(sourceEmail string, description *string) (string, error) {
 	err := entities.ValidateEmail(sourceEmail)
 	if err != nil {
 		return "", err
@@ -32,7 +35,7 @@ func AddConcealEmailUsecase(sourceEmail string, description *string, application
 	return fmt.Sprintf("%s@%s", concealedEmailPrefix, domain), nil
 }
 
-func DeleteConcealEmailMappingUsecase(concealedEmailPrefix string, applicationContext context.ApplicationContext) error {
+func (receiver ConcealEmailUsecase) Delete(concealedEmailPrefix string) error {
 	err := applicationContext.Gateways().DeleteConcealedEmailToActualEmailMapping(concealedEmailPrefix)
 	if err != nil {
 		return errors.Wrap(err, "Unable to delete conceal e-mail to actual e-mail mapping")
