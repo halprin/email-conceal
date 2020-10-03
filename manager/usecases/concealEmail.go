@@ -8,6 +8,17 @@ import (
 )
 
 
+var applicationContext = context.ApplicationContext{}
+var concealEmailGateway ConcealEmailGateway
+var environmentGateway context.EnvironmentGateway
+var uuidLibrary context.UuidLibrary
+
+func init() {
+	applicationContext.Resolve(&concealEmailGateway)
+	applicationContext.Resolve(&environmentGateway)
+	applicationContext.Resolve(&uuidLibrary)
+}
+
 type ConcealEmailUsecase struct {}
 
 func (receiver ConcealEmailUsecase) Add(sourceEmail string, description *string) (string, error) {
@@ -24,19 +35,19 @@ func (receiver ConcealEmailUsecase) Add(sourceEmail string, description *string)
 		}
 	}
 
-	concealedEmailPrefix := applicationContext.Libraries().GenerateRandomUuid()
-	err = applicationContext.Gateways().AddConcealedEmailToActualEmailMapping(concealedEmailPrefix, sourceEmail, description)
+	concealedEmailPrefix := uuidLibrary.GenerateRandomUuid()
+	err = concealEmailGateway.AddConcealedEmailToActualEmailMapping(concealedEmailPrefix, sourceEmail, description)
 	if err != nil {
 		return "", errors.Wrap(err, "Unable to add conceal e-mail to actual e-mail mapping")
 	}
 
-	domain := applicationContext.Gateways().GetEnvironmentValue("DOMAIN")
+	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 
 	return fmt.Sprintf("%s@%s", concealedEmailPrefix, domain), nil
 }
 
 func (receiver ConcealEmailUsecase) Delete(concealedEmailPrefix string) error {
-	err := applicationContext.Gateways().DeleteConcealedEmailToActualEmailMapping(concealedEmailPrefix)
+	err := concealEmailGateway.DeleteConcealedEmailToActualEmailMapping(concealedEmailPrefix)
 	if err != nil {
 		return errors.Wrap(err, "Unable to delete conceal e-mail to actual e-mail mapping")
 	}
