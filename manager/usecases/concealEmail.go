@@ -9,19 +9,15 @@ import (
 
 
 var applicationContext = context.ApplicationContext{}
-var concealEmailGateway ConcealEmailGateway
-var environmentGateway context.EnvironmentGateway
-var uuidLibrary context.UuidLibrary
 
-func init() {
-	applicationContext.Resolve(&concealEmailGateway)
-	applicationContext.Resolve(&environmentGateway)
-	applicationContext.Resolve(&uuidLibrary)
+type ConcealEmailUsecase interface {
+	Add(sourceEmail string, description *string) (string, error)
+	Delete(concealedEmailPrefix string) error
 }
 
-type ConcealEmailUsecase struct {}
+type ConcealEmailUsecaseImpl struct {}
 
-func (receiver ConcealEmailUsecase) Add(sourceEmail string, description *string) (string, error) {
+func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *string) (string, error) {
 	err := entities.ValidateEmail(sourceEmail)
 	if err != nil {
 		return "", err
@@ -35,18 +31,27 @@ func (receiver ConcealEmailUsecase) Add(sourceEmail string, description *string)
 		}
 	}
 
+	var uuidLibrary context.UuidLibrary
+	applicationContext.Resolve(&uuidLibrary)
 	concealedEmailPrefix := uuidLibrary.GenerateRandomUuid()
+
+	var concealEmailGateway ConcealEmailGateway
+	applicationContext.Resolve(&concealEmailGateway)
 	err = concealEmailGateway.AddConcealedEmailToActualEmailMapping(concealedEmailPrefix, sourceEmail, description)
 	if err != nil {
 		return "", errors.Wrap(err, "Unable to add conceal e-mail to actual e-mail mapping")
 	}
 
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
 	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 
 	return fmt.Sprintf("%s@%s", concealedEmailPrefix, domain), nil
 }
 
-func (receiver ConcealEmailUsecase) Delete(concealedEmailPrefix string) error {
+func (receiver ConcealEmailUsecaseImpl) Delete(concealedEmailPrefix string) error {
+	var concealEmailGateway ConcealEmailGateway
+	applicationContext.Resolve(&concealEmailGateway)
 	err := concealEmailGateway.DeleteConcealedEmailToActualEmailMapping(concealedEmailPrefix)
 	if err != nil {
 		return errors.Wrap(err, "Unable to delete conceal e-mail to actual e-mail mapping")

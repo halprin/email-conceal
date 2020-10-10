@@ -11,11 +11,6 @@ import (
 )
 
 var applicationContext = context.ApplicationContext{}
-var concealEmailUsecase usecases.ConcealEmailUsecase
-
-func init() {
-	applicationContext.Resolve(&concealEmailUsecase)
-}
 
 type ConcealEmailController struct {}
 
@@ -51,6 +46,8 @@ func (receiver ConcealEmailController) Add(arguments map[string]interface{}) (in
 		log.Printf("E-mail to conceal with no description = %s", sourceEmail)
 	}
 
+	var concealEmailUsecase usecases.ConcealEmailUsecase
+	applicationContext.Resolve(&concealEmailUsecase)
 	concealedEmail, err := concealEmailUsecase.Add(sourceEmail, description)
 
 	if errors.Is(err, entities.InvalidEmailAddressError) {
@@ -98,6 +95,8 @@ func (receiver ConcealEmailController) Delete(arguments map[string]interface{}) 
 
 	log.Println("Conceal E-mail ID to delete =", concealEmailId)
 
+	var concealEmailUsecase usecases.ConcealEmailUsecase
+	applicationContext.Resolve(&concealEmailUsecase)
 	err := concealEmailUsecase.Delete(concealEmailId)
 	if err != nil {
 		log.Printf("Some error occured while trying to delete the conceal e-mail, %+v", err)

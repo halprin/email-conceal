@@ -14,11 +14,6 @@ import (
 
 
 var applicationContext = context.ApplicationContext{}
-var environmentGateway context.EnvironmentGateway
-
-func init() {
-	applicationContext.Resolve(&environmentGateway)
-}
 
 type DynamoDbGateway struct {}
 
@@ -66,6 +61,8 @@ func (receiver DynamoDbGateway) DeleteConcealedEmailToActualEmailMapping(conceal
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
 
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
 	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
 	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
@@ -166,6 +163,8 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.A
 	}
 
 	//do last bit of construction for the BatchWriteItem API
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
 	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 	requestItems := map[string][]*dynamodb.WriteRequest{
 		tableName: writeRequests,

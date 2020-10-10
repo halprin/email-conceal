@@ -1,7 +1,6 @@
-package restContext
+package external
 
 import (
-	"github.com/golobby/container"
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/controllers"
 	"github.com/halprin/email-conceal/manager/external/lib"
@@ -9,28 +8,30 @@ import (
 	"github.com/halprin/email-conceal/manager/usecases"
 )
 
-func Init() {
+func init() {
+	var applicationContext = context.ApplicationContext{}
+
 	//controllers
-	container.Singleton(func() controllers.ConcealEmailController {
+	applicationContext.Bind(func() controllers.ConcealEmailController {
 		return controllers.ConcealEmailController{}
 	})
 
 	//usecases
-	container.Singleton(func() usecases.ConcealEmailUsecase {
-		return usecases.ConcealEmailUsecase{}
+	applicationContext.Bind(func() usecases.ConcealEmailUsecase {
+		return usecases.ConcealEmailUsecaseImpl{}
 	})
 
 	//gateways
-	container.Singleton(func() usecases.ConcealEmailGateway {
+	applicationContext.Bind(func() usecases.ConcealEmailGateway {
 		return gateways.DynamoDbGateway{}
 	})
 
-	container.Singleton(func() context.EnvironmentGateway {
+	applicationContext.Bind(func() context.EnvironmentGateway {
 		return gateways.OsEnvironmentGateway{}
 	})
 
 	//libraries
-	container.Singleton(func() context.UuidLibrary {
+	applicationContext.Bind(func() context.UuidLibrary {
 		return lib.GoogleUuid{}
 	})
 }

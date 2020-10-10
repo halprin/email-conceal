@@ -4,16 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/controllers"
-	"github.com/halprin/email-conceal/manager/external/restContext"
 )
 
 var applicationContext = context.ApplicationContext{}
-var concealEmailController controllers.ConcealEmailController
-
-func init() {
-	restContext.Init()
-	applicationContext.Resolve(&concealEmailController)
-}
 
 func Rest() {
 	router := gin.Default()
@@ -32,6 +25,9 @@ func createConcealEmail(context *gin.Context) {
 	if err != nil {
 		return
 	}
+
+	var concealEmailController controllers.ConcealEmailController
+	applicationContext.Resolve(&concealEmailController)
 	httpStatus, jsonMap := concealEmailController.Add(genericMap)
 
 	context.JSON(httpStatus, jsonMap)
@@ -44,6 +40,8 @@ func deleteConcealEmail(context *gin.Context) {
 		"concealEmailId": concealEmailId,
 	}
 
+	var concealEmailController controllers.ConcealEmailController
+	applicationContext.Resolve(&concealEmailController)
 	httpStatus, jsonMap := concealEmailController.Delete(requestMap)
 
 	context.JSON(httpStatus, jsonMap)
