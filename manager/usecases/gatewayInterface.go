@@ -1,7 +1,6 @@
-package context
+package usecases
 
-type ApplicationContextGateways interface {
-	GetEnvironmentValue(key string) string
+type ConcealEmailGateway interface {
 	AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error
 	DeleteConcealedEmailToActualEmailMapping(concealPrefix string) error
 }
