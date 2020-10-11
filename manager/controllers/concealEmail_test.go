@@ -34,7 +34,7 @@ func (testUsecase *TestConcealEmailUsecase) Delete(concealedEmailPrefix string) 
 	return testUsecase.DeleteReturnError
 }
 
-func TestConcealEmailGateway(t *testing.T) {
+func TestConcealEmailControllerSuccess(t *testing.T) {
 	concealedEmail := "concealed@asdf.com"
 
 	testUsecase := TestConcealEmailUsecase{
@@ -65,7 +65,7 @@ func TestConcealEmailGateway(t *testing.T) {
 	}
 }
 
-func TestConcealEmailGatewayBadEmailType(t *testing.T) {
+func TestConcealEmailControllerBadEmailType(t *testing.T) {
 
 	testUsecase := TestConcealEmailUsecase{}
 	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
@@ -87,7 +87,7 @@ func TestConcealEmailGatewayBadEmailType(t *testing.T) {
 	}
 }
 
-func TestConcealEmailGatewayInvalidEmail(t *testing.T) {
+func TestConcealEmailControllerInvalidEmail(t *testing.T) {
 
 	testUsecase := TestConcealEmailUsecase{
 		AddReturnError: entities.InvalidEmailAddressError,
@@ -112,7 +112,7 @@ func TestConcealEmailGatewayInvalidEmail(t *testing.T) {
 	}
 }
 
-func TestConcealEmailGatewayUnknownError(t *testing.T) {
+func TestConcealEmailControllerUnknownError(t *testing.T) {
 
 	testUsecase := TestConcealEmailUsecase{
 		AddReturnError: errors.New("some other error"),
@@ -137,7 +137,7 @@ func TestConcealEmailGatewayUnknownError(t *testing.T) {
 	}
 }
 
-func TestDeleteConcealEmailGateway(t *testing.T) {
+func TestDeleteConcealEmailControllerSuccess(t *testing.T) {
 
 	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{}
@@ -158,7 +158,7 @@ func TestDeleteConcealEmailGateway(t *testing.T) {
 	}
 }
 
-func TestDeleteConcealEmailGatewayBadInput(t *testing.T) {
+func TestDeleteConcealEmailControllerBadInput(t *testing.T) {
 
 	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{}
@@ -180,7 +180,7 @@ func TestDeleteConcealEmailGatewayBadInput(t *testing.T) {
 	}
 }
 
-func TestDeleteConcealEmailGatewayFailedDelete(t *testing.T) {
+func TestDeleteConcealEmailControllerFailedDelete(t *testing.T) {
 
 	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{
