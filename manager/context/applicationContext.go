@@ -1,15 +1,16 @@
 package context
 
-type ApplicationContext interface {
-	//controllers
-	Controllers() ApplicationContextControllers
+import (
+	"github.com/golobby/container"
+)
 
-	//gateways
-	Gateways() ApplicationContextGateways
 
-	//usecases
-	Usecases() ApplicationContextUsecases
+type ApplicationContext struct{}
 
-	//libraries
-	Libraries() ApplicationContextLibraries
+func(appContext ApplicationContext) Bind(bindFunction interface{}) {
+	container.Singleton(bindFunction)
+}
+
+func(appContext ApplicationContext) Resolve(toResolve interface{}) {
+	container.Make(toResolve)
 }

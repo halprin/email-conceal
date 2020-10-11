@@ -5,12 +5,16 @@ import (
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/entities"
 	"github.com/halprin/email-conceal/manager/external/lib/errors"
+	"github.com/halprin/email-conceal/manager/usecases"
 	"log"
 	"net/http"
 )
 
+var applicationContext = context.ApplicationContext{}
 
-func HttpConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
+type ConcealEmailController struct {}
+
+func (receiver ConcealEmailController) Add(arguments map[string]interface{}) (int, map[string]string) {
 	sourceEmail, sourceEmailValid := arguments["email"].(string)
 	if !sourceEmailValid {
 		errorString := "E-mail was not supplied or was not a string"
@@ -42,7 +46,9 @@ func HttpConcealEmailController(arguments map[string]interface{}, applicationCon
 		log.Printf("E-mail to conceal with no description = %s", sourceEmail)
 	}
 
-	concealedEmail, err := applicationContext.Usecases().AddConcealEmail(sourceEmail, description)
+	var concealEmailUsecase usecases.ConcealEmailUsecase
+	applicationContext.Resolve(&concealEmailUsecase)
+	concealedEmail, err := concealEmailUsecase.Add(sourceEmail, description)
 
 	if errors.Is(err, entities.InvalidEmailAddressError) {
 		errorString := fmt.Sprintf("E-mail %s is invalid", sourceEmail)
@@ -75,7 +81,7 @@ func HttpConcealEmailController(arguments map[string]interface{}, applicationCon
 	return http.StatusCreated, jsonMap
 }
 
-func HttpDeleteConcealEmailController(arguments map[string]interface{}, applicationContext context.ApplicationContext) (int, map[string]string) {
+func (receiver ConcealEmailController) Delete(arguments map[string]interface{}) (int, map[string]string) {
 	concealEmailId, valid := arguments["concealEmailId"].(string)
 
 	if !valid {
@@ -89,7 +95,9 @@ func HttpDeleteConcealEmailController(arguments map[string]interface{}, applicat
 
 	log.Println("Conceal E-mail ID to delete =", concealEmailId)
 
-	err := applicationContext.Usecases().DeleteConcealEmail(concealEmailId)
+	var concealEmailUsecase usecases.ConcealEmailUsecase
+	applicationContext.Resolve(&concealEmailUsecase)
+	err := concealEmailUsecase.Delete(concealEmailId)
 	if err != nil {
 		log.Printf("Some error occured while trying to delete the conceal e-mail, %+v", err)
 		jsonMap := map[string]string{

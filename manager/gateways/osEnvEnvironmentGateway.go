@@ -1,10 +1,12 @@
 package gateways
 
 import (
-	"github.com/halprin/email-conceal/manager/context"
 	"os"
 )
 
-func OsEnvEnvironmentGateway(key string, applicationContext context.ApplicationContext) string {
+
+type OsEnvironmentGateway struct {}
+
+func (receiver OsEnvironmentGateway) GetEnvironmentValue(key string) string {
 	return os.Getenv(key)
 }

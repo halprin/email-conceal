@@ -12,6 +12,11 @@ import (
 	"time"
 )
 
+
+var applicationContext = context.ApplicationContext{}
+
+type DynamoDbGateway struct {}
+
 var dynamoService = dynamodb.New(awsSession)
 
 type ConcealEmailMapping struct {
@@ -25,7 +30,7 @@ type ConcealEmailEntity struct {
 	Description *string `dynamodbav:"description"`
 }
 
-func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string, applicationContext context.ApplicationContext) error {
+func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {
 	if sessionErr != nil {
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
@@ -51,12 +56,14 @@ func AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail str
 	return batchWriteItemsWithRollback([]interface{}{entity, mapping}, rollbackFromNewConceal, applicationContext)
 }
 
-func DeleteConcealedEmailToActualEmailMapping(concealPrefix string, applicationContext context.ApplicationContext) error {
+func (receiver DynamoDbGateway) DeleteConcealedEmailToActualEmailMapping(concealPrefix string) error {
 	if sessionErr != nil {
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
 
-	tableName := applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
 	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
 	if err != nil {
@@ -78,12 +85,14 @@ func DeleteConcealedEmailToActualEmailMapping(concealPrefix string, applicationC
 	return nil
 }
 
-func UpdateConcealedEmail(concealPrefix string, description *string, applicationContext context.ApplicationContext) error {
+func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, description *string) error {
 	if sessionErr != nil {
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
 
-	tableName := applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
 	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
 	if err != nil || len(items) == 0 {
@@ -180,7 +189,9 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.A
 	}
 
 	//do last bit of construction for the BatchWriteItem API
-	tableName := applicationContext.Gateways().GetEnvironmentValue("TABLE_NAME")
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 	requestItems := map[string][]*dynamodb.WriteRequest{
 		tableName: writeRequests,
 	}
