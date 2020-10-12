@@ -19,15 +19,18 @@ type DynamoDbGateway struct {}
 
 var dynamoService = dynamodb.New(awsSession)
 
-type ConcealEmailMapping struct {
+type KeyBase struct {
 	Primary   string  `dynamodbav:"primary"`
 	Secondary string `dynamodbav:"secondary"`
 }
 
 type ConcealEmailEntity struct {
-	Primary     string `dynamodbav:"primary"`
-	Secondary   string `dynamodbav:"secondary"`
+	KeyBase
 	Description *string `dynamodbav:"description"`
+}
+
+type ConcealEmailMapping struct {
+	KeyBase
 }
 
 func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {
@@ -38,16 +41,16 @@ func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPre
 	var concealDynamoDbKey = generateConcealEmailKey(concealPrefix)
 	//the primary entity
 	entity := ConcealEmailEntity{
-		Primary:   concealDynamoDbKey,
-		Secondary: concealDynamoDbKey,
 		Description: description,
 	}
+	entity.Primary = concealDynamoDbKey
+	entity.Secondary = concealDynamoDbKey
+	entity.Description = description
 
 	//the mapping data for the conceal entity
-	mapping := ConcealEmailMapping{
-		Primary:   concealDynamoDbKey,
-		Secondary: generateSourceEmailKey(actualEmail),
-	}
+	mapping := ConcealEmailMapping{}
+	mapping.Primary = concealDynamoDbKey
+	mapping.Secondary = generateSourceEmailKey(actualEmail)
 
 	rollbackFromNewConceal := func(applicationContext context.ApplicationContext) {
 		_ = batchDeleteItemsWithRollback([]interface{}{entity, mapping}, nil)
@@ -72,9 +75,14 @@ func (receiver DynamoDbGateway) DeleteConcealedEmailToActualEmailMapping(conceal
 	}
 
 	for _, item := range items {
+		key, err := convertItemToKey(item)
+		if err != nil {
+			return errors.Wrap(err, "Failed to delete item in DynamoDB due to unable to get key from item")
+		}
+
 		deleteItemInput := &dynamodb.DeleteItemInput{
 			TableName: aws.String(tableName),
-			Key:       item,
+			Key:       key,
 		}
 
 		_, err = dynamoService.DeleteItem(deleteItemInput)
@@ -101,18 +109,17 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 		return errors.Wrap(err, fmt.Sprintf("Conceal e-mail %s doesn't exist", concealPrefix))
 	}
 
-	entity := ConcealEmailEntity{
-		Primary:     concealEmailKey,
-		Secondary:   concealEmailKey,
-		Description: description,
+	keyEntity := KeyBase{
+		Primary:   concealEmailKey,
+		Secondary: concealEmailKey,
 	}
 
-	dynamoMapping, err := dynamodbattribute.MarshalMap(entity)
+	dynamoKeyMapping, err := dynamodbattribute.MarshalMap(keyEntity)
 	if err != nil {
-		return errors.Wrap(err, "Failed to marshal conceal e-mail entity")
+		return errors.Wrap(err, "Failed to marshal conceal e-mail key")
 	}
 
-	updateExpressionBuilder := expression.Set(expression.Name("description"), expression.IfNotExists(expression.Name("description"), expression.Value(description)))
+	updateExpressionBuilder := expression.Set(expression.Name("description"), expression.Value(description))
 	expressionBuilder, err := expression.NewBuilder().WithUpdate(updateExpressionBuilder).Build()
 	if err != nil {
 		return errors.Wrap(err, "Failed to make update expression")
@@ -121,8 +128,9 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 
 	updateItemInput := dynamodb.UpdateItemInput{
 		TableName:                 aws.String(tableName),
-		Key:                       dynamoMapping,
-		ExpressionAttributeValues: dynamoMapping,
+		Key:                       dynamoKeyMapping,
+		ExpressionAttributeNames:  expressionBuilder.Names(),
+		ExpressionAttributeValues: expressionBuilder.Values(),
 		UpdateExpression:          expressionBuilder.Update(),
 	}
 
@@ -133,6 +141,21 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	}
 
 	return nil
+}
+
+func convertItemToKey(item map[string]*dynamodb.AttributeValue) (map[string]*dynamodb.AttributeValue, error) {
+	var keyEntity KeyBase
+	err := dynamodbattribute.UnmarshalMap(item, &keyEntity)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to convert item to key due to unmarshalling")
+	}
+
+	key, err := dynamodbattribute.MarshalMap(keyEntity)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to convert item to key due to marshalling")
+	}
+
+	return key, nil
 }
 
 var concealEmailKeyPrefix = "conceal#"
@@ -169,16 +192,19 @@ func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dyna
 }
 
 func getItem(hashKey string, sortKey string, tableName string) (map[string]*dynamodb.AttributeValue, error) {
-	keyCondition := expression.Key("primary").Equal(expression.Value(hashKey)).And(expression.Key("secondary").Equal(expression.Value(sortKey)))
-	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
-	expressionBuilder, err := keyBuilder.Build()
+	keyEntity := KeyBase{
+		Primary: hashKey,
+		Secondary: sortKey,
+	}
+
+	key, err := dynamodbattribute.MarshalMap(keyEntity)
 	if err != nil {
 		return nil, err
 	}
 
 	getInput := &dynamodb.GetItemInput{
 		TableName: aws.String(tableName),
-		Key:       expressionBuilder.Values(),
+		Key:       key,
 	}
 
 	getOutput, err := dynamoService.GetItem(getInput)
@@ -232,8 +258,14 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.A
 				PutRequest: putRequest,
 			}
 		} else if batchOperation == batchDelete {
+			key, err := convertItemToKey(dynamoItem)
+			if err != nil {
+				//return immediately without running the rollback function because we haven't even made a single DynamoDB call yet
+				return err
+			}
+
 			deleteRequest := &dynamodb.DeleteRequest{
-				Key:  dynamoItem,
+				Key:  key,
 			}
 
 			writeRequest = &dynamodb.WriteRequest{
