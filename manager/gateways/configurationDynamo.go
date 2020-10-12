@@ -95,13 +95,36 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	applicationContext.Resolve(&environmentGateway)
 	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
-	items, err := getAllItemsForHashKey(generateConcealEmailKey(concealPrefix), tableName)
-	if err != nil || len(items) == 0 {
+	concealEmailKey := generateConcealEmailKey(concealPrefix)
+	item, err := getItem(concealEmailKey, concealEmailKey, tableName)
+	if err != nil || item == nil {
 		return errors.Wrap(err, fmt.Sprintf("Conceal e-mail %s doesn't exist", concealPrefix))
 	}
 
-	//TODO: fill in update item input
-	updateItemInput := dynamodb.UpdateItemInput{}
+	entity := ConcealEmailEntity{
+		Primary:     concealEmailKey,
+		Secondary:   concealEmailKey,
+		Description: description,
+	}
+
+	dynamoMapping, err := dynamodbattribute.MarshalMap(entity)
+	if err != nil {
+		return errors.Wrap(err, "Failed to marshal conceal e-mail entity")
+	}
+
+	updateExpressionBuilder := expression.Set(expression.Name("description"), expression.IfNotExists(expression.Name("description"), expression.Value(description)))
+	expressionBuilder, err := expression.NewBuilder().WithUpdate(updateExpressionBuilder).Build()
+	if err != nil {
+		return errors.Wrap(err, "Failed to make update expression")
+	}
+
+
+	updateItemInput := dynamodb.UpdateItemInput{
+		TableName:                 aws.String(tableName),
+		Key:                       dynamoMapping,
+		ExpressionAttributeValues: dynamoMapping,
+		UpdateExpression:          expressionBuilder.Update(),
+	}
 
 	log.Println("Updating conceal e-mail to DynamoDB")
 	_, err = dynamoService.UpdateItem(&updateItemInput)
@@ -143,6 +166,27 @@ func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dyna
 	}
 
 	return queryOutput.Items, nil
+}
+
+func getItem(hashKey string, sortKey string, tableName string) (map[string]*dynamodb.AttributeValue, error) {
+	keyCondition := expression.Key("primary").Equal(expression.Value(hashKey)).And(expression.Key("secondary").Equal(expression.Value(sortKey)))
+	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
+	expressionBuilder, err := keyBuilder.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	getInput := &dynamodb.GetItemInput{
+		TableName: aws.String(tableName),
+		Key:       expressionBuilder.Values(),
+	}
+
+	getOutput, err := dynamoService.GetItem(getInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return getOutput.Item, nil
 }
 
 func batchWriteItemsWithRollback(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext)) error {
