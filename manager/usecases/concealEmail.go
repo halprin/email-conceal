@@ -67,6 +67,12 @@ func (receiver ConcealEmailUsecaseImpl) AddDescriptionToExistingEmail(concealedE
 		return err
 	}
 
+	var concealEmailGateway ConcealEmailGateway
+	applicationContext.Resolve(&concealEmailGateway)
+	err = concealEmailGateway.UpdateConcealedEmail(concealedEmailPrefix, &description)
+	if err != nil {
+		return errors.Wrap(err, "Unable to update description of conceal e-mail")
+	}
 
 	return nil
 }

@@ -35,17 +35,18 @@ func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPre
 		return errors.Wrap(sessionErr, "Error with the AWS session")
 	}
 
+	var concealDynamoDbKey = generateConcealEmailKey(concealPrefix)
 	//the primary entity
 	entity := ConcealEmailEntity{
-		Primary:   fmt.Sprintf("conceal-%s", concealPrefix),
-		Secondary: fmt.Sprintf("conceal-%s", concealPrefix),
+		Primary:   concealDynamoDbKey,
+		Secondary: concealDynamoDbKey,
 		Description: description,
 	}
 
 	//the mapping data for the conceal entity
 	mapping := ConcealEmailMapping{
-		Primary:   fmt.Sprintf("conceal-%s", concealPrefix),
-		Secondary: fmt.Sprintf("email-%s", actualEmail),
+		Primary:   concealDynamoDbKey,
+		Secondary: generateSourceEmailKey(actualEmail),
 	}
 
 	rollbackFromNewConceal := func(applicationContext context.ApplicationContext) {
@@ -65,7 +66,7 @@ func (receiver DynamoDbGateway) DeleteConcealedEmailToActualEmailMapping(conceal
 	applicationContext.Resolve(&environmentGateway)
 	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
-	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
+	items, err := getAllItemsForHashKey(generateConcealEmailKey(concealPrefix), tableName)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to get all the items for the hash key %s", concealPrefix))
 	}
@@ -94,7 +95,7 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	applicationContext.Resolve(&environmentGateway)
 	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
-	items, err := getAllItemsForHashKey(fmt.Sprintf("conceal-%s", concealPrefix), tableName)
+	items, err := getAllItemsForHashKey(generateConcealEmailKey(concealPrefix), tableName)
 	if err != nil || len(items) == 0 {
 		return errors.Wrap(err, fmt.Sprintf("Conceal e-mail %s doesn't exist", concealPrefix))
 	}
@@ -109,6 +110,17 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	}
 
 	return nil
+}
+
+var concealEmailKeyPrefix = "conceal#"
+var sourceEmailKeyPrefix = "email#"
+
+func generateConcealEmailKey(concealPrefix string) string {
+	return fmt.Sprintf("%s%s", concealEmailKeyPrefix, concealPrefix)
+}
+
+func generateSourceEmailKey(sourceEmail string) string {
+	return fmt.Sprintf("%s%s", sourceEmailKeyPrefix, sourceEmail)
 }
 
 func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dynamodb.AttributeValue, error) {
