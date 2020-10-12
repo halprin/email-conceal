@@ -50,11 +50,11 @@ func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPre
 	}
 
 	rollbackFromNewConceal := func(applicationContext context.ApplicationContext) {
-		_ = batchDeleteItemsWithRollback([]interface{}{entity, mapping}, nil, applicationContext)
+		_ = batchDeleteItemsWithRollback([]interface{}{entity, mapping}, nil)
 	}
 
 	log.Println("Writing new conceal mapping to DynamoDB")
-	return batchWriteItemsWithRollback([]interface{}{entity, mapping}, rollbackFromNewConceal, applicationContext)
+	return batchWriteItemsWithRollback([]interface{}{entity, mapping}, rollbackFromNewConceal)
 }
 
 func (receiver DynamoDbGateway) DeleteConcealedEmailToActualEmailMapping(concealPrefix string) error {
@@ -145,14 +145,14 @@ func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dyna
 	return queryOutput.Items, nil
 }
 
-func batchWriteItemsWithRollback(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext), applicationContext context.ApplicationContext) error {
+func batchWriteItemsWithRollback(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext)) error {
 	log.Println("Batch writing items")
-	return batchInternal(structsToWrite, rollbackFunction, batchWrite, applicationContext)
+	return batchInternal(structsToWrite, rollbackFunction, batchWrite)
 }
 
-func batchDeleteItemsWithRollback(structsToDelete []interface{}, rollbackFunction func(context.ApplicationContext), applicationContext context.ApplicationContext) error {
+func batchDeleteItemsWithRollback(structsToDelete []interface{}, rollbackFunction func(context.ApplicationContext)) error {
 	log.Println("Batch deleting items")
-	return batchInternal(structsToDelete, rollbackFunction, batchDelete, applicationContext)
+	return batchInternal(structsToDelete, rollbackFunction, batchDelete)
 }
 
 const (
@@ -160,7 +160,7 @@ const (
 	batchDelete = "batchDelete"
 )
 
-func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext), batchOperation string, applicationContext context.ApplicationContext) error {
+func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext), batchOperation string) error {
 	//convert the structs to dynamo attribute maps
 	var dynamoItems []map[string]*dynamodb.AttributeValue
 
