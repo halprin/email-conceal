@@ -213,3 +213,97 @@ func TestDeleteConcealEmailControllerFailedDelete(t *testing.T) {
 		t.Errorf("An error is missing from the response body; it should've been there")
 	}
 }
+
+func TestUpdateConcealEmailWithNewDescription(t *testing.T) {
+	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{}
+	})
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description": "a new description",
+	}
+
+	status, body := controller.Update(arguments)
+
+	if status != http.StatusOK {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusOK)
+	}
+
+	bodySize := len(body)
+	if bodySize != 0 {
+		t.Errorf("There was data in the response body when there shouldn't be anything")
+	}
+}
+
+func TestTooSmallDescriptionUpdate(t *testing.T) {
+	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			AddDescriptionReturnError: entities.DescriptionTooShortError,
+		}
+	})
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description": "this value doesn't matter",
+	}
+
+	status, body := controller.Update(arguments)
+
+	if status != http.StatusBadRequest {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
+	}
+
+	_, exists := body["error"]
+	if !exists {
+		t.Errorf("An error is missing from the response body; it should've been there")
+	}
+}
+
+func TestTooLongDescriptionUpdate(t *testing.T) {
+	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			AddDescriptionReturnError: entities.DescriptionTooLongError,
+		}
+	})
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description": "this value doesn't matter",
+	}
+
+	status, body := controller.Update(arguments)
+
+	if status != http.StatusBadRequest {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
+	}
+
+	_, exists := body["error"]
+	if !exists {
+		t.Errorf("An error is missing from the response body; it should've been there")
+	}
+}
+
+func TestDescriptionUpdateFailedForUnkownReason(t *testing.T) {
+	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			AddDescriptionReturnError: errors.New("Unkown error"),
+		}
+	})
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description": "this value doesn't matter",
+	}
+
+	status, body := controller.Update(arguments)
+
+	if status != http.StatusInternalServerError {
+		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
+	}
+
+	_, exists := body["error"]
+	if !exists {
+		t.Errorf("An error is missing from the response body; it should've been there")
+	}
+}
