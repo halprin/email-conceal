@@ -45,7 +45,6 @@ func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPre
 	}
 	entity.Primary = concealDynamoDbKey
 	entity.Secondary = concealDynamoDbKey
-	entity.Description = description
 
 	//the mapping data for the conceal entity
 	mapping := ConcealEmailMapping{}
