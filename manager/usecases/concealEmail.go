@@ -13,6 +13,7 @@ var applicationContext = context.ApplicationContext{}
 type ConcealEmailUsecase interface {
 	Add(sourceEmail string, description *string) (string, error)
 	Delete(concealedEmailPrefix string) error
+	AddDescriptionToExistingEmail(concealedEmailPrefix string, description string) error
 }
 
 type ConcealEmailUsecaseImpl struct {}
@@ -55,6 +56,22 @@ func (receiver ConcealEmailUsecaseImpl) Delete(concealedEmailPrefix string) erro
 	err := concealEmailGateway.DeleteConcealedEmailToActualEmailMapping(concealedEmailPrefix)
 	if err != nil {
 		return errors.Wrap(err, "Unable to delete conceal e-mail to actual e-mail mapping")
+	}
+
+	return nil
+}
+
+func (receiver ConcealEmailUsecaseImpl) AddDescriptionToExistingEmail(concealedEmailPrefix string, description string) error {
+	err := entities.ValidateDescription(description)
+	if err != nil {
+		return err
+	}
+
+	var concealEmailGateway ConcealEmailGateway
+	applicationContext.Resolve(&concealEmailGateway)
+	err = concealEmailGateway.UpdateConcealedEmail(concealedEmailPrefix, &description)
+	if err != nil {
+		return errors.Wrap(err, "Unable to update description of conceal e-mail")
 	}
 
 	return nil

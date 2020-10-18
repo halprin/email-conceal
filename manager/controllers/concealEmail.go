@@ -109,3 +109,30 @@ func (receiver ConcealEmailController) Delete(arguments map[string]interface{}) 
 	jsonMap := map[string]string{}
 	return http.StatusNoContent, jsonMap
 }
+
+func (receiver ConcealEmailController) Update(arguments map[string]interface{}) (int, map[string]string) {
+	concealEmailId, _ := arguments["concealEmailId"].(string)
+	description, _ := arguments["description"].(string)
+
+	var concealEmailUsecase usecases.ConcealEmailUsecase
+	applicationContext.Resolve(&concealEmailUsecase)
+	err := concealEmailUsecase.AddDescriptionToExistingEmail(concealEmailId, description)
+
+	if errors.Is(err, entities.DescriptionTooShortError) || errors.Is(err, entities.DescriptionTooLongError) {
+		errorString := err.Error()
+		log.Printf(errorString)
+		jsonMap := map[string]string{
+			"error": errorString,
+		}
+		return http.StatusBadRequest, jsonMap
+	} else if err != nil {
+		log.Printf("Another error occured, %+v", err)
+		jsonMap := map[string]string{
+			"error": "An unknown error occurred",
+		}
+		return http.StatusInternalServerError, jsonMap
+	}
+
+	jsonMap := map[string]string{}
+	return http.StatusOK, jsonMap
+}

@@ -19,6 +19,10 @@ type TestConcealEmailGateway struct {
 
 	DeleteReceiveConcealPrefix string
 	DeleteReturnError          error
+
+	UpdateReceiveConcealPrefix string
+	UpdateReceiveDescription   *string
+	UpdateReturnError          error
 }
 
 func (testGateway *TestConcealEmailGateway) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {
@@ -32,6 +36,12 @@ func (testGateway *TestConcealEmailGateway) AddConcealedEmailToActualEmailMappin
 func (testGateway *TestConcealEmailGateway) DeleteConcealedEmailToActualEmailMapping(concealPrefix string) error {
 	testGateway.DeleteReceiveConcealPrefix = concealPrefix
 	return testGateway.DeleteReturnError
+}
+
+func (testGateway *TestConcealEmailGateway) UpdateConcealedEmail(concealPrefix string, description *string) error {
+	testGateway.UpdateReceiveConcealPrefix = concealPrefix
+	testGateway.UpdateReceiveDescription = description
+	return testGateway.UpdateReturnError
 }
 
 type TestEnvironmentGateway struct {
@@ -187,5 +197,53 @@ func TestDeleteConcealEmailNegative(t *testing.T) {
 
 	if err == nil {
 		t.Error("Expected an error to be returned from the delete conceal usecase, but there wasn't one")
+	}
+}
+
+func TestAddDescriptionFailsForEntityError(t *testing.T) {
+
+	err := usecase.AddDescriptionToExistingEmail("some_prefix", "")
+
+	if err == nil {
+		t.Error("Expected an error to be returned from the update conceal usecase, but there wasn't one")
+	}
+}
+
+func TestAddDescriptionFailsForGatewayFailure(t *testing.T) {
+
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &TestConcealEmailGateway{
+			UpdateReturnError: errors.New("an error"),
+		}
+	})
+
+	err := usecase.AddDescriptionToExistingEmail("some_prefix", "a description")
+
+	if err == nil {
+		t.Error("Expected an error to be returned from the update conceal usecase, but there wasn't one")
+	}
+}
+
+func TestAddDescriptionSuccess(t *testing.T) {
+
+	testGateway := TestConcealEmailGateway{}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+
+	prefix := "some_prefix"
+	description := "a description"
+	err := usecase.AddDescriptionToExistingEmail(prefix, description)
+
+	if err != nil {
+		t.Error("An error was returned from the add description usecase, but it wasn't expected")
+	}
+
+	if testGateway.UpdateReceiveConcealPrefix != prefix {
+		t.Errorf("The update gateway wasn't called with the prefix %s, instead it was called with %s", prefix, testGateway.UpdateReceiveConcealPrefix)
+	}
+
+	if *testGateway.UpdateReceiveDescription != description {
+		t.Errorf("The update gateway wasn't called with the description %s, instead it was called with %s", description, *testGateway.UpdateReceiveDescription)
 	}
 }

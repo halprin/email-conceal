@@ -23,7 +23,7 @@ func GetRealEmailForConcealPrefix(concealPrefix string, applicationContext conte
 		return "", sessionErr
 	}
 
-	keyCondition := expression.Key("primary").Equal(expression.Value(fmt.Sprintf("conceal-%s", concealPrefix))).And(expression.Key("secondary").BeginsWith("email-"))
+	keyCondition := expression.Key("primary").Equal(expression.Value(fmt.Sprintf("conceal#%s", concealPrefix))).And(expression.Key("secondary").BeginsWith("email#"))
 	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
 	expressionBuilder, err := keyBuilder.Build()
 	if err != nil {
@@ -52,5 +52,5 @@ func GetRealEmailForConcealPrefix(concealPrefix string, applicationContext conte
 		return "", err
 	}
 
-	return strings.TrimPrefix(item.Secondary, "email-"), nil
+	return strings.TrimPrefix(item.Secondary, "email#"), nil
 }
