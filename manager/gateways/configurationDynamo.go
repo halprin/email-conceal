@@ -51,7 +51,7 @@ func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPre
 	mapping.Primary = concealDynamoDbKey
 	mapping.Secondary = generateSourceEmailKey(actualEmail)
 
-	rollbackFromNewConceal := func(applicationContext context.ApplicationContext) {
+	rollbackFromNewConceal := func() {
 		_ = batchDeleteItemsWithRollback([]interface{}{entity, mapping}, nil)
 	}
 
@@ -214,12 +214,12 @@ func getItem(hashKey string, sortKey string, tableName string) (map[string]*dyna
 	return getOutput.Item, nil
 }
 
-func batchWriteItemsWithRollback(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext)) error {
+func batchWriteItemsWithRollback(structsToWrite []interface{}, rollbackFunction func()) error {
 	log.Println("Batch writing items")
 	return batchInternal(structsToWrite, rollbackFunction, batchWrite)
 }
 
-func batchDeleteItemsWithRollback(structsToDelete []interface{}, rollbackFunction func(context.ApplicationContext)) error {
+func batchDeleteItemsWithRollback(structsToDelete []interface{}, rollbackFunction func()) error {
 	log.Println("Batch deleting items")
 	return batchInternal(structsToDelete, rollbackFunction, batchDelete)
 }
@@ -229,7 +229,7 @@ const (
 	batchDelete = "batchDelete"
 )
 
-func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.ApplicationContext), batchOperation string) error {
+func batchInternal(structsToWrite []interface{}, rollbackFunction func(), batchOperation string) error {
 	//convert the structs to dynamo attribute maps
 	var dynamoItems []map[string]*dynamodb.AttributeValue
 
@@ -297,7 +297,7 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(context.A
 			log.Println("Failed to put/delete items in DynamoDB")
 			if rollbackFunction != nil {
 				log.Println("Calling rollback function")
-				go rollbackFunction(applicationContext)
+				go rollbackFunction()
 			}
 			return errors.Wrap(err, "Failed to put/delete items in DynamoDB")
 		}
