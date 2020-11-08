@@ -247,3 +247,39 @@ func TestAddDescriptionSuccess(t *testing.T) {
 		t.Errorf("The update gateway wasn't called with the description %s, instead it was called with %s", description, *testGateway.UpdateReceiveDescription)
 	}
 }
+
+func TestDeleteDescriptionFailed(t *testing.T) {
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &TestConcealEmailGateway{
+			UpdateReturnError: errors.New("an error"),
+		}
+	})
+
+	err := usecase.DeleteDescriptionFromExistingEmail("some_prefix")
+
+	if err == nil {
+		t.Error("An error wasn't returned from the delete description usecase, but it was supposed to")
+	}
+}
+
+func TestDeleteDescriptionSuccess(t *testing.T) {
+	testGateway := TestConcealEmailGateway{}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+
+	prefix := "some_prefix"
+	err := usecase.DeleteDescriptionFromExistingEmail(prefix)
+
+	if err != nil {
+		t.Error("An error was returned from the delete description usecase, but it wasn't expected")
+	}
+
+	if testGateway.UpdateReceiveConcealPrefix != prefix {
+		t.Errorf("The update gateway wasn't called with the prefix %s, instead it was called with %s", prefix, testGateway.UpdateReceiveConcealPrefix)
+	}
+
+	if testGateway.UpdateReceiveDescription != nil {
+		t.Errorf("The update gateway wasn't called with a nil description, instead it was called with %s", *testGateway.UpdateReceiveDescription)
+	}
+}

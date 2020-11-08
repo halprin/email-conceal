@@ -14,6 +14,15 @@ type ConcealEmailUsecase interface {
 	Add(sourceEmail string, description *string) (string, error)
 	Delete(concealedEmailPrefix string) error
 	AddDescriptionToExistingEmail(concealedEmailPrefix string, description string) error
+	DeleteDescriptionFromExistingEmail(concealedEmailPrefix string) error
+}
+
+type ConcealEmailNotExistError struct {
+	ConcealEmailId string
+}
+
+func (c ConcealEmailNotExistError) Error() string {
+	return fmt.Sprintf("The conceal e-mail %s doesn't exist", c.ConcealEmailId)
 }
 
 type ConcealEmailUsecaseImpl struct {}
@@ -72,6 +81,18 @@ func (receiver ConcealEmailUsecaseImpl) AddDescriptionToExistingEmail(concealedE
 	err = concealEmailGateway.UpdateConcealedEmail(concealedEmailPrefix, &description)
 	if err != nil {
 		return errors.Wrap(err, "Unable to update description of conceal e-mail")
+	}
+
+	return nil
+}
+
+func (receiver ConcealEmailUsecaseImpl) DeleteDescriptionFromExistingEmail(concealedEmailPrefix string) error {
+
+	var concealEmailGateway ConcealEmailGateway
+	applicationContext.Resolve(&concealEmailGateway)
+	err := concealEmailGateway.UpdateConcealedEmail(concealedEmailPrefix, nil)
+	if err != nil {
+		return errors.Wrap(err, "Unable to delete description of conceal e-mail")
 	}
 
 	return nil

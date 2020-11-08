@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/halprin/email-conceal/manager/context"
 	"github.com/halprin/email-conceal/manager/external/lib/errors"
+	"github.com/halprin/email-conceal/manager/usecases"
 	"log"
 	"time"
 )
@@ -104,8 +105,12 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 
 	concealEmailKey := generateConcealEmailKey(concealPrefix)
 	item, err := getItem(concealEmailKey, concealEmailKey, tableName)
-	if err != nil || item == nil {
-		return errors.Wrap(err, fmt.Sprintf("Conceal e-mail %s doesn't exist", concealPrefix))
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("Failed to get conceal e-mail %s to update it", concealPrefix))
+	} else if item == nil {
+		return usecases.ConcealEmailNotExistError{
+			ConcealEmailId: concealPrefix,
+		}
 	}
 
 	keyEntity := KeyBase{

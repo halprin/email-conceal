@@ -116,15 +116,29 @@ func (receiver ConcealEmailController) Update(arguments map[string]interface{}) 
 
 	var concealEmailUsecase usecases.ConcealEmailUsecase
 	applicationContext.Resolve(&concealEmailUsecase)
-	err := concealEmailUsecase.AddDescriptionToExistingEmail(concealEmailId, description)
 
-	if errors.Is(err, entities.DescriptionTooShortError) || errors.Is(err, entities.DescriptionTooLongError) {
+	var err error
+
+	if description == "" {
+		err = concealEmailUsecase.DeleteDescriptionFromExistingEmail(concealEmailId)
+	} else {
+		err = concealEmailUsecase.AddDescriptionToExistingEmail(concealEmailId, description)
+	}
+
+	if errors.Is(err, entities.DescriptionTooLongError) {
 		errorString := err.Error()
 		log.Printf(errorString)
 		jsonMap := map[string]string{
 			"error": errorString,
 		}
 		return http.StatusBadRequest, jsonMap
+	} else if errors.As(err, &usecases.ConcealEmailNotExistError{}) {
+		errorString := err.Error()
+		log.Printf(errorString)
+		jsonMap := map[string]string{
+			"error": errorString,
+		}
+		return http.StatusNotFound, jsonMap
 	} else if err != nil {
 		log.Printf("Another error occured, %+v", err)
 		jsonMap := map[string]string{
