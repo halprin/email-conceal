@@ -2,10 +2,14 @@ package forwardEmail
 
 import (
 	"encoding/json"
-	"github.com/halprin/email-conceal/forwarder/context"
+	"github.com/halprin/email-conceal/src/context"
 	"log"
 	"strings"
 )
+
+var applicationContext = context.ApplicationContext{}
+
+type SqsQueueForwardController struct {}
 
 type S3FileUploadedEvent struct {
 	Records []struct {
@@ -20,7 +24,7 @@ type S3FileUploadedEvent struct {
 	}
 }
 
-func SqsQueueForwardEmail(arguments map[string]interface{}, applicationContext context.ApplicationContext) error {
+func (receiver SqsQueueForwardController) ForwardEmail(arguments map[string]interface{}) error {
 	messageJsonString := arguments["message"].(*string)
 
 	var message S3FileUploadedEvent

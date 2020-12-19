@@ -4,6 +4,12 @@ import (
 	"github.com/halprin/email-conceal/forwarder/controllers"
 	"github.com/halprin/email-conceal/forwarder/gateways"
 	"github.com/halprin/email-conceal/forwarder/usecases"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/controllers/forwardEmail"
+	"github.com/halprin/email-conceal/src/external/lib"
+	"github.com/halprin/email-conceal/src/gateways/dynamodb"
+	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
+	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	"os"
 )
 
@@ -35,4 +41,33 @@ func (appContext *SqsQueueApplicationContext) ForwardEmailUsecase(url string) er
 
 func (appContext *SqsQueueApplicationContext) Exit(returnCode int) {
 	os.Exit(returnCode)
+}
+
+
+func init() {
+	var applicationContext = context.ApplicationContext{}
+
+	//controllers
+	applicationContext.Bind(func() forwardEmail.ForwardEmail {
+		return forwardEmail.SqsQueueForwardController{}
+	})
+
+	//usecases
+	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
+		return concealEmailUsecase.ConcealEmailUsecaseImpl{}
+	})
+
+	//gateways
+	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailGateway {
+		return dynamodb.DynamoDbGateway{}
+	})
+
+	applicationContext.Bind(func() context.EnvironmentGateway {
+		return osEnvironmentVariable.OsEnvironmentGateway{}
+	})
+
+	//libraries
+	applicationContext.Bind(func() context.UuidLibrary {
+		return lib.GoogleUuid{}
+	})
 }

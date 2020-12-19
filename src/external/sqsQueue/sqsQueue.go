@@ -4,10 +4,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/controllers/forwardEmail"
 	"log"
 )
 
-var sqsQueueApplicationContext = &SqsQueueApplicationContext{}
+var applicationContext = context.ApplicationContext{}
 
 func SqsQueueListener() {
 	sqsService := createSqsService()
@@ -43,7 +45,10 @@ func handleQueueMessage(message *sqs.Message, sqsService *sqs.SQS, queueUrl *str
 		"message": message.Body,
 	}
 
-	err := sqsQueueApplicationContext.ForwardEmailController(arguments)
+	var forwardEmailController forwardEmail.ForwardEmail
+	applicationContext.Resolve(&forwardEmailController)
+
+	err := forwardEmailController.ForwardEmail(arguments)
 	if err != nil {
 		//don't delete the message since we weren't able to handle it
 		log.Printf("Failed to handle the message, do not delete it")
@@ -62,8 +67,11 @@ func handleQueueMessage(message *sqs.Message, sqsService *sqs.SQS, queueUrl *str
 }
 
 func getQueueUrl(sqsService *sqs.SQS) *string {
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+
 	queueUrlResult, err := sqsService.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(sqsQueueApplicationContext.EnvironmentGateway("SQS_QUEUE_NAME")),
+		QueueName: aws.String(environmentGateway.GetEnvironmentValue("SQS_QUEUE_NAME")),
 	})
 
 	if err != nil {

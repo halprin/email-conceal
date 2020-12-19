@@ -1,4 +1,4 @@
-package controllers
+package forwardEmail
 
 import (
 	"github.com/halprin/email-conceal/forwarder/context"

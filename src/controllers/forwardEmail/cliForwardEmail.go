@@ -1,11 +1,12 @@
-package controllers
+package forwardEmail
 
 import (
 	"fmt"
-	"github.com/halprin/email-conceal/forwarder/context"
 )
 
-func CliForwardEmail(cliArguments map[string]interface{}, applicationContext context.ApplicationContext) error {
+type CliForwardController struct {}
+
+func (receiver CliForwardController) ForwardEmail(cliArguments map[string]interface{}) error {
 	url := cliArguments["url"].(string)
 	fmt.Println("URL to read e-mail from =", url)
 
