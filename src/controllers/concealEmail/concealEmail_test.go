@@ -4,7 +4,7 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
-	"github.com/halprin/email-conceal/src/usecases"
+	"github.com/halprin/email-conceal/src/usecases/concealEmail"
 	"net/http"
 	"testing"
 )
@@ -58,7 +58,7 @@ func TestConcealEmailControllerSuccess(t *testing.T) {
 	testUsecase := TestConcealEmailUsecase{
 		AddReturnConcealEmail: concealedEmail,
 	}
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
 
@@ -86,7 +86,7 @@ func TestConcealEmailControllerSuccess(t *testing.T) {
 func TestConcealEmailControllerBadEmailType(t *testing.T) {
 
 	testUsecase := TestConcealEmailUsecase{}
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
 
@@ -110,7 +110,7 @@ func TestConcealEmailControllerInvalidEmail(t *testing.T) {
 	testUsecase := TestConcealEmailUsecase{
 		AddReturnError: entities.InvalidEmailAddressError,
 	}
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
 
@@ -135,7 +135,7 @@ func TestConcealEmailControllerUnknownError(t *testing.T) {
 	testUsecase := TestConcealEmailUsecase{
 		AddReturnError: errors.New("some other error"),
 	}
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
 
@@ -157,7 +157,7 @@ func TestConcealEmailControllerUnknownError(t *testing.T) {
 
 func TestDeleteConcealEmailControllerSuccess(t *testing.T) {
 
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{}
 	})
 
@@ -178,7 +178,7 @@ func TestDeleteConcealEmailControllerSuccess(t *testing.T) {
 
 func TestDeleteConcealEmailControllerBadInput(t *testing.T) {
 
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{}
 	})
 
@@ -200,7 +200,7 @@ func TestDeleteConcealEmailControllerBadInput(t *testing.T) {
 
 func TestDeleteConcealEmailControllerFailedDelete(t *testing.T) {
 
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{
 			DeleteReturnError: errors.New("moof! go boom"),
 		}
@@ -223,7 +223,7 @@ func TestDeleteConcealEmailControllerFailedDelete(t *testing.T) {
 }
 
 func TestUpdateConcealEmailWithNewDescription(t *testing.T) {
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{}
 	})
 
@@ -245,7 +245,7 @@ func TestUpdateConcealEmailWithNewDescription(t *testing.T) {
 }
 
 func TestTooLongDescriptionUpdate(t *testing.T) {
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{
 			AddDescriptionReturnError: entities.DescriptionTooLongError,
 		}
@@ -269,7 +269,7 @@ func TestTooLongDescriptionUpdate(t *testing.T) {
 }
 
 func TestDescriptionUpdateFailedForUnkownReason(t *testing.T) {
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{
 			AddDescriptionReturnError: errors.New("Unknown error"),
 		}
@@ -295,7 +295,7 @@ func TestDescriptionUpdateFailedForUnkownReason(t *testing.T) {
 func TestDescriptionUpdateWithDelete(t *testing.T) {
 
 	concealEmailUsecase := TestConcealEmailUsecase{}
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &concealEmailUsecase
 	})
 
@@ -324,9 +324,9 @@ func TestDescriptionUpdateWithDelete(t *testing.T) {
 func TestUpdateFailedWithConcealEmailNotExist(t *testing.T) {
 
 	conceaEmailId := "an ID"
-	testAppContext.Bind(func() usecases.ConcealEmailUsecase {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{
-			DeleteDescriptionReturnError: usecases.ConcealEmailNotExistError{
+			DeleteDescriptionReturnError: concealEmail.ConcealEmailNotExistError{
 				ConcealEmailId: conceaEmailId,
 			},
 		}

@@ -1,4 +1,4 @@
-package usecases
+package concealEmail
 
 type ConcealEmailGateway interface {
 	AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error

@@ -6,7 +6,7 @@ import (
 	"github.com/halprin/email-conceal/src/external/lib"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
-	"github.com/halprin/email-conceal/src/usecases"
+	concealEmail2 "github.com/halprin/email-conceal/src/usecases/concealEmail"
 )
 
 func init() {
@@ -18,12 +18,12 @@ func init() {
 	})
 
 	//usecases
-	applicationContext.Bind(func() usecases.ConcealEmailUsecase {
-		return usecases.ConcealEmailUsecaseImpl{}
+	applicationContext.Bind(func() concealEmail2.ConcealEmailUsecase {
+		return concealEmail2.ConcealEmailUsecaseImpl{}
 	})
 
 	//gateways
-	applicationContext.Bind(func() usecases.ConcealEmailGateway {
+	applicationContext.Bind(func() concealEmail2.ConcealEmailGateway {
 		return dynamodb.DynamoDbGateway{}
 	})
 
