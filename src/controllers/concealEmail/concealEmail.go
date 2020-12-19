@@ -1,4 +1,4 @@
-package controllers
+package concealEmail
 
 import (
 	"fmt"
