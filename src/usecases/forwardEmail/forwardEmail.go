@@ -3,13 +3,22 @@ package usecases
 import (
 	"bytes"
 	"fmt"
-	"github.com/halprin/email-conceal/forwarder/context"
+	"github.com/halprin/email-conceal/src/context"
 	"log"
 	"net/mail"
 	"strings"
 )
 
-func ForwardEmailUsecase(url string, applicationContext context.ApplicationContext) error {
+
+var applicationContext = context.ApplicationContext{}
+
+type ForwardEmailUsecase interface {
+	ForwardEmail(url string) error
+}
+
+type ForwardEmailUsecaseImpl struct {}
+
+func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	//TODO: I may be copying `rawEmail` around, which could be 150 MB or whatever size big of an e-mail.  That would be bad.
 	//But maybe not?  I believe I may be passing around a "slice", which internally is a pointer?
 	log.Println("Reading the e-mail")
@@ -26,11 +35,14 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 		return NewUnableToParseEmailError(err)
 	}
 
-	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+
+	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 	concealedRecipients := getConcealedRecipients(email, domain)
 	log.Printf("Concealed recipients are %s", concealedRecipients)
 	log.Println("Looking up actual recipients...")
-	actualRecipients := getActualRecipients(concealedRecipients, domain, applicationContext)
+	actualRecipients := getActualRecipients(concealedRecipients, domain)
 	log.Printf("Actual recipients are %s", actualRecipients)
 	if len(actualRecipients) == 0 {
 		log.Println("No actual recipients to forward e-mail to")
@@ -38,7 +50,7 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 	}
 
 	log.Println("Changing the headers in e-mail")
-	changeHeadersInEmail(email, applicationContext)
+	changeHeadersInEmail(email)
 
 	log.Println("Reconstruct raw e-mail bytes")
 	myTypeEmail := ByteSliceMessage(*email)
@@ -54,7 +66,7 @@ func ForwardEmailUsecase(url string, applicationContext context.ApplicationConte
 	return nil
 }
 
-func getActualRecipients(concealedRecipients []string, domain string, applicationContext context.ApplicationContext) []string {
+func getActualRecipients(concealedRecipients []string, domain string) []string {
 	recipientsStrings := make([]string, 0, len(concealedRecipients))
 
 	for _, concealedRecipient := range concealedRecipients {
@@ -93,13 +105,16 @@ func emailFromRawBytes(rawEmail []byte) (*mail.Message, error) {
 	return mail.ReadMessage(bytes.NewReader(rawEmail))
 }
 
-func changeHeadersInEmail(email *mail.Message, applicationContext context.ApplicationContext) {
+func changeHeadersInEmail(email *mail.Message) {
 	delete(email.Header, "Dkim-Signature")  //the signature is handled by the forwarding service, not us
 	delete(email.Header, "Return-Path")  //don't continue on the return path, especially because it's probably not from a verified domain
 
 	//construct the complete forwarder e-mail address
-	forwarderEmailPrefix := applicationContext.EnvironmentGateway("FORWARDER_EMAIL_PREFIX")
-	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+
+	forwarderEmailPrefix := environmentGateway.GetEnvironmentValue("FORWARDER_EMAIL_PREFIX")
+	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 	forwarderEmailAddress := fmt.Sprintf("%s@%s", forwarderEmailPrefix, domain)
 
 	//get the "From" based header

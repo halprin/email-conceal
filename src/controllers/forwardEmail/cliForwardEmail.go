@@ -2,6 +2,8 @@ package forwardEmail
 
 import (
 	"fmt"
+	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
+	"os"
 )
 
 type CliForwardController struct {}
@@ -10,10 +12,13 @@ func (receiver CliForwardController) ForwardEmail(cliArguments map[string]interf
 	url := cliArguments["url"].(string)
 	fmt.Println("URL to read e-mail from =", url)
 
-	err := applicationContext.ForwardEmailUsecase(url)
+	var forwardEmailUsecaseVar forwardEmailUsecase.ForwardEmailUsecase
+	applicationContext.Resolve(&forwardEmailUsecaseVar)
+
+	err := forwardEmailUsecaseVar.ForwardEmail(url)
 	if err != nil {
 		fmt.Println("Unable to forward e-mail")
-		defer applicationContext.Exit(1) //allows for any other deferred actions before Exit is called
+		defer os.Exit(1) //allows for any other deferred actions before Exit is called
 		return err
 	}
 

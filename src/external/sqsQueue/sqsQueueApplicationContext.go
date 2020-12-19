@@ -1,15 +1,12 @@
 package sqsQueue
 
 import (
-	"github.com/halprin/email-conceal/forwarder/controllers"
-	"github.com/halprin/email-conceal/forwarder/gateways"
-	"github.com/halprin/email-conceal/forwarder/usecases"
 	"github.com/halprin/email-conceal/src/context"
-	"github.com/halprin/email-conceal/src/controllers/forwardEmail"
+	forwardEmailController "github.com/halprin/email-conceal/src/controllers/forwardEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
-	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
+	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"os"
 )
 
@@ -48,13 +45,13 @@ func init() {
 	var applicationContext = context.ApplicationContext{}
 
 	//controllers
-	applicationContext.Bind(func() forwardEmail.ForwardEmail {
-		return forwardEmail.SqsQueueForwardController{}
+	applicationContext.Bind(func() forwardEmailController.ForwardEmail {
+		return forwardEmailController.SqsQueueForwardController{}
 	})
 
 	//usecases
-	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
-		return concealEmailUsecase.ConcealEmailUsecaseImpl{}
+	applicationContext.Bind(func() forwardEmailUsecase.ForwardEmailUsecase {
+		return forwardEmailUsecase.ForwardEmailUsecaseImpl{}
 	})
 
 	//gateways

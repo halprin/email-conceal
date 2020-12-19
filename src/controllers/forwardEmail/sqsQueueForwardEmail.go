@@ -3,6 +3,7 @@ package forwardEmail
 import (
 	"encoding/json"
 	"github.com/halprin/email-conceal/src/context"
+	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"log"
 	"strings"
 )
@@ -44,7 +45,10 @@ func (receiver SqsQueueForwardController) ForwardEmail(arguments map[string]inte
 
 		log.Println("URL to read e-mail from =", url)
 
-		err = applicationContext.ForwardEmailUsecase(url)
+		var forwardEmailUsecaseVar forwardEmailUsecase.ForwardEmailUsecase
+		applicationContext.Resolve(&forwardEmailUsecaseVar)
+
+		err = forwardEmailUsecaseVar.ForwardEmail(url)
 		if err != nil {
 			log.Printf("Unable to forward e-mail at %s due to error, %+v\n", url, err)
 			return err
