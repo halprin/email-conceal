@@ -2,7 +2,7 @@ package entities
 
 import (
 	"fmt"
-	"github.com/halprin/email-conceal/manager/external/lib/errors"
+	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"unicode/utf8"
 )
 

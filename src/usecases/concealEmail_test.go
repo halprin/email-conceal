@@ -3,7 +3,7 @@ package usecases
 import (
 	"errors"
 	"fmt"
-	"github.com/halprin/email-conceal/manager/context"
+	"github.com/halprin/email-conceal/src/context"
 	"testing"
 )
 

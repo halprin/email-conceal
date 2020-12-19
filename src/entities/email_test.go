@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"github.com/halprin/email-conceal/manager/external/lib/errors"
+	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"testing"
 )
 

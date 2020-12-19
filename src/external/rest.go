@@ -2,8 +2,8 @@ package external
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/halprin/email-conceal/manager/context"
-	"github.com/halprin/email-conceal/manager/controllers"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/controllers"
 )
 
 var applicationContext = context.ApplicationContext{}

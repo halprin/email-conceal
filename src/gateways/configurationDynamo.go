@@ -6,9 +6,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-	"github.com/halprin/email-conceal/manager/context"
-	"github.com/halprin/email-conceal/manager/external/lib/errors"
-	"github.com/halprin/email-conceal/manager/usecases"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases"
 	"log"
 	"time"
 )

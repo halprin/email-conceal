@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"github.com/halprin/email-conceal/manager/context"
-	"github.com/halprin/email-conceal/manager/entities"
-	"github.com/halprin/email-conceal/manager/external/lib/errors"
-	"github.com/halprin/email-conceal/manager/usecases"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/entities"
+	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases"
 	"net/http"
 	"testing"
 )

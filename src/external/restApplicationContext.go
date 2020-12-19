@@ -1,11 +1,11 @@
 package external
 
 import (
-	"github.com/halprin/email-conceal/manager/context"
-	"github.com/halprin/email-conceal/manager/controllers"
-	"github.com/halprin/email-conceal/manager/external/lib"
-	"github.com/halprin/email-conceal/manager/gateways"
-	"github.com/halprin/email-conceal/manager/usecases"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/controllers"
+	"github.com/halprin/email-conceal/src/external/lib"
+	"github.com/halprin/email-conceal/src/gateways"
+	"github.com/halprin/email-conceal/src/usecases"
 )
 
 func init() {
