@@ -4,7 +4,7 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/controllers/concealEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
-	"github.com/halprin/email-conceal/src/gateways"
+	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
 	"github.com/halprin/email-conceal/src/usecases"
 )
@@ -24,7 +24,7 @@ func init() {
 
 	//gateways
 	applicationContext.Bind(func() usecases.ConcealEmailGateway {
-		return gateways.DynamoDbGateway{}
+		return dynamodb.DynamoDbGateway{}
 	})
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
