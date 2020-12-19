@@ -29,7 +29,7 @@ jobs:
         pushd ./forwarder/
         go get -v -t -d ./
         popd
-        pushd ./manager/
+        pushd ./src/
         go get -v -t -d ./
         popd
         
@@ -45,13 +45,13 @@ jobs:
 
     - name: Test Manager
       run: |
-        cd ./manager/
+        cd ./src/
         go test -v ./...
 
     - name: Build Manager
       run: |
-        cd ./manager/
-        go build -v ./
+        cd ./src/
+        go build -v ./cmd/manager/
 
     - name: Terraform has correct formatting
       run: terraform fmt -check -recursive ./iac/
