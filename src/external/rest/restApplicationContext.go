@@ -5,6 +5,7 @@ import (
 	"github.com/halprin/email-conceal/src/controllers/concealEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
 	"github.com/halprin/email-conceal/src/gateways"
+	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
 	"github.com/halprin/email-conceal/src/usecases"
 )
 
@@ -27,7 +28,7 @@ func init() {
 	})
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
-		return gateways.OsEnvironmentGateway{}
+		return osEnvironmentVariable.OsEnvironmentGateway{}
 	})
 
 	//libraries

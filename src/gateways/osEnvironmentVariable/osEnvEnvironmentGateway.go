@@ -1,4 +1,4 @@
-package gateways
+package osEnvironmentVariable
 
 import (
 	"os"
