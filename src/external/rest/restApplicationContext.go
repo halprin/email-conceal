@@ -1,4 +1,4 @@
-package external
+package rest
 
 import (
 	"github.com/halprin/email-conceal/src/context"
