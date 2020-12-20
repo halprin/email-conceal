@@ -26,27 +26,18 @@ jobs:
 
     - name: Get dependencies
       run: |
-        pushd ./forwarder/
+        cd ./src/
         go get -v -t -d ./
-        popd
-        pushd ./src/
-        go get -v -t -d ./
-        popd
-        
-    - name: Test Forwarder
+
+    - name: Test
       run: |
-        cd ./forwarder/
+        cd ./src/
         go test -v ./...
 
     - name: Build Forwarder
       run: |
-        cd ./forwarder/
-        go build -v ./
-
-    - name: Test Manager
-      run: |
         cd ./src/
-        go test -v ./...
+        go build -v ./cmd/forwarder/
 
     - name: Build Manager
       run: |
