@@ -1,16 +1,20 @@
-package gateways
+package awsSesSendEmail
 
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ses"
-	"github.com/halprin/email-conceal/forwarder/context"
+	"github.com/halprin/email-conceal/src/context"
 	"log"
 )
 
 var sesService = ses.New(awsSession)
 
-func AwsSesSendEmailGateway(email []byte, recipients []string, applicationContext context.ApplicationContext) error {
+var applicationContext = context.ApplicationContext{}
+
+type AwsSesSendEmailGateway struct {}
+
+func (receiver AwsSesSendEmailGateway) SendEmail(email []byte, recipients []string) error {
 	if sessionErr != nil {
 		return sessionErr
 	}
@@ -20,8 +24,11 @@ func AwsSesSendEmailGateway(email []byte, recipients []string, applicationContex
 		recipientsPointers = append(recipientsPointers, aws.String(recipient))
 	}
 
-	forwarderEmailPrefix := applicationContext.EnvironmentGateway("FORWARDER_EMAIL_PREFIX")
-	domain := applicationContext.EnvironmentGateway("DOMAIN")
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+
+	forwarderEmailPrefix := environmentGateway.GetEnvironmentValue("FORWARDER_EMAIL_PREFIX")
+	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 	forwarderEmailAddress := fmt.Sprintf("%s@%s", forwarderEmailPrefix, domain)
 
 	log.Printf("Fowarding mail from %s", forwarderEmailAddress)
