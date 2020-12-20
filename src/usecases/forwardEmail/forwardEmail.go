@@ -76,10 +76,13 @@ func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 func getActualRecipients(concealedRecipients []string, domain string) []string {
 	recipientsStrings := make([]string, 0, len(concealedRecipients))
 
+	var configurationGateway ConfigurationGateway
+	applicationContext.Resolve(&configurationGateway)
+
 	for _, concealedRecipient := range concealedRecipients {
 		concealedRecipientPrefix := strings.TrimSuffix(concealedRecipient, fmt.Sprintf("@%s", domain))
 
-		actualRecipient, err := applicationContext.GetRealEmailForConcealPrefix(concealedRecipientPrefix)
+		actualRecipient, err := configurationGateway.GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix)
 
 		if err != nil {
 			log.Printf("Unable to get actual recipient for concealed recipient %s due to error %+v", concealedRecipient, err)

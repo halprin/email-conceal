@@ -10,6 +10,7 @@ import (
 	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"github.com/halprin/email-conceal/src/usecases/concealEmail"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -145,6 +146,46 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	}
 
 	return nil
+}
+
+func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefix string) (string, error) {
+	if sessionErr != nil {
+		return "", sessionErr
+	}
+
+	keyCondition := expression.Key("primary").Equal(expression.Value(fmt.Sprintf("conceal#%s", concealPrefix))).And(expression.Key("secondary").BeginsWith("email#"))
+	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
+	expressionBuilder, err := keyBuilder.Build()
+	if err != nil {
+		return "", err
+	}
+
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+
+	queryInput := &dynamodb.QueryInput{
+		TableName:                 aws.String(environmentGateway.GetEnvironmentValue("TABLE_NAME")),
+		KeyConditionExpression:    expressionBuilder.KeyCondition(),
+		ExpressionAttributeNames:  expressionBuilder.Names(),
+		ExpressionAttributeValues: expressionBuilder.Values(),
+	}
+	queryOutput, err := dynamoService.Query(queryInput)
+	if err != nil {
+		return "", err
+	}
+
+	if *queryOutput.Count < 1 {
+		return "", errors.New(fmt.Sprintf("No real e-mail for conceal prefix %s", concealPrefix))
+	}
+
+	firstItem := queryOutput.Items[0]
+	item := ConcealEmailMapping{}
+	err = dynamodbattribute.UnmarshalMap(firstItem, &item)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimPrefix(item.Secondary, "email#"), nil
 }
 
 func convertItemToKey(item map[string]*dynamodb.AttributeValue) (map[string]*dynamodb.AttributeValue, error) {
