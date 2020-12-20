@@ -22,7 +22,11 @@ func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	//TODO: I may be copying `rawEmail` around, which could be 150 MB or whatever size big of an e-mail.  That would be bad.
 	//But maybe not?  I believe I may be passing around a "slice", which internally is a pointer?
 	log.Println("Reading the e-mail")
-	rawEmail, err := applicationContext.ReadEmailGateway(url)
+
+	var emailReaderGateway ReadEmailGateway
+	applicationContext.Resolve(&emailReaderGateway)
+
+	rawEmail, err := emailReaderGateway.ReadEmail(url)
 	if err != nil {
 		log.Printf("Reading the e-mail failed, %+v\n", err)
 		return NewUnableToReadEmailError(url, err)

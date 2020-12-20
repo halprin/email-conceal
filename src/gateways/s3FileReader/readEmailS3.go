@@ -1,10 +1,9 @@
-package gateways
+package s3FileReader
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/halprin/email-conceal/forwarder/context"
 	"log"
 	"regexp"
 )
@@ -13,17 +12,19 @@ var s3Downloader = s3manager.NewDownloader(awsSession)
 
 var s3UrlParseRegex = regexp.MustCompile(`^s3://([^/]+)(/.+)$`)
 
-func S3ReadEmailGateway(url string, applicationContext context.ApplicationContext) ([]byte, error) {
+type S3FileReader struct {}
+
+func (receiver S3FileReader) ReadEmail(uri string) ([]byte, error) {
 	if sessionErr != nil {
 		return nil, sessionErr
 	}
 
-	bucket, object := parseBucketAndObjectFromS3Url(url)
+	bucket, object := parseBucketAndObjectFromS3Url(uri)
 
 	var internalBuffer []byte
 	inMemoryBuffer := aws.NewWriteAtBuffer(internalBuffer)
 
-	log.Printf("Downloading S3 file at %s", url)
+	log.Printf("Downloading S3 file at %s", uri)
 	_, err := s3Downloader.Download(inMemoryBuffer, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(object),
@@ -32,7 +33,7 @@ func S3ReadEmailGateway(url string, applicationContext context.ApplicationContex
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Download S3 file complete at %s", url)
+	log.Printf("Download S3 file complete at %s", uri)
 
 	return inMemoryBuffer.Bytes(), nil
 }

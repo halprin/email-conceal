@@ -1,11 +1,15 @@
 package sqsQueue
 
 import (
+	"github.com/halprin/email-conceal/forwarder/gateways"
+	"github.com/halprin/email-conceal/forwarder/usecases"
 	"github.com/halprin/email-conceal/src/context"
 	forwardEmailController "github.com/halprin/email-conceal/src/controllers/forwardEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
+	"github.com/halprin/email-conceal/src/gateways/localFileReader"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
+	"github.com/halprin/email-conceal/src/gateways/s3FileReader"
 	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"os"
 )
@@ -55,16 +59,11 @@ func init() {
 	})
 
 	//gateways
-	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailGateway {
-		return dynamodb.DynamoDbGateway{}
+	applicationContext.Bind(func() forwardEmailUsecase.ReadEmailGateway {
+		return s3FileReader.S3FileReader{}
 	})
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
 		return osEnvironmentVariable.OsEnvironmentGateway{}
-	})
-
-	//libraries
-	applicationContext.Bind(func() context.UuidLibrary {
-		return lib.GoogleUuid{}
 	})
 }
