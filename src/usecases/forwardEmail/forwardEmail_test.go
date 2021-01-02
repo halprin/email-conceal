@@ -3,20 +3,70 @@ package forwardEmail
 import (
 	"bytes"
 	"fmt"
-	"github.com/halprin/email-conceal/forwarder/context"
-	"github.com/halprin/email-conceal/forwarder/external/lib/errors"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"testing"
 )
 
+var usecase = ForwardEmailUsecaseImpl{}
+var testAppContext = context.ApplicationContext{}
+
+type TestReadEmailGateway struct {
+	ReadEmailUri         string
+	ReadEmailReturnByte  []byte
+	ReadEmailReturnError error
+}
+
+func (testGateway *TestReadEmailGateway) ReadEmail(uri string) ([]byte, error) {
+	testGateway.ReadEmailUri = uri
+
+	return testGateway.ReadEmailReturnByte, testGateway.ReadEmailReturnError
+}
+
+type TestSendEmailGateway struct {
+	SendEmailEmail       []byte
+	SendEmailRecipients  []string
+	SendEmailReturnError error
+}
+
+func (testGateway *TestSendEmailGateway) SendEmail(email []byte, recipients []string) error {
+	testGateway.SendEmailEmail = email
+	testGateway.SendEmailRecipients = recipients
+
+	return testGateway.SendEmailReturnError
+}
+
+type TestConfigurationGateway struct {
+	GetRealEmailConcealPrefix string
+	GetRealEmailReturnString  string
+	GetRealEmailReturnError   error
+}
+
+func (testGateway *TestConfigurationGateway) GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix string) (string, error) {
+	testGateway.GetRealEmailConcealPrefix = concealedRecipientPrefix
+
+	return testGateway.GetRealEmailReturnString, testGateway.GetRealEmailReturnError
+}
+
+type TestEnvironmentGateway struct {
+	GetEnvironmentValueReturn map[string]string
+}
+
+func (testGateway *TestEnvironmentGateway) GetEnvironmentValue(key string) string {
+	return testGateway.GetEnvironmentValueReturn[key]
+}
+
 func TestForwardEmailUsecaseWithFailingToReadEmail(t *testing.T) {
 	errorFromGateway := errors.New("something bad happened")
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway:      nil,
-		ReturnErrorFromReadEmailGateway: errorFromGateway,
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnError: errorFromGateway,
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
 	testUrl := "https://email.com"
-	err := ForwardEmailUsecase(testUrl, &appContext)
+	err := usecase.ForwardEmail(testUrl)
 
 	if !errors.Is(err, NewUnableToReadEmailError(testUrl, errorFromGateway)) {
 		t.Errorf("An UnableToReadEmailError should have been returned from ForwardEmailUsecase")
@@ -31,11 +81,14 @@ Subject: bad T header
 
 There is an initial space and that is bad.
 `
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(badEmail),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(badEmail),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	err := usecase.ForwardEmail("https://email.com")
 
 	if !errors.Is(err, NewUnableToParseEmailError(nil)) {
 		t.Errorf("An UnableToParseEmailError should have been returned from ForwardEmailUsecase")
@@ -55,18 +108,36 @@ Subject: lol
 
 Test e-mail.
 `
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	testEnvironmentGateway := TestEnvironmentGateway{}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
+
+	testConfigurationGateway := TestConfigurationGateway{}
+	testAppContext.Bind(func() ConfigurationGateway {
+		return &testConfigurationGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 	if bytes.Contains(rawForwardedEmail, []byte(dkimHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", dkimHeader)
 	}
@@ -88,18 +159,26 @@ Subject: lol
 Test e-mail.
 `, fromHeader, fromName, fromAddress)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 	if bytes.Contains(rawForwardedEmail, []byte(fromHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", fromHeader)
 	}
@@ -125,18 +204,26 @@ Subject: lol
 Test e-mail.
 `, fromHeader, fromName, fromAddress)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 	if bytes.Contains(rawForwardedEmail, []byte(fromHeader)) {
 		t.Errorf("Header %s was not removed from the e-mail; it should have been", fromHeader)
 	}
@@ -162,18 +249,26 @@ Subject: lol
 Test e-mail.
 `, fromHeader, fromName, fromAddress)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 
 	if !bytes.Contains(rawForwardedEmail, []byte(fromName)) {
 		t.Errorf("The from name %s is missing from the e-mail and it should have been there", fromName)
@@ -196,18 +291,26 @@ Subject: lol
 Test e-mail.
 `, senderEmail, fromEmail)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 
 	if !bytes.Contains(rawForwardedEmail, []byte(fromEmail)) {
 		t.Errorf("The from address %s is missing from the e-mail and it should have been there", fromEmail)
@@ -230,18 +333,26 @@ Subject: lol
 Test e-mail.
 `, sourceEmail, senderEmail)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 
 	if !bytes.Contains(rawForwardedEmail, []byte(senderEmail)) {
 		t.Errorf("The sender address %s is missing from the e-mail and it should have been there", senderEmail)
@@ -262,18 +373,26 @@ Subject: lol
 Test e-mail.
 `, sourceEmail)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 
 	if !bytes.Contains(rawForwardedEmail, []byte(sourceEmail)) {
 		t.Errorf("The source address %s is missing from the e-mail and it should have been there", sourceEmail)
@@ -291,23 +410,43 @@ Subject: lol
 Test e-mail.
 `
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
-		ReturnFromEnvironmentGateway: map[string]string{
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
+	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
+
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	testConfigurationGateway := TestConfigurationGateway{
+		GetRealEmailReturnString: "actual@apple.com",
+	}
+	testAppContext.Bind(func() ConfigurationGateway {
+		return &testConfigurationGateway
+	})
+
+	testEnvironmentGateway := TestEnvironmentGateway{
+		GetEnvironmentValueReturn: map[string]string{
 			"FORWARDER_EMAIL_PREFIX": forwarderPrefix,
 			"DOMAIN": domain,
 		},
-		ReturnFromGetRealEmailForConcealPrefix: "actual@apple.com",
 	}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 
 	if !bytes.Contains(rawForwardedEmail, []byte(forwarderEmail)) {
 		t.Errorf("The forwarder address %s is missing from the e-mail and it should have been there", forwarderEmail)
@@ -324,12 +463,21 @@ Subject: lol
 
 Test e-mail
 `
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
-		ReturnErrorFromSendEmailGateway: errors.New("sending failed"),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{
+		SendEmailReturnError: errors.New("sending failed"),
+	}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if !errors.Is(err, NewUnableToSendEmailError(nil)) {
 		t.Errorf("An NewUnableToSendEmailError should have been returned from ForwardEmailUsecase")
@@ -347,18 +495,26 @@ Subject: lol
 %s
 `, body)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	rawForwardedEmail := appContext.ReceivedSendEmailGatewayEmailArgument
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
 
 	if !bytes.Contains(rawForwardedEmail, []byte(body)) {
 		t.Errorf("The e-mail body %s is missing from the e-mail and it should have been there", body)
@@ -377,19 +533,33 @@ Subject: lol
 This is the coolest e-mail ever
 `, knownConcealedEmail, knownConcealedEmail2)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
-		ReturnFromGetRealEmailForConcealPrefix: actualEmail,
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	testConfigurationGateway := TestConfigurationGateway{
+		GetRealEmailReturnString: actualEmail,
+	}
+	testAppContext.Bind(func() ConfigurationGateway {
+		return &testConfigurationGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	forwardedEmailRecipients := appContext.ReceivedSendEmailGatewayRecipientArgument
+	forwardedEmailRecipients := testSendEmailGateway.SendEmailRecipients
 	if !contains(forwardedEmailRecipients, actualEmail) {
 		t.Errorf("Should have converted the concealed e-mail to the actual e-mails")
 	}
@@ -406,20 +576,34 @@ Subject: lol
 This is the coolest e-mail ever
 `, unknownConcealedEmail, unknownConcealedEmail2)
 
-	appContext := context.TestApplicationContext{
-		ReturnFromReadEmailGateway: []byte(email),
-		ReturnErrorFromGetRealEmailForConcealPrefix: errors.New("can't find the actual e-mail"),
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
 	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
 
-	err := ForwardEmailUsecase("https://email.com", &appContext)
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	testConfigurationGateway := TestConfigurationGateway{
+		GetRealEmailReturnError: errors.New("can't find the actual e-mail"),
+	}
+	testAppContext.Bind(func() ConfigurationGateway {
+		return &testConfigurationGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
 
 	if err != nil {
 		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
 		t.Errorf("Instead this was returned %+v", err)
 	}
 
-	if len(appContext.ReceivedSendEmailGatewayEmailArgument) !=0 && len(appContext.ReceivedSendEmailGatewayRecipientArgument) != 0 {
-		t.Errorf("The passed in recipients had some items, instead there shouldn't have been any; passed in recipients = %s", appContext.ReceivedSendEmailGatewayRecipientArgument)
+	if len(testSendEmailGateway.SendEmailEmail) !=0 && len(testSendEmailGateway.SendEmailRecipients) != 0 {
+		t.Errorf("The passed in recipients had some items, instead there shouldn't have been any; passed in recipients = %s", testSendEmailGateway.SendEmailRecipients)
 	}
 }
 
