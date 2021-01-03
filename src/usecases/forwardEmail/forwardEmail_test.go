@@ -37,15 +37,16 @@ func (testGateway *TestSendEmailGateway) SendEmail(email []byte, recipients []st
 }
 
 type TestConfigurationGateway struct {
-	GetRealEmailConcealPrefix string
-	GetRealEmailReturnString  string
-	GetRealEmailReturnError   error
+	GetRealEmailConcealPrefix     string
+	GetRealEmailReturnString      string
+	GetRealEmailReturnDescription *string
+	GetRealEmailReturnError       error
 }
 
-func (testGateway *TestConfigurationGateway) GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix string) (string, error) {
+func (testGateway *TestConfigurationGateway) GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix string) (string, *string, error) {
 	testGateway.GetRealEmailConcealPrefix = concealedRecipientPrefix
 
-	return testGateway.GetRealEmailReturnString, testGateway.GetRealEmailReturnError
+	return testGateway.GetRealEmailReturnString, testGateway.GetRealEmailReturnDescription, testGateway.GetRealEmailReturnError
 }
 
 type TestEnvironmentGateway struct {

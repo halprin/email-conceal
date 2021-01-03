@@ -82,7 +82,7 @@ func getActualRecipients(concealedRecipients []string, domain string) []string {
 	for _, concealedRecipient := range concealedRecipients {
 		concealedRecipientPrefix := strings.TrimSuffix(concealedRecipient, fmt.Sprintf("@%s", domain))
 
-		actualRecipient, err := configurationGateway.GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix)
+		actualRecipient, _, err := configurationGateway.GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix)
 
 		if err != nil {
 			log.Printf("Unable to get actual recipient for concealed recipient %s due to error %+v", concealedRecipient, err)

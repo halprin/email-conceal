@@ -147,16 +147,16 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	return nil
 }
 
-func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefix string) (string, error) {
+func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefix string) (string, *string, error) {
 	if sessionErr != nil {
-		return "", sessionErr
+		return "", nil, sessionErr
 	}
 
 	keyCondition := expression.Key("primary").Equal(expression.Value(generateConcealEmailKey(concealPrefix))).And(expression.Key("secondary").BeginsWith(sourceEmailKeyPrefix))
 	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
 	expressionBuilder, err := keyBuilder.Build()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	var environmentGateway context.EnvironmentGateway
@@ -170,19 +170,19 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 	}
 	queryOutput, err := dynamoService.Query(queryInput)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	if *queryOutput.Count < 1 {
-		return "", errors.New(fmt.Sprintf("No real e-mail for conceal prefix %s", concealPrefix))
+		return "", nil, errors.New(fmt.Sprintf("No real e-mail for conceal prefix %s", concealPrefix))
 	}
 
 	firstItem := queryOutput.Items[0]
 	item := ConcealEmailMapping{}
 	err = dynamodbattribute.UnmarshalMap(firstItem, &item)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), nil
+	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), nil, nil
 }

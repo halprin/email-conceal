@@ -9,5 +9,5 @@ type SendEmailGateway interface {
 }
 
 type ConfigurationGateway interface {
-	GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix string) (string, error)
+	GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix string) (string, *string, error)
 }
