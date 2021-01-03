@@ -26,6 +26,7 @@ jobs:
 
     - name: Get dependencies
       run: |
+        ls -l
         cd ./src/
         go get -v -t -d ./
 
