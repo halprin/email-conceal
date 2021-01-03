@@ -2,32 +2,50 @@ package forwardEmail
 
 import (
 	"fmt"
-	"github.com/halprin/email-conceal/forwarder/context"
-	"github.com/halprin/email-conceal/forwarder/external/lib/errors"
+	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"testing"
 )
 
+var sqsController = SqsQueueForwardController{}
+var testAppContext = context.ApplicationContext{}
+
+type TestForwardEmailUsecase struct {
+	ForwardEmailUri         string
+	ForwardEmailReturnError error
+}
+
+func (testUsecase *TestForwardEmailUsecase) ForwardEmail(url string) error {
+	testUsecase.ForwardEmailUri = url
+
+	return testUsecase.ForwardEmailReturnError
+}
+
 func TestSqsQueueForwardEmailFailsJsonParsing(t *testing.T) {
-	appContext := context.TestApplicationContext{}
 
 	message := `{"moof": "dogcow}`
 	arguments := map[string]interface{}{
 		"message": &message,  //no ending quote
 	}
 
-	err := SqsQueueForwardEmail(arguments, &appContext)
+	testForwardEmailUsecase := TestForwardEmailUsecase{}
+	testAppContext.Bind(func() forwardEmail.ForwardEmailUsecase {
+		return &testForwardEmailUsecase
+	})
+
+	err := sqsController.ForwardEmail(arguments)
 
 	if err == nil {
 		t.Error("An error should have been returned from SqsQueueForwardEmail controller")
 	}
 
-	if appContext.ReceivedForwardEmailUsecaseArguments != "" {
+	if testForwardEmailUsecase.ForwardEmailUri != "" {
 		t.Errorf("The forward e-mail usecase was called when it shouldn't have")
 	}
 }
 
 func TestSqsQueueForwardEmailFailsJsonNotBeingAsExpected(t *testing.T) {
-	appContext := context.TestApplicationContext{}
 
 	key := "an_object.txt"
 	message := fmt.Sprintf( //no bucket key
@@ -45,25 +63,35 @@ func TestSqsQueueForwardEmailFailsJsonNotBeingAsExpected(t *testing.T) {
 }`, key)
 	expectedUrl := fmt.Sprintf("s3:///%s", key) // the lack of bucket because the bucket key was not correct in the above JSON
 
+	testForwardEmailUsecase := TestForwardEmailUsecase{}
+	testAppContext.Bind(func() forwardEmail.ForwardEmailUsecase {
+		return &testForwardEmailUsecase
+	})
+
 	arguments := map[string]interface{}{
 		"message": &message,
 	}
 
-	err := SqsQueueForwardEmail(arguments, &appContext)
+	err := sqsController.ForwardEmail(arguments)
 
 	if err != nil {
 		t.Error("An error shouldn't have been returned from SqsQueueForwardEmail controller")
 	}
 
-	if appContext.ReceivedForwardEmailUsecaseArguments != expectedUrl {
+	if testForwardEmailUsecase.ForwardEmailUri != expectedUrl {
 		t.Errorf("The forward e-mail usecase didn't have the expected URL passed to it; expted %s", expectedUrl)
 	}
 }
 
 func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
-	appContext := context.TestApplicationContext{}
+
 	expectedErrorFromUsecase := errors.New("oops")
-	appContext.ReturnErrorForwardEmailUsecase = expectedErrorFromUsecase
+	testForwardEmailUsecase := TestForwardEmailUsecase{
+		ForwardEmailReturnError: expectedErrorFromUsecase,
+	}
+	testAppContext.Bind(func() forwardEmail.ForwardEmailUsecase {
+		return &testForwardEmailUsecase
+	})
 
 	bucket := "a_bucket"
 	key := "an_object.txt"
@@ -86,19 +114,18 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 		"message": &message,
 	}
 
-	err := SqsQueueForwardEmail(arguments, &appContext)
+	err := sqsController.ForwardEmail(arguments)
 
 	if err != expectedErrorFromUsecase {
 		t.Error("A specific error should have been returned from SqsQueueForwardEmail controller")
 	}
 
-	if appContext.ReceivedForwardEmailUsecaseArguments != expectedUrl {
+	if testForwardEmailUsecase.ForwardEmailUri != expectedUrl {
 		t.Errorf("The forward e-mail usecase didn't have the expected URL passed to it; expted %s", expectedUrl)
 	}
 }
 
 func TestSqsQueueForwardEmailIsSuccess(t *testing.T) {
-	appContext := context.TestApplicationContext{}
 
 	bucket := "a_bucket"
 	key := "an_object.txt"
@@ -117,17 +144,22 @@ func TestSqsQueueForwardEmailIsSuccess(t *testing.T) {
 }`, bucket, key)
 	expectedUrl := fmt.Sprintf("s3://%s/%s", bucket, key)
 
+	testForwardEmailUsecase := TestForwardEmailUsecase{}
+	testAppContext.Bind(func() forwardEmail.ForwardEmailUsecase {
+		return &testForwardEmailUsecase
+	})
+
 	arguments := map[string]interface{}{
 		"message": &message,
 	}
 
-	err := SqsQueueForwardEmail(arguments, &appContext)
+	err := sqsController.ForwardEmail(arguments)
 
 	if err != nil {
 		t.Error("An  error shouldn't have been returned from SqsQueueForwardEmail controller")
 	}
 
-	if appContext.ReceivedForwardEmailUsecaseArguments != expectedUrl {
+	if testForwardEmailUsecase.ForwardEmailUri != expectedUrl {
 		t.Errorf("The forward e-mail usecase didn't have the expected URL passed to it; expted %s", expectedUrl)
 	}
 }

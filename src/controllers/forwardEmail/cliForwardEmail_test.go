@@ -2,25 +2,12 @@ package forwardEmail
 
 import (
 	"fmt"
-	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"testing"
 )
 
-var controller = CliForwardController{}
-var testAppContext = context.ApplicationContext{}
-
-type TestForwardEmailUsecase struct {
-	ForwardEmailUri         string
-	ForwardEmailReturnError error
-}
-
-func (testUsecase *TestForwardEmailUsecase) ForwardEmail(url string) error {
-	testUsecase.ForwardEmailUri = url
-
-	return testUsecase.ForwardEmailReturnError
-}
+var cliController = CliForwardController{}
 
 func TestCliForwardEmailFails(t *testing.T) {
 
@@ -36,7 +23,7 @@ func TestCliForwardEmailFails(t *testing.T) {
 	}
 
 	fmt.Println("About to go!")
-	err := controller.ForwardEmail(arguments)
+	err := cliController.ForwardEmail(arguments)
 	fmt.Println("Let's do this!")
 
 	if err == nil {
@@ -55,7 +42,7 @@ func TestCliForwardEmailSuccess(t *testing.T) {
 		return &testForwardEmailUsecase
 	})
 
-	err := controller.ForwardEmail(arguments)
+	err := cliController.ForwardEmail(arguments)
 
 	if err != nil {
 		t.Errorf("An error was returned from CliForwardEmail when it shouldn't have been.  Error: %+v", err)
