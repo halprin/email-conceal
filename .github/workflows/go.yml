@@ -47,3 +47,6 @@ jobs:
 
     - name: Terraform has correct formatting
       run: terraform fmt -check -recursive ./iac/
+
+    - name: Build Forwarder Docker image
+      run: docker build -f ForwarderDockerfile .
