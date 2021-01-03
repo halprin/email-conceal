@@ -15,5 +15,9 @@ func Cli() {
 	arguments := map[string]interface{}{
 		"url": os.Args[1],
 	}
-	_ = forwardEmailController.ForwardEmail(arguments)
+	err := forwardEmailController.ForwardEmail(arguments)
+
+	if err != nil {
+		defer os.Exit(1) //allows for any other deferred actions before Exit is called
+	}
 }
