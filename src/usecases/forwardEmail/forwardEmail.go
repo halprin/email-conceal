@@ -18,7 +18,7 @@ type ForwardEmailUsecase interface {
 
 type ForwardEmailUsecaseImpl struct {}
 
-type EmailAndDescriptionTuple struct {
+type emailAndDescriptionTuple struct {
 	Email       string
 	Description *string
 }
@@ -78,7 +78,7 @@ func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	return nil
 }
 
-func getActualEmailsFromRecipients(concealToActualRecipients map[string]EmailAndDescriptionTuple) []string {
+func getActualEmailsFromRecipients(concealToActualRecipients map[string]emailAndDescriptionTuple) []string {
 	keys := make([]string, len(concealToActualRecipients))
 
 	index := 0
@@ -90,9 +90,9 @@ func getActualEmailsFromRecipients(concealToActualRecipients map[string]EmailAnd
 	return keys
 }
 
-func getActualRecipients(concealedRecipients []string, domain string) map[string]EmailAndDescriptionTuple {
+func getActualRecipients(concealedRecipients []string, domain string) map[string]emailAndDescriptionTuple {
 	//a map of a conceal recipient to (a tuple of the actual email and description)
-	recipientsAndDescriptions := map[string]EmailAndDescriptionTuple{}
+	recipientsAndDescriptions := map[string]emailAndDescriptionTuple{}
 
 	var configurationGateway ConfigurationGateway
 	applicationContext.Resolve(&configurationGateway)
@@ -108,7 +108,7 @@ func getActualRecipients(concealedRecipients []string, domain string) map[string
 			continue
 		}
 
-		recipientsAndDescriptions[concealedRecipient] = EmailAndDescriptionTuple{
+		recipientsAndDescriptions[concealedRecipient] = emailAndDescriptionTuple{
 			Email:       actualRecipient,
 			Description: description,
 		}
@@ -137,7 +137,7 @@ func emailFromRawBytes(rawEmail []byte) (*mail.Message, error) {
 	return mail.ReadMessage(bytes.NewReader(rawEmail))
 }
 
-func changeHeadersInEmail(email *mail.Message, concealToActualRecipients map[string]EmailAndDescriptionTuple) {
+func changeHeadersInEmail(email *mail.Message, concealToActualRecipients map[string]emailAndDescriptionTuple) {
 	delete(email.Header, "Dkim-Signature")  //the signature is handled by the forwarding service, not us
 	delete(email.Header, "Return-Path")  //don't continue on the return path, especially because it's probably not from a verified domain
 
