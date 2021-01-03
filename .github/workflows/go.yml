@@ -26,13 +26,9 @@ jobs:
 
     - name: Get dependencies
       run: |
-        cd ./src/cmd/
-        pushd ./forwarder/
-        go get -v -t -d ./
-        popd
-        pushd ./manager/
-        go get -v -t -d ./
-        popd
+        cd ./src/
+        go get -v -t -d ./cmd/forwarder/
+        go get -v -t -d ./cmd/manager/
 
     - name: Test
       run: |
