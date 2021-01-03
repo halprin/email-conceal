@@ -608,6 +608,65 @@ This is the coolest e-mail ever
 	}
 }
 
+func TestForwardEmailUsecaseThatCorrectlyUsesDescription(t *testing.T) {
+	//TODO: modify the test such that I can have different descriptions for these different known concealed e-mail addresses
+	knownConcealedEmail := "known@apple.com"
+	knownConcealedEmail2 := "known2@apple.com"
+	actualEmail := "moof@dogcow.com"
+	actualDescription := "The coolest description"
+
+	email := fmt.Sprintf(`To: %s, %s
+From: moof@apple.com
+Subject: lol
+
+This is the coolest e-mail ever
+`, knownConcealedEmail, knownConcealedEmail2)
+
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
+	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
+
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	testConfigurationGateway := TestConfigurationGateway{
+		GetRealEmailReturnString: actualEmail,
+		GetRealEmailReturnDescription: &actualDescription,
+	}
+	testAppContext.Bind(func() ConfigurationGateway {
+		return &testConfigurationGateway
+	})
+
+	testEnvironmentGateway := TestEnvironmentGateway{}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
+
+	if err != nil {
+		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
+		t.Errorf("Instead this was returned %+v", err)
+	}
+
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
+	stringForwardedEmail := string(rawForwardedEmail)
+	fmt.Println(stringForwardedEmail)
+
+	if !bytes.Contains(rawForwardedEmail, []byte(actualDescription)) {
+		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription)
+	}
+
+	if bytes.Contains(rawForwardedEmail, []byte(", \r\n")) {
+		t.Errorf("Incorrectly formatted the To header, there's a trailing comma")
+	}
+}
+
 func contains(slice []string, item string) bool {
 	for _, currentItem := range slice {
 		if currentItem == item {
