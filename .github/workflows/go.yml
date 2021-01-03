@@ -26,10 +26,13 @@ jobs:
 
     - name: Get dependencies
       run: |
-        pwd
-        ls -l
-        cd ./src/
+        cd ./src/cmd/
+        pushd ./forwarder/
         go get -v -t -d ./
+        popd
+        pushd ./manager/
+        go get -v -t -d ./
+        popd
 
     - name: Test
       run: |

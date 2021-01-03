@@ -8,5 +8,4 @@ require (
 	github.com/golobby/container v1.3.0
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.9.1
-	golang.org/x/net v0.0.0-20201216054612-986b41b23924 // indirect
 )
