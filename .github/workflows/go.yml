@@ -18,7 +18,7 @@ jobs:
     - name: Set-up Go 1.x
       uses: actions/setup-go@v2
       with:
-        go-version: ^1.14
+        go-version: ^1.15
       id: go
 
     - name: Check out code into the Go module directory
@@ -26,32 +26,24 @@ jobs:
 
     - name: Get dependencies
       run: |
-        pushd ./forwarder/
-        go get -v -t -d ./
-        popd
-        pushd ./manager/
-        go get -v -t -d ./
-        popd
-        
-    - name: Test Forwarder
+        cd ./src/
+        go get -v -t -d ./cmd/forwarder/
+        go get -v -t -d ./cmd/manager/
+
+    - name: Test
       run: |
-        cd ./forwarder/
+        cd ./src/
         go test -v ./...
 
     - name: Build Forwarder
       run: |
-        cd ./forwarder/
-        go build -v ./
-
-    - name: Test Manager
-      run: |
-        cd ./manager/
-        go test -v ./...
+        cd ./src/
+        go build -v ./cmd/forwarder/
 
     - name: Build Manager
       run: |
-        cd ./manager/
-        go build -v ./
+        cd ./src/
+        go build -v ./cmd/manager/
 
     - name: Terraform has correct formatting
       run: terraform fmt -check -recursive ./iac/
