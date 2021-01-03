@@ -22,11 +22,6 @@ github.com/golobby/container v1.3.0/go.mod h1:6yAH4QK+Hi8HxGuCJuAGiqS/a5n8YP+4bX
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/halprin/email-conceal v0.0.0-20201108192054-433df20a28d4 h1:v9099a2LRDxBcDnvSiSqSEnt1JKtSXH7XdWsAJm52Fg=
-github.com/halprin/email-conceal/forwarder v0.0.0-20201108192054-433df20a28d4 h1:B7pYqc6x1vAWyPgJfKcixaV7a3OzM8fzRtIvD4GtHVM=
-github.com/halprin/email-conceal/forwarder v0.0.0-20201108192054-433df20a28d4/go.mod h1:j4wmOX8trCi85xjTuhFfY2c1HCQCMfRzdjXMMZqqNBU=
-github.com/halprin/email-conceal/manager v0.0.0-20201108192054-433df20a28d4 h1:Cj6o0Z3jFshdzuk4h8jfpkNQCoCoKNUSZnwGIwzDi1M=
-github.com/halprin/email-conceal/manager v0.0.0-20201108192054-433df20a28d4/go.mod h1:7Gh/cIs+nmYWvA9rvNzMmjeeuJqU42yQ1sqf2Ef9zPo=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/json-iterator/go v1.1.9 h1:9yzud/Ht36ygwatGx56VwCZtlI/2AD15T1X2sjSuGns=
