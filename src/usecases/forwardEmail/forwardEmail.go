@@ -18,6 +18,11 @@ type ForwardEmailUsecase interface {
 
 type ForwardEmailUsecaseImpl struct {}
 
+type emailAndDescriptionTuple struct {
+	Email       string
+	Description *string
+}
+
 func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	//TODO: I may be copying `rawEmail` around, which could be 150 MB or whatever size big of an e-mail.  That would be bad.
 	//But maybe not?  I believe I may be passing around a "slice", which internally is a pointer?
@@ -46,15 +51,15 @@ func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	concealedRecipients := getConcealedRecipients(email, domain)
 	log.Printf("Concealed recipients are %s", concealedRecipients)
 	log.Println("Looking up actual recipients...")
-	actualRecipients := getActualRecipients(concealedRecipients, domain)
-	log.Printf("Actual recipients are %s", actualRecipients)
-	if len(actualRecipients) == 0 {
+	concealToActualRecipients := getActualRecipients(concealedRecipients, domain)
+	log.Println("Actual recipients are", concealToActualRecipients)
+	if len(concealToActualRecipients) == 0 {
 		log.Println("No actual recipients to forward e-mail to")
 		return nil
 	}
 
 	log.Println("Changing the headers in e-mail")
-	changeHeadersInEmail(email)
+	changeHeadersInEmail(email, concealToActualRecipients)
 
 	log.Println("Reconstruct raw e-mail bytes")
 	myTypeEmail := ByteSliceMessage(*email)
@@ -63,8 +68,8 @@ func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	log.Println("Sending the e-mail")
 	var emailSenderGateway SendEmailGateway
 	applicationContext.Resolve(&emailSenderGateway)
-
-	err = emailSenderGateway.SendEmail(modifiedRawEmail, actualRecipients)
+	actualRecipientsEmail := getActualEmailsFromRecipients(concealToActualRecipients)
+	err = emailSenderGateway.SendEmail(modifiedRawEmail, actualRecipientsEmail)
 	if err != nil {
 		log.Printf("Sending the e-mail failed, %+v\n", err)
 		return NewUnableToSendEmailError(err)
@@ -73,8 +78,21 @@ func (receiver ForwardEmailUsecaseImpl) ForwardEmail(url string) error {
 	return nil
 }
 
-func getActualRecipients(concealedRecipients []string, domain string) []string {
-	recipientsStrings := make([]string, 0, len(concealedRecipients))
+func getActualEmailsFromRecipients(concealToActualRecipients map[string]emailAndDescriptionTuple) []string {
+	keys := make([]string, len(concealToActualRecipients))
+
+	index := 0
+	for key := range concealToActualRecipients {
+		keys[index] = concealToActualRecipients[key].Email
+		index++
+	}
+
+	return keys
+}
+
+func getActualRecipients(concealedRecipients []string, domain string) map[string]emailAndDescriptionTuple {
+	//a map of a conceal recipient to (a tuple of the actual email and description)
+	recipientsAndDescriptions := map[string]emailAndDescriptionTuple{}
 
 	var configurationGateway ConfigurationGateway
 	applicationContext.Resolve(&configurationGateway)
@@ -82,7 +100,7 @@ func getActualRecipients(concealedRecipients []string, domain string) []string {
 	for _, concealedRecipient := range concealedRecipients {
 		concealedRecipientPrefix := strings.TrimSuffix(concealedRecipient, fmt.Sprintf("@%s", domain))
 
-		actualRecipient, err := configurationGateway.GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix)
+		actualRecipient, description, err := configurationGateway.GetRealEmailAddressForConcealPrefix(concealedRecipientPrefix)
 
 		if err != nil {
 			log.Printf("Unable to get actual recipient for concealed recipient %s due to error %+v", concealedRecipient, err)
@@ -90,10 +108,13 @@ func getActualRecipients(concealedRecipients []string, domain string) []string {
 			continue
 		}
 
-		recipientsStrings = append(recipientsStrings, actualRecipient)
+		recipientsAndDescriptions[concealedRecipient] = emailAndDescriptionTuple{
+			Email:       actualRecipient,
+			Description: description,
+		}
 	}
 
-	return recipientsStrings
+	return recipientsAndDescriptions
 }
 
 func getConcealedRecipients(email *mail.Message, domain string) []string {
@@ -115,7 +136,7 @@ func emailFromRawBytes(rawEmail []byte) (*mail.Message, error) {
 	return mail.ReadMessage(bytes.NewReader(rawEmail))
 }
 
-func changeHeadersInEmail(email *mail.Message) {
+func changeHeadersInEmail(email *mail.Message, concealToActualRecipients map[string]emailAndDescriptionTuple) {
 	delete(email.Header, "Dkim-Signature")  //the signature is handled by the forwarding service, not us
 	delete(email.Header, "Return-Path")  //don't continue on the return path, especially because it's probably not from a verified domain
 
@@ -149,6 +170,25 @@ func changeHeadersInEmail(email *mail.Message) {
 	}
 	email.Header["From"] = []string{newFrom.String()}
 	email.Header["Reply-To"] = []string{originalFromString}
+
+	//add the descriptions to the concealed e-mails in the To header
+	toRecipients, _ := email.Header.AddressList("To")
+	var newRecipients strings.Builder
+	for index, toRecipient := range toRecipients {
+		toAddress := toRecipient.Address
+		actualAddressAndDescription := concealToActualRecipients[toAddress]
+
+		if actualAddressAndDescription.Description != nil {
+			toRecipient.Name = *actualAddressAndDescription.Description
+		}
+
+		newRecipients.WriteString(toRecipient.String())
+		if index != len(toRecipients) - 1 {  //don't write the trailing comma and space if this is the last item
+			newRecipients.WriteString(", ")
+		}
+	}
+
+	email.Header["To"] = []string{newRecipients.String()}
 }
 
 func fromAddressOf(email *mail.Message) *mail.Address {

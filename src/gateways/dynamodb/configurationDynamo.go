@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
-	"github.com/halprin/email-conceal/src/usecases/concealEmail"
+	"github.com/halprin/email-conceal/src/usecases"
 	"log"
 	"strings"
 )
@@ -108,7 +108,7 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to get conceal e-mail %s to update it", concealPrefix))
 	} else if item == nil {
-		return concealEmail.ConcealEmailNotExistError{
+		return usecases.ConcealEmailNotExistError{
 			ConcealEmailId: concealPrefix,
 		}
 	}
@@ -147,42 +147,53 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	return nil
 }
 
-func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefix string) (string, error) {
+func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefix string) (string, *string, error) {
 	if sessionErr != nil {
-		return "", sessionErr
-	}
-
-	keyCondition := expression.Key("primary").Equal(expression.Value(generateConcealEmailKey(concealPrefix))).And(expression.Key("secondary").BeginsWith(sourceEmailKeyPrefix))
-	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
-	expressionBuilder, err := keyBuilder.Build()
-	if err != nil {
-		return "", err
+		return "", nil, sessionErr
 	}
 
 	var environmentGateway context.EnvironmentGateway
 	applicationContext.Resolve(&environmentGateway)
+	tableName :=environmentGateway.GetEnvironmentValue("TABLE_NAME")
+
+	//get description first
+	concealEmailKey := generateConcealEmailKey(concealPrefix)
+	concealEmailEntity, err := getItemAsConcealEmailEntity(concealEmailKey, concealEmailKey, tableName)
+	if err != nil {
+		return "", nil, usecases.ConcealEmailNotExistError{
+			ConcealEmailId: concealPrefix,
+		}
+	}
+
+	//now get the actual e-mail address
+	keyCondition := expression.Key("primary").Equal(expression.Value(concealEmailKey)).And(expression.Key("secondary").BeginsWith(sourceEmailKeyPrefix))
+	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
+	expressionBuilder, err := keyBuilder.Build()
+	if err != nil {
+		return "", nil, err
+	}
 
 	queryInput := &dynamodb.QueryInput{
-		TableName:                 aws.String(environmentGateway.GetEnvironmentValue("TABLE_NAME")),
+		TableName:                 aws.String(tableName),
 		KeyConditionExpression:    expressionBuilder.KeyCondition(),
 		ExpressionAttributeNames:  expressionBuilder.Names(),
 		ExpressionAttributeValues: expressionBuilder.Values(),
 	}
 	queryOutput, err := dynamoService.Query(queryInput)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	if *queryOutput.Count < 1 {
-		return "", errors.New(fmt.Sprintf("No real e-mail for conceal prefix %s", concealPrefix))
+		return "", nil, errors.New(fmt.Sprintf("No real e-mail for conceal prefix %s", concealPrefix))
 	}
 
 	firstItem := queryOutput.Items[0]
 	item := ConcealEmailMapping{}
 	err = dynamodbattribute.UnmarshalMap(firstItem, &item)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), nil
+	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), concealEmailEntity.Description, nil
 }

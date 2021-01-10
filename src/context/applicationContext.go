@@ -14,3 +14,7 @@ func(appContext ApplicationContext) Bind(bindFunction interface{}) {
 func(appContext ApplicationContext) Resolve(toResolve interface{}) {
 	container.Make(toResolve)
 }
+
+func(appContext ApplicationContext) Reset() {
+	container.Reset()
+}

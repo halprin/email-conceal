@@ -17,14 +17,6 @@ type ConcealEmailUsecase interface {
 	DeleteDescriptionFromExistingEmail(concealedEmailPrefix string) error
 }
 
-type ConcealEmailNotExistError struct {
-	ConcealEmailId string
-}
-
-func (c ConcealEmailNotExistError) Error() string {
-	return fmt.Sprintf("The conceal e-mail %s doesn't exist", c.ConcealEmailId)
-}
-
 type ConcealEmailUsecaseImpl struct {}
 
 func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *string) (string, error) {

@@ -5,6 +5,7 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases"
 	"github.com/halprin/email-conceal/src/usecases/concealEmail"
 	"log"
 	"net/http"
@@ -132,7 +133,7 @@ func (receiver ConcealEmailController) Update(arguments map[string]interface{}) 
 			"error": errorString,
 		}
 		return http.StatusBadRequest, jsonMap
-	} else if errors.As(err, &concealEmail.ConcealEmailNotExistError{}) {
+	} else if errors.As(err, &usecases.ConcealEmailNotExistError{}) {
 		errorString := err.Error()
 		log.Printf(errorString)
 		jsonMap := map[string]string{
