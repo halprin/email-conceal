@@ -177,11 +177,13 @@ func changeHeadersInEmail(email *mail.Message, concealToActualRecipients map[str
 	for index, toRecipient := range toRecipients {
 		toAddress := toRecipient.Address
 		actualAddressAndDescription, exists := concealToActualRecipients[toAddress]
-		if !exists || actualAddressAndDescription.Description == nil {
+		if !exists {
 			continue
 		}
 
-		toRecipient.Name = *actualAddressAndDescription.Description
+		if actualAddressAndDescription.Description != nil {
+			toRecipient.Name = *actualAddressAndDescription.Description
+		}
 
 		newRecipients.WriteString(toRecipient.String())
 		if index != len(toRecipients) - 1 {  //don't write the trailing comma and space if this is the last item

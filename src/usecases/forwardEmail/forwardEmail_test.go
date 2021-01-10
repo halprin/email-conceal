@@ -663,17 +663,24 @@ func TestForwardEmailUsecaseThatCorrectlyUsesDescription(t *testing.T) {
 
 	knownConcealedEmail := "known@apple.com"
 	knownConcealedEmail2 := "known2@apple.com"
+	knownConcealedEmail3 := "known3@apple.com"
+
+	knownConcealedDescription3 := "To the moon"
+
 	actualEmail1 := "moof@dogcow.com"
 	actualDescription1 := "The coolest description"
+
 	actualEmail2 := "halprin@dogcow.com"
 	actualDescription2 := "Kaboom"
 
-	email := fmt.Sprintf(`To: %s, %s
+	actualEmail3 := "george@dogcow.com"
+
+	email := fmt.Sprintf(`To: %s, %s, %s <%s>
 From: moof@apple.com
 Subject: lol
 
 This is the coolest e-mail ever
-`, knownConcealedEmail, knownConcealedEmail2)
+`, knownConcealedEmail, knownConcealedEmail2, knownConcealedDescription3, knownConcealedEmail3)
 
 	testReadEmailGateway := TestReadEmailGateway{
 		ReadEmailReturnByte: []byte(email),
@@ -691,6 +698,7 @@ This is the coolest e-mail ever
 		GetRealEmailReturn: map[string][]*string{
 			"known": {&actualEmail1, &actualDescription1},
 			"known2": {&actualEmail2, &actualDescription2},
+			"known3": {&actualEmail3, nil},
 		},
 	}
 	testAppContext.Bind(func() ConfigurationGateway {
@@ -714,12 +722,18 @@ This is the coolest e-mail ever
 	}
 
 	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
+	rawForwardedEmailString := string(rawForwardedEmail)
+	fmt.Println(rawForwardedEmailString)
 
 	if !bytes.Contains(rawForwardedEmail, []byte(actualDescription1)) {
 		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription1)
 	}
 
 	if !bytes.Contains(rawForwardedEmail, []byte(actualDescription2)) {
+		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription2)
+	}
+
+	if !bytes.Contains(rawForwardedEmail, []byte(knownConcealedDescription3)) {
 		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription2)
 	}
 
