@@ -152,18 +152,29 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 		return "", nil, sessionErr
 	}
 
-	keyCondition := expression.Key("primary").Equal(expression.Value(generateConcealEmailKey(concealPrefix))).And(expression.Key("secondary").BeginsWith(sourceEmailKeyPrefix))
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	tableName :=environmentGateway.GetEnvironmentValue("TABLE_NAME")
+
+	//get description first
+	concealEmailKey := generateConcealEmailKey(concealPrefix)
+	concealEmailEntity, err := getItemAsConcealEmailEntity(concealEmailKey, concealEmailKey, tableName)
+	if err != nil {
+		return "", nil, concealEmail.ConcealEmailNotExistError{
+			ConcealEmailId: concealPrefix,
+		}
+	}
+
+	//now get the actual e-mail address
+	keyCondition := expression.Key("primary").Equal(expression.Value(concealEmailKey)).And(expression.Key("secondary").BeginsWith(sourceEmailKeyPrefix))
 	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
 	expressionBuilder, err := keyBuilder.Build()
 	if err != nil {
 		return "", nil, err
 	}
 
-	var environmentGateway context.EnvironmentGateway
-	applicationContext.Resolve(&environmentGateway)
-
 	queryInput := &dynamodb.QueryInput{
-		TableName:                 aws.String(environmentGateway.GetEnvironmentValue("TABLE_NAME")),
+		TableName:                 aws.String(tableName),
 		KeyConditionExpression:    expressionBuilder.KeyCondition(),
 		ExpressionAttributeNames:  expressionBuilder.Names(),
 		ExpressionAttributeValues: expressionBuilder.Values(),
@@ -184,5 +195,5 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 		return "", nil, err
 	}
 
-	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), nil, nil
+	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), concealEmailEntity.Description, nil
 }

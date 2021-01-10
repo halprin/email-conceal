@@ -84,6 +84,21 @@ func getItem(hashKey string, sortKey string, tableName string) (map[string]*dyna
 	return getOutput.Item, nil
 }
 
+func getItemAsConcealEmailEntity(hashKey string, sortKey string, tableName string) (ConcealEmailEntity, error) {
+	rawItem, err := getItem(hashKey, sortKey, tableName)
+	if err != nil {
+		return ConcealEmailEntity{}, err
+	}
+
+	var concealEmailEntity ConcealEmailEntity
+	err = dynamodbattribute.UnmarshalMap(rawItem, &concealEmailEntity)
+	if err != nil {
+		return ConcealEmailEntity{}, err
+	}
+
+	return concealEmailEntity, nil
+}
+
 func batchWriteItemsWithRollback(structsToWrite []interface{}, rollbackFunction func()) error {
 	log.Println("Batch writing items")
 	return batchInternal(structsToWrite, rollbackFunction, batchWrite)
