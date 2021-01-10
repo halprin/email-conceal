@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
-	"github.com/halprin/email-conceal/src/usecases/concealEmail"
+	"github.com/halprin/email-conceal/src/usecases"
 	"log"
 	"strings"
 )
@@ -108,7 +108,7 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to get conceal e-mail %s to update it", concealPrefix))
 	} else if item == nil {
-		return concealEmail.ConcealEmailNotExistError{
+		return usecases.ConcealEmailNotExistError{
 			ConcealEmailId: concealPrefix,
 		}
 	}
@@ -160,7 +160,7 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 	concealEmailKey := generateConcealEmailKey(concealPrefix)
 	concealEmailEntity, err := getItemAsConcealEmailEntity(concealEmailKey, concealEmailKey, tableName)
 	if err != nil {
-		return "", nil, concealEmail.ConcealEmailNotExistError{
+		return "", nil, usecases.ConcealEmailNotExistError{
 			ConcealEmailId: concealPrefix,
 		}
 	}

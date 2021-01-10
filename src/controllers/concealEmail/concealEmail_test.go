@@ -4,6 +4,7 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases"
 	"github.com/halprin/email-conceal/src/usecases/concealEmail"
 	"net/http"
 	"testing"
@@ -326,7 +327,7 @@ func TestUpdateFailedWithConcealEmailNotExist(t *testing.T) {
 	conceaEmailId := "an ID"
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &TestConcealEmailUsecase{
-			DeleteDescriptionReturnError: concealEmail.ConcealEmailNotExistError{
+			DeleteDescriptionReturnError: usecases.ConcealEmailNotExistError{
 				ConcealEmailId: conceaEmailId,
 			},
 		}
