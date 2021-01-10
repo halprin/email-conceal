@@ -112,7 +112,6 @@ func getActualRecipients(concealedRecipients []string, domain string) map[string
 			Email:       actualRecipient,
 			Description: description,
 		}
-		//recipientsAndDescriptions = append(recipientsAndDescriptions, actualRecipient)
 	}
 
 	return recipientsAndDescriptions
