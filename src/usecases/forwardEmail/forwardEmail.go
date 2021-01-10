@@ -176,10 +176,7 @@ func changeHeadersInEmail(email *mail.Message, concealToActualRecipients map[str
 	var newRecipients strings.Builder
 	for index, toRecipient := range toRecipients {
 		toAddress := toRecipient.Address
-		actualAddressAndDescription, exists := concealToActualRecipients[toAddress]
-		if !exists {
-			continue
-		}
+		actualAddressAndDescription := concealToActualRecipients[toAddress]
 
 		if actualAddressAndDescription.Description != nil {
 			toRecipient.Name = *actualAddressAndDescription.Description

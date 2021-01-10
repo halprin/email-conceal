@@ -658,7 +658,7 @@ This is the coolest e-mail ever
 	}
 }
 
-func TestForwardEmailUsecaseThatCorrectlyUsesDescription(t *testing.T) {
+func TestForwardEmailUsecaseThatCorrectlyChangesToHeader(t *testing.T) {
 	resetBaseDependencies()
 
 	knownConcealedEmail := "known@apple.com"
@@ -666,6 +666,8 @@ func TestForwardEmailUsecaseThatCorrectlyUsesDescription(t *testing.T) {
 	knownConcealedEmail3 := "known3@apple.com"
 
 	knownConcealedDescription3 := "To the moon"
+
+	unknownEmail := "sugar@other.com"
 
 	actualEmail1 := "moof@dogcow.com"
 	actualDescription1 := "The coolest description"
@@ -675,12 +677,12 @@ func TestForwardEmailUsecaseThatCorrectlyUsesDescription(t *testing.T) {
 
 	actualEmail3 := "george@dogcow.com"
 
-	email := fmt.Sprintf(`To: %s, %s, %s <%s>
+	email := fmt.Sprintf(`To: %s, %s, %s <%s>, %s
 From: moof@apple.com
 Subject: lol
 
 This is the coolest e-mail ever
-`, knownConcealedEmail, knownConcealedEmail2, knownConcealedDescription3, knownConcealedEmail3)
+`, knownConcealedEmail, knownConcealedEmail2, knownConcealedDescription3, knownConcealedEmail3, unknownEmail)
 
 	testReadEmailGateway := TestReadEmailGateway{
 		ReadEmailReturnByte: []byte(email),
@@ -734,7 +736,11 @@ This is the coolest e-mail ever
 	}
 
 	if !bytes.Contains(rawForwardedEmail, []byte(knownConcealedDescription3)) {
-		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription2)
+		t.Errorf("The original e-mail recipient's description %s is missing from the e-mail and it should have been there and not replaced", knownConcealedDescription3)
+	}
+
+	if !bytes.Contains(rawForwardedEmail, []byte(unknownEmail)) {
+		t.Errorf("The unknown e-mail %s is missing from the e-mail and it should have been there", unknownEmail)
 	}
 
 	if bytes.Contains(rawForwardedEmail, []byte(", \r\n")) {
