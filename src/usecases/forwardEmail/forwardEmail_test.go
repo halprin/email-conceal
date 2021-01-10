@@ -724,8 +724,6 @@ This is the coolest e-mail ever
 	}
 
 	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
-	rawForwardedEmailString := string(rawForwardedEmail)
-	fmt.Println(rawForwardedEmailString)
 
 	if !bytes.Contains(rawForwardedEmail, []byte(actualDescription1)) {
 		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription1)
@@ -806,8 +804,6 @@ This is the coolest e-mail ever
 	}
 
 	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
-	rawForwardedEmailString := string(rawForwardedEmail)
-	fmt.Println(rawForwardedEmailString)
 
 	if !bytes.Contains(rawForwardedEmail, []byte(actualDescription1)) {
 		t.Errorf("The actual e-mail recipient's description %s is missing from the e-mail and it should have been there", actualDescription1)
@@ -824,6 +820,69 @@ This is the coolest e-mail ever
 
 func TestToHeaderDoesNotChangeUnknownEmailDescription(t *testing.T) {
 	//TODO: has to a single unknown e-mail address with a description that doesn't change even with a config in gateway for some other e-mail address
+	resetBaseDependencies()
+
+	unknownEmail := "sugar@other.com"
+	unknownDescription := "Not Hear"
+
+	knownConcealedEmail := "known@apple.com"  //need at least one known e-mail for the logic to get to the header munging logic
+	actualEmail := "moof@dogcow.com"
+	actualDescription := "The coolest description"
+
+	email := fmt.Sprintf(`To: %s <%s>, %s
+From: moof@apple.com
+Subject: lol
+
+This is the coolest e-mail ever
+`, unknownDescription, unknownEmail, knownConcealedEmail)
+
+	testReadEmailGateway := TestReadEmailGateway{
+		ReadEmailReturnByte: []byte(email),
+	}
+	testAppContext.Bind(func() ReadEmailGateway {
+		return &testReadEmailGateway
+	})
+
+	testSendEmailGateway := TestSendEmailGateway{}
+	testAppContext.Bind(func() SendEmailGateway {
+		return &testSendEmailGateway
+	})
+
+	testConfigurationGateway := TestConfigurationGateway{
+		GetRealEmailReturn: map[string][]*string{
+			"known": {&actualEmail, &actualDescription},
+		},
+	}
+	testAppContext.Bind(func() ConfigurationGateway {
+		return &testConfigurationGateway
+	})
+
+	testEnvironmentGateway := TestEnvironmentGateway{
+		GetEnvironmentValueReturn: map[string]string{
+			"DOMAIN": "apple.com",
+		},
+	}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
+
+	err := usecase.ForwardEmail("https://email.com")
+
+	if err != nil {
+		t.Errorf("No error should have been returned from the ForwardEmailUsecase")
+		t.Errorf("Instead this was returned %+v", err)
+	}
+
+	rawForwardedEmail := testSendEmailGateway.SendEmailEmail
+	rawForwardedEmailString := string(rawForwardedEmail)
+	fmt.Println(rawForwardedEmailString)
+
+	if !bytes.Contains(rawForwardedEmail, []byte(unknownEmail)) {
+		t.Errorf("The unknown e-mail %s is missing from the e-mail and it should have been there", unknownEmail)
+	}
+	if !bytes.Contains(rawForwardedEmail, []byte(unknownDescription)) {
+		t.Errorf("The unknown description %s is missing from the e-mail and it should have been there", unknownDescription)
+	}
 }
 
 func TestToHeaderDoesNotChangeKnownEmailDescriptionWithNoDescriptionReturned(t *testing.T) {
