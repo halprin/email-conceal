@@ -7,7 +7,7 @@ import (
 )
 
 var minimumLength = 1
-var maximumLength = 25
+var maximumLength = 50
 var DescriptionTooShortError = errors.New(fmt.Sprintf("The description must be at least %d characters long", minimumLength))
 var DescriptionTooLongError = errors.New(fmt.Sprintf("The description can only be up to %d characters long", maximumLength))
 
