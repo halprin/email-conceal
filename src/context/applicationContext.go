@@ -18,3 +18,7 @@ func(appContext ApplicationContext) Resolve(toResolve interface{}) {
 func(appContext ApplicationContext) Reset() {
 	container.Reset()
 }
+
+type Initer interface {
+	Init()
+}

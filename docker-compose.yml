@@ -6,10 +6,11 @@ services:
       dockerfile: ManagerDockerfile
     environment:
       DOMAIN: localhost.local
-      TABLE_NAME: only
-      ENVIRONMENT: "local"
+      TABLE_NAME: LocalTable
+      ENVIRONMENT: local
     ports:
       - "8000:8000"
+    depends_on: [dynamodb]
   dynamodb:
     image: amazon/dynamodb-local
     ports:
