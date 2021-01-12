@@ -12,9 +12,14 @@ func Rest() {
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
+
+	//conceal e-mail
 	v1.POST("/concealEmail", createConcealEmail)
 	v1.PUT("/concealEmail/:concealEmailId", updateConcealEmail)
 	v1.DELETE("/concealEmail/:concealEmailId", deleteConcealEmail)
+
+	//actual e-mail
+	v1.POST("/actualEmail", createActualEmail)
 
 	_ = router.Run(":8000")
 }
@@ -62,4 +67,19 @@ func updateConcealEmail(context *gin.Context) {
 	httpStatus, jsonMap := concealEmailController.Update(requestMap)
 
 	context.JSON(httpStatus, jsonMap)
+}
+
+func createActualEmail(context *gin.Context) {
+	var genericMap map[string]interface{}
+
+	err := context.BindJSON(&genericMap)
+	if err != nil {
+		return
+	}
+
+	//var concealEmailController concealEmail.ConcealEmailController
+	//applicationContext.Resolve(&concealEmailController)
+	//httpStatus, jsonMap := concealEmailController.Add(genericMap)
+	//
+	//context.JSON(httpStatus, jsonMap)
 }

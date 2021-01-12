@@ -7,6 +7,7 @@ import (
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
 	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
+	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
 )
 
 func init() {
@@ -20,6 +21,10 @@ func init() {
 	//usecases
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
 		return concealEmailUsecase.ConcealEmailUsecaseImpl{}
+	})
+
+	applicationContext.Bind(func() actualEmailUsecase.ActualEmailUsecase {
+		return actualEmailUsecase.ActualEmailUsecaseImpl{}
 	})
 
 	//gateways
