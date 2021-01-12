@@ -3,6 +3,7 @@ package rest
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/controllers/actualEmail"
 	"github.com/halprin/email-conceal/src/controllers/concealEmail"
 )
 
@@ -77,9 +78,9 @@ func createActualEmail(context *gin.Context) {
 		return
 	}
 
-	//var concealEmailController concealEmail.ConcealEmailController
-	//applicationContext.Resolve(&concealEmailController)
-	//httpStatus, jsonMap := concealEmailController.Add(genericMap)
-	//
-	//context.JSON(httpStatus, jsonMap)
+	var actualEmailController actualEmail.ActualEmailController
+	applicationContext.Resolve(&actualEmailController)
+	httpStatus, jsonMap := actualEmailController.Add(genericMap)
+
+	context.JSON(httpStatus, jsonMap)
 }

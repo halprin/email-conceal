@@ -8,6 +8,7 @@ import (
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
 	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
+	actualEmailController "github.com/halprin/email-conceal/src/controllers/actualEmail"
 )
 
 func init() {
@@ -18,13 +19,17 @@ func init() {
 		return concealEmailController.ConcealEmailController{}
 	})
 
+	applicationContext.Bind(func() actualEmailController.ActualEmailController {
+		return actualEmailController.ActualEmailController{}
+	})
+
 	//usecases
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
 		return concealEmailUsecase.ConcealEmailUsecaseImpl{}
 	})
 
 	applicationContext.Bind(func() actualEmailUsecase.ActualEmailUsecase {
-		return actualEmailUsecase.ActualEmailUsecaseImpl{}
+		return actualEmailUsecase.ActualEmailUsecase{}
 	})
 
 	//gateways
