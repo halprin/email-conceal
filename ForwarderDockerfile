@@ -8,6 +8,7 @@ ENV DOMAIN=""
 ENV FORWARDER_EMAIL_PREFIX=""
 ENV SQS_QUEUE_NAME=""
 ENV TABLE_NAME=""
+ENV ENVIRONMENT=""
 
 RUN apt update && apt install -y --no-install-recommends ca-certificates
 
