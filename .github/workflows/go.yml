@@ -50,3 +50,6 @@ jobs:
 
     - name: Build Forwarder Docker image
       run: docker build -f ForwarderDockerfile .
+
+    - name: Build Manager Docker image
+      run: docker build -f ManagerDockerfile .

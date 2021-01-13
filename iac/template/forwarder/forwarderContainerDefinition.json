@@ -7,7 +7,8 @@
       {"name":  "DOMAIN", "value": "${domain}"},
       {"name":  "FORWARDER_EMAIL_PREFIX", "value": "${forwarderEmailPrefix}"},
       {"name":  "SQS_QUEUE_NAME", "value": "${sqsQueueName}"},
-      {"name":  "TABLE_NAME", "value": "${tableName}"}
+      {"name":  "TABLE_NAME", "value": "${tableName}"},
+      {"name":  "ENVIRONMENT", "value": "${environment}"}
     ],
     "logConfiguration": {
       "logDriver": "awslogs",

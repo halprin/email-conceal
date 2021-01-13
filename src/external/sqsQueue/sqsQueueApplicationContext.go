@@ -25,6 +25,8 @@ func init() {
 	})
 
 	//gateways
+	dynamoDbGateway := dynamodb.DynamoDbGateway{}
+
 	applicationContext.Bind(func() forwardEmailUsecase.ReadEmailGateway {
 		return s3FileReader.S3FileReader{}
 	})
@@ -34,10 +36,13 @@ func init() {
 	})
 
 	applicationContext.Bind(func() forwardEmailUsecase.ConfigurationGateway {
-		return dynamodb.DynamoDbGateway{}
+		return dynamoDbGateway
 	})
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
 		return osEnvironmentVariable.OsEnvironmentGateway{}
 	})
+
+	//init
+	dynamoDbGateway.Init()
 }
