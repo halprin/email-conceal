@@ -16,8 +16,6 @@ import (
 
 var applicationContext = context.ApplicationContext{}
 
-type DynamoDbGateway struct {}
-
 var dynamoService = dynamodb.New(awsSession)
 
 type KeyBase struct {
@@ -32,6 +30,18 @@ type ConcealEmailEntity struct {
 
 type ConcealEmailMapping struct {
 	KeyBase
+}
+
+type DynamoDbGateway struct {}
+
+func (receiver DynamoDbGateway) Init() {
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	environment := environmentGateway.GetEnvironmentValue("ENVIRONMENT")
+
+	if environment == "local" {
+		localInit()
+	}
 }
 
 func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {

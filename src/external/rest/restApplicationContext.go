@@ -12,11 +12,13 @@ import (
 )
 
 func init() {
-	var applicationContext = context.ApplicationContext{}
+	applicationContext := context.ApplicationContext{}
 
 	//controllers
+	concealEmailControllerInstance := concealEmailController.ConcealEmailController{}
+
 	applicationContext.Bind(func() concealEmailController.ConcealEmailController {
-		return concealEmailController.ConcealEmailController{}
+		return concealEmailControllerInstance
 	})
 
 	applicationContext.Bind(func() actualEmailController.ActualEmailController {
@@ -24,8 +26,10 @@ func init() {
 	})
 
 	//usecases
+	concealEmailUsecaseInstance := concealEmailUsecase.ConcealEmailUsecaseImpl{}
+
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
-		return concealEmailUsecase.ConcealEmailUsecaseImpl{}
+		return concealEmailUsecaseInstance
 	})
 
 	applicationContext.Bind(func() actualEmailUsecase.ActualEmailUsecase {
@@ -33,16 +37,24 @@ func init() {
 	})
 
 	//gateways
+	dynamoDbGateway := dynamodb.DynamoDbGateway{}
+	environmentGateway := osEnvironmentVariable.OsEnvironmentGateway{}
+
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailGateway {
-		return dynamodb.DynamoDbGateway{}
+		return dynamoDbGateway
 	})
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
-		return osEnvironmentVariable.OsEnvironmentGateway{}
+		return environmentGateway
 	})
 
 	//libraries
+	googleUuid := lib.GoogleUuid{}
+
 	applicationContext.Bind(func() context.UuidLibrary {
-		return lib.GoogleUuid{}
+		return googleUuid
 	})
+
+	//inits
+	dynamoDbGateway.Init()
 }

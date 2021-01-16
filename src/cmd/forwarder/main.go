@@ -6,4 +6,6 @@ import (
 
 func main() {
 	sqsQueue.SqsQueueListener()
+	//uncomment below to test locally
+	//localFileWatch.LocalFileWatcher()
 }
