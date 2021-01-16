@@ -1,7 +1,12 @@
 package actualEmail
 
-type ActualEmailUsecase struct {}
 
-func (receiver ActualEmailUsecase) Add(actualEmail string) error {
+type ActualEmailUsecase interface {
+	Add(actualEmail string) error
+}
+
+type ActualEmailUsecaseImpl struct {}
+
+func (receiver ActualEmailUsecaseImpl) Add(actualEmail string) error {
 	return nil
 }

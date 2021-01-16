@@ -16,24 +16,26 @@ func init() {
 
 	//controllers
 	concealEmailControllerInstance := concealEmailController.ConcealEmailController{}
+	actualEmailControllerInstance := actualEmailController.ActualEmailController{}
 
 	applicationContext.Bind(func() concealEmailController.ConcealEmailController {
 		return concealEmailControllerInstance
 	})
 
 	applicationContext.Bind(func() actualEmailController.ActualEmailController {
-		return actualEmailController.ActualEmailController{}
+		return actualEmailControllerInstance
 	})
 
 	//usecases
 	concealEmailUsecaseInstance := concealEmailUsecase.ConcealEmailUsecaseImpl{}
+	actualEmailUsecaseInstance := actualEmailUsecase.ActualEmailUsecaseImpl{}
 
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
 		return concealEmailUsecaseInstance
 	})
 
 	applicationContext.Bind(func() actualEmailUsecase.ActualEmailUsecase {
-		return actualEmailUsecase.ActualEmailUsecase{}
+		return actualEmailUsecaseInstance
 	})
 
 	//gateways
@@ -56,5 +58,6 @@ func init() {
 	})
 
 	//inits
+	actualEmailControllerInstance.Init()
 	dynamoDbGateway.Init()
 }
