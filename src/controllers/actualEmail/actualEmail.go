@@ -29,8 +29,6 @@ func (receiver ActualEmailController) Add(arguments map[string]interface{}) (int
 
 	log.Printf("Parsed out the actual e-mail %s", actualEmail)
 
-	//var actualEmailUsecase actualEmailUsecase2.ActualEmailUsecase
-	//applicationContext.Resolve(&actualEmailUsecase)
 	err := actualEmailUsecase.Add(actualEmail)
 
 	//TODO: do more error handling based on whatever errors can come back from the usecase
