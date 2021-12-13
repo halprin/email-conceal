@@ -8,4 +8,5 @@ require (
 	github.com/golobby/container v1.3.0
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.9.1
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 )
