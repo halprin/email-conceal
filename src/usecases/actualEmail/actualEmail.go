@@ -6,6 +6,7 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"github.com/jordan-wright/email"
 	"math/big"
 	"strings"
@@ -16,7 +17,7 @@ const secretKeyLength = 128
 
 var applicationContext = context.ApplicationContext{}
 var actualEmailConfigGateway ActualEmailConfigurationGateway
-var actualEmailConfirmationGateway SendRegistrationEmailGateway
+var sendEmailGateway forwardEmail.SendEmailGateway
 var environmentGateway context.EnvironmentGateway
 
 type ActualEmailUsecase interface {
@@ -27,7 +28,7 @@ type ActualEmailUsecaseImpl struct{}
 
 func (receiver ActualEmailUsecaseImpl) Init() {
 	applicationContext.Resolve(&actualEmailConfigGateway)
-	applicationContext.Resolve(&actualEmailConfirmationGateway)
+	applicationContext.Resolve(&sendEmailGateway)
 	applicationContext.Resolve(&environmentGateway)
 }
 
@@ -52,7 +53,7 @@ func (receiver ActualEmailUsecaseImpl) Add(actualEmail string) error {
 		return errors.Wrap(err, "Failed to generate the registration e-mail")
 	}
 
-	err = actualEmailConfirmationGateway.SendEmail(registrationEmailBytes, actualEmail)
+	err = sendEmailGateway.SendEmail(registrationEmailBytes, []string{actualEmail})
 	if err != nil {
 		return errors.Wrap(err, "Failed to send the confirmation e-mail")
 	}
@@ -81,7 +82,7 @@ func generateRegistrationEmail(receipient string, secret string) ([]byte, error)
 	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 	forwarderEmailPrefix := environmentGateway.GetEnvironmentValue("FORWARDER_EMAIL_PREFIX")
 
-	body := fmt.Sprintf("You have registered your e-mail, %s, for E-mail Conceal.  To complete registration, click the link.  Do nothing if you didn't click the link.\n"+
+	body := fmt.Sprintf("You have registered your e-mail, %s, for E-mail Conceal.  To complete registration, click the link.  Do nothing if you didn't register.\n"+
 		"https://%s/v1/activateRegistration/%s", receipient, domain, secret)
 
 	registrationEmail := email.NewEmail()
