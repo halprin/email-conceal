@@ -2,13 +2,15 @@ package rest
 
 import (
 	"github.com/halprin/email-conceal/src/context"
+	actualEmailController "github.com/halprin/email-conceal/src/controllers/actualEmail"
 	concealEmailController "github.com/halprin/email-conceal/src/controllers/concealEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
+	"github.com/halprin/email-conceal/src/gateways/awsSesSendEmail"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
-	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
-	actualEmailController "github.com/halprin/email-conceal/src/controllers/actualEmail"
+	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
+	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
 )
 
 func init() {
@@ -46,6 +48,14 @@ func init() {
 		return dynamoDbGateway
 	})
 
+	applicationContext.Bind(func() actualEmailUsecase.ActualEmailConfigurationGateway {
+		return dynamoDbGateway
+	})
+
+	applicationContext.Bind(func() forwardEmailUsecase.SendEmailGateway {
+		return awsSesSendEmail.AwsSesSendEmailGateway{}
+	})
+
 	applicationContext.Bind(func() context.EnvironmentGateway {
 		return environmentGateway
 	})
@@ -60,4 +70,5 @@ func init() {
 	//inits
 	actualEmailControllerInstance.Init()
 	dynamoDbGateway.Init()
+	actualEmailUsecaseInstance.Init()
 }

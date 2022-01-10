@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: ManagerDockerfile
     environment:
+      FORWARDER_EMAIL_PREFIX: forwarder
       DOMAIN: localhost.local
       TABLE_NAME: LocalTable
       ENVIRONMENT: local
