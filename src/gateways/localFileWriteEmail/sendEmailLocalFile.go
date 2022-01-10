@@ -12,7 +12,7 @@ import (
 
 var applicationContext = context.ApplicationContext{}
 
-type LocalFileWriteEmailGateway struct {}
+type LocalFileWriteEmailGateway struct{}
 
 func (receiver LocalFileWriteEmailGateway) SendEmail(email []byte, recipients []string) error {
 	outputDirectory := os.Args[1]
