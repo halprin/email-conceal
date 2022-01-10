@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/halprin/email-conceal/src/external/localFileWatch"
-	"github.com/halprin/email-conceal/src/external/sqsQueue"
+	"github.com/halprin/email-conceal/src/external/forwarder/localFileWatch"
+	"github.com/halprin/email-conceal/src/external/forwarder/sqsQueue"
 	"os"
 )
 
@@ -16,6 +16,4 @@ func main() {
 
 	sqsQueue.Init()
 	sqsQueue.SqsQueueListener()
-	//uncomment below to test locally
-	//localFileWatch.LocalFileWatcher()
 }
