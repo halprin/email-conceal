@@ -1,19 +1,19 @@
-package rest
+package localRest
 
 import (
 	"github.com/halprin/email-conceal/src/context"
 	actualEmailController "github.com/halprin/email-conceal/src/controllers/actualEmail"
 	concealEmailController "github.com/halprin/email-conceal/src/controllers/concealEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
-	"github.com/halprin/email-conceal/src/gateways/awsSesSendEmail"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
+	"github.com/halprin/email-conceal/src/gateways/localFileWriteEmail"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
 	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
 	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
 )
 
-func init() {
+func Init() {
 	applicationContext := context.ApplicationContext{}
 
 	//controllers
@@ -53,7 +53,7 @@ func init() {
 	})
 
 	applicationContext.Bind(func() forwardEmailUsecase.SendEmailGateway {
-		return awsSesSendEmail.AwsSesSendEmailGateway{}
+		return localFileWriteEmail.LocalFileWriteEmailGateway{}
 	})
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
