@@ -21,11 +21,6 @@ variable "email_lifetime" {
   description = "The time an e-mail sticks around until it is deleted, whether or not it was delivered.  Measured in days."
 }
 
-variable "docker_image" {
-  type        = string
-  description = "The Docker image URI to deploy"
-}
-
 variable "configuration_database_name" {
   type        = string
   description = "Name to the configuration database"
