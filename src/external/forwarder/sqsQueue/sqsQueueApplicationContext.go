@@ -10,8 +10,7 @@ import (
 	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
 )
 
-
-func init() {
+func Init() {
 	var applicationContext = context.ApplicationContext{}
 
 	//controllers

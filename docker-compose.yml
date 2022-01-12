@@ -4,10 +4,14 @@ services:
     build:
       context: .
       dockerfile: ManagerDockerfile
+    command: ["/opt/"]
     environment:
+      FORWARDER_EMAIL_PREFIX: forwarder
       DOMAIN: localhost.local
       TABLE_NAME: LocalTable
       ENVIRONMENT: local
+    volumes:
+      - "/Users/halprin/Desktop/:/opt/"
     ports:
       - "8000:8000"
     depends_on: [dynamodb]
