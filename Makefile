@@ -1,12 +1,19 @@
+GOOS = darwin
+GOARCH = amd64
+
 compile: compileForwarder compileManager
+
+compileForLinux: GOOS = linux
+compileForLinux: GOARCH = amd64
+compileForLinux: compile
 
 compileForwarder:
 	cd ./src/ && \
-	go build -ldflags="-w -s" -o forwarder -v ./cmd/forwarder/
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s" -o forwarder -v ./cmd/forwarder/
 
 compileManager:
 	cd ./src/ && \
-	go build -ldflags="-w -s" -o manager -v ./cmd/manager/
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s" -o manager -v ./cmd/manager/
 
 test:
 	go test ./...
@@ -14,6 +21,6 @@ test:
 runLocally:
 	docker-compose up
 
-devDeploy: compile
+devDeploy: compileForLinux
 	cd ./iac/environments/dev/ && \
 	terraform apply -auto-approve
