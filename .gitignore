@@ -18,3 +18,4 @@
 
 # Terraform
 .terraform/
+*.zip
