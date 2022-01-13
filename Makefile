@@ -13,3 +13,7 @@ test:
 
 runLocally:
 	docker-compose up
+
+devDeploy: compile
+	cd ./iac/environments/dev/ && \
+	terraform apply -auto-approve
