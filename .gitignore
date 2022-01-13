@@ -4,6 +4,8 @@
 *.dll
 *.so
 *.dylib
+/src/forwarder
+/src/manager
 
 # Test binary, built with `go test -c`
 *.test
