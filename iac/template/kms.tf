@@ -5,6 +5,7 @@ resource "aws_kms_key" "application_key" {
   policy              = data.aws_iam_policy_document.s3_can_encrypt_for_sqs.json
 
   tags = {
+    project     = local.project
     environment = var.environment
   }
 }

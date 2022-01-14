@@ -1,5 +1,10 @@
 resource "aws_api_gateway_rest_api" "api_gateway" {
   name = "email-conceal-manager-${var.environment}"
+
+  tags = {
+    project     = local.project
+    environment = var.environment
+  }
 }
 
 resource "aws_api_gateway_resource" "proxy" {
@@ -72,4 +77,9 @@ resource "aws_api_gateway_stage" "stage" {
   rest_api_id   = aws_api_gateway_rest_api.api_gateway.id
   stage_name    = var.environment
   deployment_id = aws_api_gateway_deployment.deployment.id
+
+  tags = {
+    project     = local.project
+    environment = var.environment
+  }
 }

@@ -6,6 +6,11 @@ resource "aws_iam_role" "execution_role" {
   name = "email-conceal-manager-${var.environment}"
 
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+
+  tags = {
+    project     = local.project
+    environment = var.environment
+  }
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -22,6 +27,11 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_policy" "permissions_for_manager" {
   name   = "email-conceal-manager-${var.environment}"
   policy = data.aws_iam_policy_document.permissions.json
+
+  tags = {
+    project     = local.project
+    environment = var.environment
+  }
 }
 
 data "aws_iam_policy_document" "permissions" {

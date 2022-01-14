@@ -1,3 +1,7 @@
+locals {
+  project = "email-conceal"
+}
+
 module "forwarder" {
   source = "./forwarder/"
 

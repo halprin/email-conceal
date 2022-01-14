@@ -21,6 +21,7 @@ resource "aws_lambda_function" "api_lambda" {
   role = aws_iam_role.execution_role.arn
 
   tags = {
+    project     = local.project
     environment = var.environment
   }
 }
@@ -28,6 +29,5 @@ resource "aws_lambda_function" "api_lambda" {
 data "archive_file" "lambda_zip_archive" {
   type             = "zip"
   source_file      = "${path.module}/../../../src/manager"
-#  output_file_mode = "0666"
   output_path      = "${path.module}/manager_lambda.zip"
 }
