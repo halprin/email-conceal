@@ -1,4 +1,4 @@
-package rest
+package lambda
 
 import (
 	"github.com/halprin/email-conceal/src/context"

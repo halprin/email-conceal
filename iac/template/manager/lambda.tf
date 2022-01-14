@@ -3,7 +3,7 @@ resource "aws_lambda_function" "api_lambda" {
 
   filename = data.archive_file.lambda_zip_archive.output_path
   source_code_hash = data.archive_file.lambda_zip_archive.output_base64sha256
-  handler = "main.LambdaHandler"
+  handler = "manager"
   timeout = 10
   memory_size = 128
   runtime = "go1.x"
@@ -14,6 +14,7 @@ resource "aws_lambda_function" "api_lambda" {
       TABLE_NAME             = var.configuration_database_name
       ENVIRONMENT            = var.environment
       FORWARDER_EMAIL_PREFIX = var.forward_email_prefix
+      GIN_MODE               = var.environment == "prod" ? "release" : "debug"
     }
   }
 

@@ -3,7 +3,9 @@ module github.com/halprin/email-conceal/src
 go 1.15
 
 require (
+	github.com/aws/aws-lambda-go v1.28.0
 	github.com/aws/aws-sdk-go v1.28.13
+	github.com/awslabs/aws-lambda-go-api-proxy v0.12.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golobby/container v1.3.0
 	github.com/google/uuid v1.1.1
