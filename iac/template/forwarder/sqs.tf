@@ -10,6 +10,7 @@ resource "aws_sqs_queue" "email_storage_add_event_queue" {
   policy = data.aws_iam_policy_document.s3_write_to_sqs.json
 
   tags = {
+    project     = local.project
     environment = var.environment
   }
 }

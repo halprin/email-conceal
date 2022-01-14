@@ -2,6 +2,11 @@ resource "aws_iam_role" "execution_role" {
   name = "email-conceal-forwarder-${var.environment}"
 
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+
+  tags = {
+    project     = local.project
+    environment = var.environment
+  }
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -18,6 +23,11 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_policy" "permissions_for_forwarder" {
   name   = "email-conceal-forwarder-${var.environment}"
   policy = data.aws_iam_policy_document.permissions.json
+
+  tags = {
+    project     = local.project
+    environment = var.environment
+  }
 }
 
 data "aws_iam_policy_document" "permissions" {
@@ -69,4 +79,13 @@ data "aws_iam_policy_document" "permissions" {
 resource "aws_iam_role_policy_attachment" "attach_permission_to_role" {
   role       = aws_iam_role.execution_role.name
   policy_arn = aws_iam_policy.permissions_for_forwarder.arn
+}
+
+data "aws_iam_policy" "lambda_basic_execution" {
+  name = "AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "attach_log_permission_to_role" {
+  role       = aws_iam_role.execution_role.name
+  policy_arn = data.aws_iam_policy.lambda_basic_execution.arn
 }

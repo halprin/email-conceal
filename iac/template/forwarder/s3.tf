@@ -23,6 +23,7 @@ resource "aws_s3_bucket" "email_storage" {
   }
 
   tags = {
+    project     = local.project
     environment = var.environment
   }
 }
