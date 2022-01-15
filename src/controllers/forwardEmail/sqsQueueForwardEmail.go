@@ -10,15 +10,15 @@ import (
 
 var applicationContext = context.ApplicationContext{}
 
-type SqsQueueForwardController struct {}
+type SqsQueueForwardController struct{}
 
 type S3FileUploadedEvent struct {
 	Records []struct {
-		S3 struct{
-			Bucket struct{
+		S3 struct {
+			Bucket struct {
 				Name string
 			}
-			Object struct{
+			Object struct {
 				Key string
 			}
 		}
@@ -26,10 +26,10 @@ type S3FileUploadedEvent struct {
 }
 
 func (receiver SqsQueueForwardController) ForwardEmail(arguments map[string]interface{}) error {
-	messageJsonString := arguments["message"].(*string)
+	messageJsonString := arguments["message"].(string)
 
 	var message S3FileUploadedEvent
-	err := json.Unmarshal([]byte(*messageJsonString), &message)
+	err := json.Unmarshal([]byte(messageJsonString), &message)
 	if err != nil {
 		log.Printf("Unable to unmarshal the JSON message; %+v", err)
 		return err
