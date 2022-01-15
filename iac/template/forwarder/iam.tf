@@ -70,6 +70,8 @@ data "aws_iam_policy_document" "permissions" {
     sid    = "ReadConfigurationFromDynamo"
     effect = "Allow"
     actions = [
+      "dynamodb:GetItem",
+      "dynamodb:BatchGetItem",
       "dynamodb:Query",
     ]
     resources = ["arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${var.configuration_database_name}"]
