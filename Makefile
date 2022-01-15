@@ -25,3 +25,7 @@ runLocally:
 devDeploy: compileForLinux
 	cd ./iac/environments/dev/ && \
 	terraform apply -auto-approve
+
+prodDeploy: compileForLinux
+	cd ./iac/environments/prod/ && \
+	terraform apply -auto-approve -var 'domain=$(DOMAIN)'
