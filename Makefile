@@ -16,6 +16,7 @@ compileManager:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s" -o manager -v ./cmd/manager/
 
 test:
+	cd ./src/ && \
 	go test ./...
 
 runLocally:
