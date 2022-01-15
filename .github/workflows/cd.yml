@@ -10,6 +10,9 @@ jobs:
   build:
     name: Continuous Deploy
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
 
     - name: Set-up Go 1.x
