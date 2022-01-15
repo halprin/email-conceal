@@ -1,12 +1,12 @@
 resource "aws_lambda_function" "api_lambda" {
   function_name = "email-conceal-manager-${var.environment}"
 
-  filename = data.archive_file.lambda_zip_archive.output_path
+  filename         = data.archive_file.lambda_zip_archive.output_path
   source_code_hash = data.archive_file.lambda_zip_archive.output_base64sha256
-  handler = "manager"
-  timeout = 10
-  memory_size = 128
-  runtime = "go1.x"
+  handler          = "manager"
+  timeout          = 10
+  memory_size      = 128
+  runtime          = "go1.x"
 
   environment {
     variables = {
@@ -27,7 +27,7 @@ resource "aws_lambda_function" "api_lambda" {
 }
 
 data "archive_file" "lambda_zip_archive" {
-  type             = "zip"
-  source_file      = "${path.module}/../../../src/manager"
-  output_path      = "${path.module}/manager_lambda.zip"
+  type        = "zip"
+  source_file = "${path.module}/../../../src/manager"
+  output_path = "${path.module}/manager_lambda.zip"
 }
