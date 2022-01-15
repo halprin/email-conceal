@@ -13,13 +13,12 @@ import (
 	"strings"
 )
 
-
 var applicationContext = context.ApplicationContext{}
 
 var dynamoService = dynamodb.New(awsSession)
 
 type KeyBase struct {
-	Primary   string  `dynamodbav:"primary"`
+	Primary   string `dynamodbav:"primary"`
 	Secondary string `dynamodbav:"secondary"`
 }
 
@@ -32,7 +31,7 @@ type ConcealEmailMapping struct {
 	KeyBase
 }
 
-type DynamoDbGateway struct {}
+type DynamoDbGateway struct{}
 
 func (receiver DynamoDbGateway) Init() {
 	var environmentGateway context.EnvironmentGateway
@@ -139,7 +138,6 @@ func (receiver DynamoDbGateway) UpdateConcealedEmail(concealPrefix string, descr
 		return errors.Wrap(err, "Failed to make update expression")
 	}
 
-
 	updateItemInput := dynamodb.UpdateItemInput{
 		TableName:                 aws.String(tableName),
 		Key:                       dynamoKeyMapping,
@@ -164,7 +162,7 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 
 	var environmentGateway context.EnvironmentGateway
 	applicationContext.Resolve(&environmentGateway)
-	tableName :=environmentGateway.GetEnvironmentValue("TABLE_NAME")
+	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
 
 	//get description first
 	concealEmailKey := generateConcealEmailKey(concealPrefix)
