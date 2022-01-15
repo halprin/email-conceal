@@ -1,6 +1,6 @@
 module github.com/halprin/email-conceal/src
 
-go 1.15
+go 1.17
 
 require (
 	github.com/aws/aws-lambda-go v1.28.0
