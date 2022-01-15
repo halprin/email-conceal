@@ -18,5 +18,4 @@ module "template" {
 
   email_lifetime = 4
   domain         = var.domain
-  docker_image   = var.docker_image
 }

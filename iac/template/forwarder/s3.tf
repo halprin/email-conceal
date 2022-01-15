@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "email_storage" {
-  bucket = data.null_data_source.names.outputs.bucket_name
+  bucket = local.bucket_name
   acl    = "private"
 
   policy = data.aws_iam_policy_document.ses_write_to_s3.json
@@ -23,6 +23,7 @@ resource "aws_s3_bucket" "email_storage" {
   }
 
   tags = {
+    project     = local.project
     environment = var.environment
   }
 }
@@ -48,7 +49,7 @@ data "aws_iam_policy_document" "ses_write_to_s3" {
       identifiers = ["ses.amazonaws.com"]
     }
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${data.null_data_source.names.outputs.bucket_name}/*"]
+    resources = ["arn:aws:s3:::${local.bucket_name}/*"]
     condition {
       test     = "StringEquals"
       variable = "aws:Referer"

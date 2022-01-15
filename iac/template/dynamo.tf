@@ -23,6 +23,7 @@ resource "aws_dynamodb_table" "configuration" {
   }
 
   tags = {
+    project     = local.project
     environment = var.environment
   }
 }

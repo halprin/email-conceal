@@ -10,6 +10,10 @@ import (
 var applicationContext = context.ApplicationContext{}
 
 func Rest() {
+	_ = RestConfiguration().Run(":8000")
+}
+
+func RestConfiguration() *gin.Engine {
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
@@ -22,7 +26,7 @@ func Rest() {
 	//actual e-mail
 	v1.POST("/actualEmail", createActualEmail)
 
-	_ = router.Run(":8000")
+	return router
 }
 
 func createConcealEmail(context *gin.Context) {

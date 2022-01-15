@@ -1,8 +1,9 @@
 package main
 
 import (
+	awsLambda "github.com/aws/aws-lambda-go/lambda"
+	"github.com/halprin/email-conceal/src/external/manager/lambda"
 	"github.com/halprin/email-conceal/src/external/manager/localRest"
-	"github.com/halprin/email-conceal/src/external/manager/rest"
 	"os"
 )
 
@@ -14,6 +15,7 @@ func main() {
 		return
 	}
 
-	rest.Init()
-	rest.Rest()
+	lambda.Init()
+	lambda.PrepareLambda()
+	awsLambda.Start(lambda.LambdaHandler)
 }

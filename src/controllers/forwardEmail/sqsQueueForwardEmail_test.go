@@ -26,7 +26,7 @@ func TestSqsQueueForwardEmailFailsJsonParsing(t *testing.T) {
 
 	message := `{"moof": "dogcow}`
 	arguments := map[string]interface{}{
-		"message": &message,  //no ending quote
+		"message": message, //no ending quote
 	}
 
 	testForwardEmailUsecase := TestForwardEmailUsecase{}
@@ -49,7 +49,7 @@ func TestSqsQueueForwardEmailFailsJsonNotBeingAsExpected(t *testing.T) {
 
 	key := "an_object.txt"
 	message := fmt.Sprintf( //no bucket key
-`{
+		`{
 	"Records": [{
 		"s3": {
 			"asdf": {
@@ -69,7 +69,7 @@ func TestSqsQueueForwardEmailFailsJsonNotBeingAsExpected(t *testing.T) {
 	})
 
 	arguments := map[string]interface{}{
-		"message": &message,
+		"message": message,
 	}
 
 	err := sqsController.ForwardEmail(arguments)
@@ -96,7 +96,7 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 	bucket := "a_bucket"
 	key := "an_object.txt"
 	message := fmt.Sprintf(
-`{
+		`{
 	"Records": [{
 		"s3": {
 			"bucket": {
@@ -111,7 +111,7 @@ func TestSqsQueueForwardEmailFailsTheUsecase(t *testing.T) {
 	expectedUrl := fmt.Sprintf("s3://%s/%s", bucket, key)
 
 	arguments := map[string]interface{}{
-		"message": &message,
+		"message": message,
 	}
 
 	err := sqsController.ForwardEmail(arguments)
@@ -150,7 +150,7 @@ func TestSqsQueueForwardEmailIsSuccess(t *testing.T) {
 	})
 
 	arguments := map[string]interface{}{
-		"message": &message,
+		"message": message,
 	}
 
 	err := sqsController.ForwardEmail(arguments)

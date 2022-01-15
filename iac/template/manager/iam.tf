@@ -1,5 +1,9 @@
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_role" "execution_role" {
-  name = "email-conceal-forwarder-${var.environment}"
+  name = "email-conceal-manager-${var.environment}"
 
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
@@ -20,8 +24,8 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_iam_policy" "permissions_for_forwarder" {
-  name   = "email-conceal-forwarder-${var.environment}"
+resource "aws_iam_policy" "permissions_for_manager" {
+  name   = "email-conceal-manager-${var.environment}"
   policy = data.aws_iam_policy_document.permissions.json
 
   tags = {
@@ -32,14 +36,7 @@ resource "aws_iam_policy" "permissions_for_forwarder" {
 
 data "aws_iam_policy_document" "permissions" {
   statement {
-    sid       = "GetObjectFromEmailStore"
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.email_storage.arn}/*"]
-  }
-
-  statement {
-    sid    = "DecryptSqSAndS3BucketStuff"
+    sid    = "DecryptDynamoDb"
     effect = "Allow"
     actions = [
       "kms:Decrypt",
@@ -56,23 +53,16 @@ data "aws_iam_policy_document" "permissions" {
   }
 
   statement {
-    sid    = "WorkWithEventQueue"
-    effect = "Allow"
-    actions = [
-      "sqs:ReceiveMessage",
-      "sqs:DeleteMessage",
-      "sqs:GetQueueAttributes",
-    ]
-    resources = [aws_sqs_queue.email_storage_add_event_queue.arn]
-  }
-
-  statement {
     sid    = "ReadConfigurationFromDynamo"
     effect = "Allow"
     actions = [
       "dynamodb:GetItem",
       "dynamodb:BatchGetItem",
       "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:DeleteItem",
     ]
     resources = ["arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${var.configuration_database_name}"]
   }
@@ -80,7 +70,7 @@ data "aws_iam_policy_document" "permissions" {
 
 resource "aws_iam_role_policy_attachment" "attach_permission_to_role" {
   role       = aws_iam_role.execution_role.name
-  policy_arn = aws_iam_policy.permissions_for_forwarder.arn
+  policy_arn = aws_iam_policy.permissions_for_manager.arn
 }
 
 data "aws_iam_policy" "lambda_basic_execution" {
@@ -91,3 +81,4 @@ resource "aws_iam_role_policy_attachment" "attach_log_permission_to_role" {
   role       = aws_iam_role.execution_role.name
   policy_arn = data.aws_iam_policy.lambda_basic_execution.arn
 }
+

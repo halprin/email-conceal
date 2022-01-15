@@ -20,8 +20,3 @@ variable "email_lifetime" {
   default     = 4
   description = "The time an e-mail sticks around until it is deleted, whether or not it was delivered.  Measured in days."
 }
-
-variable "docker_image" {
-  type        = string
-  description = "The Docker image URI to deploy"
-}

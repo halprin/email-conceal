@@ -1,8 +1,9 @@
 package main
 
 import (
+	awsLambda "github.com/aws/aws-lambda-go/lambda"
+	"github.com/halprin/email-conceal/src/external/forwarder/lambda"
 	"github.com/halprin/email-conceal/src/external/forwarder/localFileWatch"
-	"github.com/halprin/email-conceal/src/external/forwarder/sqsQueue"
 	"os"
 )
 
@@ -14,6 +15,6 @@ func main() {
 		return
 	}
 
-	sqsQueue.Init()
-	sqsQueue.SqsQueueListener()
+	lambda.Init()
+	awsLambda.Start(lambda.LambdaHandler)
 }
