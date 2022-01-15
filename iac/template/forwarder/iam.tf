@@ -59,9 +59,9 @@ data "aws_iam_policy_document" "permissions" {
     sid    = "WorkWithEventQueue"
     effect = "Allow"
     actions = [
-      "sqs:GetQueueUrl",
       "sqs:ReceiveMessage",
       "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
     ]
     resources = [aws_sqs_queue.email_storage_add_event_queue.arn]
   }
