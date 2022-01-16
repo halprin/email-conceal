@@ -25,7 +25,7 @@ runLocally:
 devDeploy: compileForLinux
 	cd ./iac/environments/dev/ && \
 	terraform init && \
-	terraform apply -auto-approve
+	terraform apply
 
 prodDeploy: compileForLinux
 	cd ./iac/environments/prod/ && \
