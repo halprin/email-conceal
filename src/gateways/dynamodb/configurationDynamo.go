@@ -59,7 +59,7 @@ func (receiver DynamoDbGateway) AddConcealedEmailToActualEmailMapping(concealPre
 	//the mapping data for the conceal entity
 	mapping := ConcealEmailMapping{}
 	mapping.Primary = concealDynamoDbKey
-	mapping.Secondary = generateSourceEmailKey(actualEmail)
+	mapping.Secondary = generateActualEmailKey(actualEmail)
 
 	rollbackFromNewConceal := func() {
 		_ = batchDeleteItemsWithRollback([]interface{}{entity, mapping}, nil)
@@ -174,7 +174,7 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 	}
 
 	//now get the actual e-mail address
-	keyCondition := expression.Key("primary").Equal(expression.Value(concealEmailKey)).And(expression.Key("secondary").BeginsWith(sourceEmailKeyPrefix))
+	keyCondition := expression.Key("primary").Equal(expression.Value(concealEmailKey)).And(expression.Key("secondary").BeginsWith(actualEmailKeyPrefix))
 	keyBuilder := expression.NewBuilder().WithKeyCondition(keyCondition)
 	expressionBuilder, err := keyBuilder.Build()
 	if err != nil {
@@ -203,5 +203,5 @@ func (receiver DynamoDbGateway) GetRealEmailAddressForConcealPrefix(concealPrefi
 		return "", nil, err
 	}
 
-	return strings.TrimPrefix(item.Secondary, sourceEmailKeyPrefix), concealEmailEntity.Description, nil
+	return strings.TrimPrefix(item.Secondary, actualEmailKeyPrefix), concealEmailEntity.Description, nil
 }

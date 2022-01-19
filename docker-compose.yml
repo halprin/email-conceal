@@ -7,7 +7,7 @@ services:
     command: ["/opt/"]
     environment:
       FORWARDER_EMAIL_PREFIX: forwarder
-      DOMAIN: localhost.local
+      DOMAIN: localhost:8000
       TABLE_NAME: LocalTable
       ENVIRONMENT: local
     volumes:
@@ -22,7 +22,7 @@ services:
     command: ["/opt/"]
     environment:
       FORWARDER_EMAIL_PREFIX: forwarder
-      DOMAIN: localhost.local
+      DOMAIN: localhost:8000
       TABLE_NAME: LocalTable
       ENVIRONMENT: local
     volumes:
@@ -30,5 +30,13 @@ services:
     depends_on: [dynamodb]
   dynamodb:
     image: amazon/dynamodb-local
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
     ports:
     - "8001:8000"
+  dynamodbAdmin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8002:8001"
+    environment:
+      - DYNAMO_ENDPOINT=http://dynamodb:8000
+    depends_on: [dynamodb]

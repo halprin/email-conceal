@@ -25,6 +25,7 @@ func RestConfiguration() *gin.Engine {
 
 	//actual e-mail
 	v1.POST("/actualEmail", createActualEmail)
+	v1.GET("/activateRegistration/:secret", activateActualEmail)
 
 	return router
 }
@@ -85,6 +86,16 @@ func createActualEmail(context *gin.Context) {
 	var actualEmailController actualEmail.ActualEmailController
 	applicationContext.Resolve(&actualEmailController)
 	httpStatus, jsonMap := actualEmailController.Add(genericMap)
+
+	context.JSON(httpStatus, jsonMap)
+}
+
+func activateActualEmail(context *gin.Context) {
+	secret := context.Param("secret")
+
+	var actualEmailController actualEmail.ActualEmailController
+	applicationContext.Resolve(&actualEmailController)
+	httpStatus, jsonMap := actualEmailController.Activate(secret)
 
 	context.JSON(httpStatus, jsonMap)
 }

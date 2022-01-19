@@ -8,6 +8,7 @@ import (
 	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"github.com/halprin/email-conceal/src/usecases/forwardEmail"
 	"github.com/jordan-wright/email"
+	"log"
 	"math/big"
 	"strings"
 )
@@ -22,6 +23,7 @@ var environmentGateway context.EnvironmentGateway
 
 type ActualEmailUsecase interface {
 	Add(actualEmail string) error
+	Activate(secret string) error
 }
 
 type ActualEmailUsecaseImpl struct{}
@@ -58,6 +60,29 @@ func (receiver ActualEmailUsecaseImpl) Add(actualEmail string) error {
 		return errors.Wrap(err, "Failed to send the confirmation e-mail")
 	}
 
+	return nil
+}
+
+func (receiver ActualEmailUsecaseImpl) Activate(secret string) error {
+	log.Println("Activating an actual e-mail")
+	actualEmail, err := actualEmailConfigGateway.GetActualEmailForSecret(secret)
+	if err != nil {
+		return err
+	}
+
+	if actualEmail == nil {
+		log.Println("No actual e-mail for the provided secret")
+		//there isn't a matching
+		//return no error because we don't want people information on what works and what doesn't
+		return nil
+	}
+
+	err = actualEmailConfigGateway.ActivateActualEmail(*actualEmail)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Activated actual e-mail %s", *actualEmail)
 	return nil
 }
 
