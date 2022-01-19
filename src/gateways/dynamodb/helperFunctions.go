@@ -28,14 +28,14 @@ func convertItemToKey(item map[string]*dynamodb.AttributeValue) (map[string]*dyn
 }
 
 var concealEmailKeyPrefix = "conceal#"
-var sourceEmailKeyPrefix = "email#"
+var actualEmailKeyPrefix = "email#"
 
 func generateConcealEmailKey(concealPrefix string) string {
 	return fmt.Sprintf("%s%s", concealEmailKeyPrefix, concealPrefix)
 }
 
-func generateSourceEmailKey(sourceEmail string) string {
-	return fmt.Sprintf("%s%s", sourceEmailKeyPrefix, sourceEmail)
+func generateActualEmailKey(sourceEmail string) string {
+	return fmt.Sprintf("%s%s", actualEmailKeyPrefix, sourceEmail)
 }
 
 func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dynamodb.AttributeValue, error) {
@@ -62,7 +62,7 @@ func getAllItemsForHashKey(hashKey string, tableName string) ([]map[string]*dyna
 
 func getItem(hashKey string, sortKey string, tableName string) (map[string]*dynamodb.AttributeValue, error) {
 	keyEntity := KeyBase{
-		Primary: hashKey,
+		Primary:   hashKey,
 		Secondary: sortKey,
 	}
 
@@ -110,7 +110,7 @@ func batchDeleteItemsWithRollback(structsToDelete []interface{}, rollbackFunctio
 }
 
 const (
-	batchWrite = "batchWrite"
+	batchWrite  = "batchWrite"
 	batchDelete = "batchDelete"
 )
 
@@ -135,7 +135,7 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(), batchO
 	for _, dynamoItem := range dynamoItems {
 		if batchOperation == batchWrite {
 			putRequest := &dynamodb.PutRequest{
-				Item:  dynamoItem,
+				Item: dynamoItem,
 			}
 
 			writeRequest = &dynamodb.WriteRequest{
@@ -149,7 +149,7 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(), batchO
 			}
 
 			deleteRequest := &dynamodb.DeleteRequest{
-				Key:  key,
+				Key: key,
 			}
 
 			writeRequest = &dynamodb.WriteRequest{
@@ -204,4 +204,3 @@ func batchInternal(structsToWrite []interface{}, rollbackFunction func(), batchO
 
 	return nil
 }
-

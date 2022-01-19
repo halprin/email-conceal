@@ -10,7 +10,7 @@ import (
 var applicationContext = context.ApplicationContext{}
 var actualEmailUsecase actualEmailUsecase2.ActualEmailUsecase
 
-type ActualEmailController struct {}
+type ActualEmailController struct{}
 
 func (receiver ActualEmailController) Init() {
 	applicationContext.Resolve(&actualEmailUsecase)
@@ -41,4 +41,19 @@ func (receiver ActualEmailController) Add(arguments map[string]interface{}) (int
 	}
 
 	return http.StatusCreated, nil
+}
+
+func (receiver ActualEmailController) Activate(secret string) (int, map[string]string) {
+
+	err := actualEmailUsecase.Activate(secret)
+
+	if err != nil {
+		log.Printf("Another error occured, %+v", err)
+		jsonMap := map[string]string{
+			"error": "An unknown error occurred",
+		}
+		return http.StatusInternalServerError, jsonMap
+	}
+
+	return http.StatusOK, nil
 }
