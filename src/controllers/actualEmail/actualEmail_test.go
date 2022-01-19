@@ -8,7 +8,6 @@ import (
 	"testing"
 )
 
-
 var controller = ActualEmailController{}
 var testAppContext = context.ApplicationContext{}
 
@@ -20,6 +19,10 @@ type TestActualEmailUsecase struct {
 func (testUsecase *TestActualEmailUsecase) Add(actualEmail string) error {
 	testUsecase.AddReceiveActualEmail = actualEmail
 	return testUsecase.AddReturnError
+}
+
+func (testUsecase *TestActualEmailUsecase) Activate(secret string) error {
+	return nil
 }
 
 func TestActualEmailControllerSuccess(t *testing.T) {
