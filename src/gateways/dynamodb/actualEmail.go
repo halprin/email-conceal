@@ -140,7 +140,7 @@ func (receiver DynamoDbGateway) GetActualEmailDetails(actualEmail string) (strin
 	}
 
 	var actualEmailEntity ActualEmailEntity
-	err = dynamodbattribute.UnmarshalMap(rawItem, &actualEmail)
+	err = dynamodbattribute.UnmarshalMap(rawItem, &actualEmailEntity)
 	if err != nil {
 		return "", false, errors.Wrap(err, "Unable to unmarshal the actual e-mail to a Go object")
 	}
