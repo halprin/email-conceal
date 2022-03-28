@@ -4,12 +4,287 @@ import (
 	"errors"
 	"fmt"
 	"github.com/halprin/email-conceal/src/context"
+	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-
 var usecase = ConcealEmailUsecaseImpl{}
 var testAppContext = context.ApplicationContext{}
+
+type ConcealEmailTestSuite struct {
+	suite.Suite
+}
+
+func (suite *ConcealEmailTestSuite) SetupTest() {
+	//defaults each test to a dummy set of values
+	testAppContext.Reset()
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &TestConcealEmailGateway{} //no good default for this, so nothing set
+	})
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &TestEnvironmentGateway{
+			GetReturnMap: map[string]string{
+				"DOMAIN": "example.com",
+			},
+		}
+	})
+	testAppContext.Bind(func() context.UuidLibrary {
+		return &TestUuidLibrary{
+			GenerateReturnUuid: "random-uuid",
+		}
+	})
+	usecase.Init()
+}
+
+func (suite *ConcealEmailTestSuite) TestConcealEmailSuccess() {
+	uuid := "moof-uuid"
+	domain := "dogcow.com"
+
+	testConcealGateway := TestConcealEmailGateway{
+		GetActualEmailDetails_ReturnIsVerified: true,
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testConcealGateway
+	})
+	testEnvironmentGateway := TestEnvironmentGateway{
+		GetReturnMap: map[string]string{
+			"DOMAIN": domain,
+		},
+	}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
+	testUuidLibrary := TestUuidLibrary{
+		GenerateReturnUuid: uuid,
+	}
+	testAppContext.Bind(func() context.UuidLibrary {
+		return &testUuidLibrary
+	})
+	usecase.Init()
+
+	description := "description"
+
+	actualConcealedEmail, err := usecase.Add("valid-email@dogcow.com", &description)
+
+	suite.Assert().Nil(err)
+
+	expectedConcealedEmail := fmt.Sprintf("%s@%s", uuid, domain)
+	suite.Assert().Equal(expectedConcealedEmail, actualConcealedEmail)
+}
+
+func (suite *ConcealEmailTestSuite) TestConcealEmailSuccessWithNoDescription() {
+	uuid := "moof-uuid"
+	domain := "dogcow.com"
+
+	testConcealGateway := TestConcealEmailGateway{
+		GetActualEmailDetails_ReturnIsVerified: true,
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testConcealGateway
+	})
+	testEnvironmentGateway := TestEnvironmentGateway{
+		GetReturnMap: map[string]string{
+			"DOMAIN": domain,
+		},
+	}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
+	testUuidLibrary := TestUuidLibrary{
+		GenerateReturnUuid: uuid,
+	}
+	testAppContext.Bind(func() context.UuidLibrary {
+		return &testUuidLibrary
+	})
+	usecase.Init()
+
+	actualConcealedEmail, err := usecase.Add("valid-email@dogcow.com", nil)
+
+	suite.Assert().Nil(err)
+
+	expectedConcealedEmail := fmt.Sprintf("%s@%s", uuid, domain)
+	suite.Assert().Equal(expectedConcealedEmail, actualConcealedEmail)
+}
+
+func (suite *ConcealEmailTestSuite) TestConcealEmailBadEmail() {
+
+	description := "description"
+
+	_, err := usecase.Add("in[valid-email@dogcow.com", &description)
+
+	if err == nil {
+		suite.T().Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestFailedToAddTheMapping() {
+
+	testGateway := TestConcealEmailGateway{
+		AddReturnError: errors.New("oops"),
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+	testUuidLibrary := TestUuidLibrary{
+		GenerateReturnUuid: "whatever",
+	}
+	testAppContext.Bind(func() context.UuidLibrary {
+		return &testUuidLibrary
+	})
+	testEnvironmentGateway := TestEnvironmentGateway{
+		GetReturnMap: map[string]string{
+			"DOMAIN": "whatever.com",
+		},
+	}
+	testAppContext.Bind(func() context.EnvironmentGateway {
+		return &testEnvironmentGateway
+	})
+	usecase.Init()
+
+	description := "description"
+
+	_, err := usecase.Add("moof@dogcow.com", &description)
+
+	if err == nil {
+		suite.T().Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestConcealEmailBadDescription() {
+
+	testGateway := TestConcealEmailGateway{
+		AddReturnError: errors.New("oops"),
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+	usecase.Init()
+
+	description := ""
+
+	_, err := usecase.Add("moof@dogcow.com", &description)
+
+	if err == nil {
+		suite.T().Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestDeleteConcealEmailSuccess() {
+
+	err := usecase.Delete("some_prefix")
+
+	if err != nil {
+		suite.T().Error("Expected no error to be returned from the delete conceal usecase, but there was one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestDeleteConcealEmailNegative() {
+
+	testGateway := TestConcealEmailGateway{
+		DeleteReturnError: errors.New("it failed"),
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+	usecase.Init()
+
+	err := usecase.Delete("some_prefix")
+
+	if err == nil {
+		suite.T().Error("Expected an error to be returned from the delete conceal usecase, but there wasn't one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestAddDescriptionFailsForEntityError() {
+
+	err := usecase.AddDescriptionToExistingEmail("some_prefix", "")
+
+	if err == nil {
+		suite.T().Error("Expected an error to be returned from the update conceal usecase, but there wasn't one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestAddDescriptionFailsForGatewayFailure() {
+
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &TestConcealEmailGateway{
+			UpdateReturnError: errors.New("an error"),
+		}
+	})
+	usecase.Init()
+
+	err := usecase.AddDescriptionToExistingEmail("some_prefix", "a description")
+
+	if err == nil {
+		suite.T().Error("Expected an error to be returned from the update conceal usecase, but there wasn't one")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestAddDescriptionSuccess() {
+
+	testGateway := TestConcealEmailGateway{}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+	usecase.Init()
+
+	prefix := "some_prefix"
+	description := "a description"
+	err := usecase.AddDescriptionToExistingEmail(prefix, description)
+
+	if err != nil {
+		suite.T().Error("An error was returned from the add description usecase, but it wasn't expected")
+	}
+
+	if testGateway.UpdateReceiveConcealPrefix != prefix {
+		suite.T().Errorf("The update gateway wasn't called with the prefix %s, instead it was called with %s", prefix, testGateway.UpdateReceiveConcealPrefix)
+	}
+
+	if *testGateway.UpdateReceiveDescription != description {
+		suite.T().Errorf("The update gateway wasn't called with the description %s, instead it was called with %s", description, *testGateway.UpdateReceiveDescription)
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestDeleteDescriptionFailed() {
+
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &TestConcealEmailGateway{
+			UpdateReturnError: errors.New("an error"),
+		}
+	})
+	usecase.Init()
+
+	err := usecase.DeleteDescriptionFromExistingEmail("some_prefix")
+
+	if err == nil {
+		suite.T().Error("An error wasn't returned from the delete description usecase, but it was supposed to")
+	}
+}
+
+func (suite *ConcealEmailTestSuite) TestDeleteDescriptionSuccess() {
+	testGateway := TestConcealEmailGateway{}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testGateway
+	})
+	usecase.Init()
+
+	prefix := "some_prefix"
+	err := usecase.DeleteDescriptionFromExistingEmail(prefix)
+
+	if err != nil {
+		suite.T().Error("An error was returned from the delete description usecase, but it wasn't expected")
+	}
+
+	if testGateway.UpdateReceiveConcealPrefix != prefix {
+		suite.T().Errorf("The update gateway wasn't called with the prefix %s, instead it was called with %s", prefix, testGateway.UpdateReceiveConcealPrefix)
+	}
+
+	if testGateway.UpdateReceiveDescription != nil {
+		suite.T().Errorf("The update gateway wasn't called with a nil description, instead it was called with %s", *testGateway.UpdateReceiveDescription)
+	}
+}
+
+//dependency injection mocks
 
 type TestConcealEmailGateway struct {
 	AddReceiveConcealPrefix string
@@ -23,6 +298,11 @@ type TestConcealEmailGateway struct {
 	UpdateReceiveConcealPrefix string
 	UpdateReceiveDescription   *string
 	UpdateReturnError          error
+
+	GetActualEmailDetails_ActualEmail        string
+	GetActualEmailDetails_ReturnEmailAddress string
+	GetActualEmailDetails_ReturnIsVerified   bool
+	GetActualEmailDetails_ReturnError        error
 }
 
 func (testGateway *TestConcealEmailGateway) AddConcealedEmailToActualEmailMapping(concealPrefix string, actualEmail string, description *string) error {
@@ -44,6 +324,11 @@ func (testGateway *TestConcealEmailGateway) UpdateConcealedEmail(concealPrefix s
 	return testGateway.UpdateReturnError
 }
 
+func (testGateway *TestConcealEmailGateway) GetActualEmailDetails(actualEmail string) (string, bool, error) {
+	testGateway.GetActualEmailDetails_ActualEmail = actualEmail
+	return testGateway.GetActualEmailDetails_ReturnEmailAddress, testGateway.GetActualEmailDetails_ReturnIsVerified, testGateway.GetActualEmailDetails_ReturnError
+}
+
 type TestEnvironmentGateway struct {
 	GetReceiveKey string
 	GetReturnMap  map[string]string
@@ -62,224 +347,8 @@ func (testLibrary *TestUuidLibrary) GenerateRandomUuid() string {
 	return testLibrary.GenerateReturnUuid
 }
 
-func TestConcealEmailSuccess(t *testing.T) {
-	uuid := "moof-uuid"
-	domain := "dogcow.com"
+//Start the test suite
 
-	testConcealGateway := TestConcealEmailGateway{}
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &testConcealGateway
-	})
-	testEnvironmentGateway := TestEnvironmentGateway{
-		GetReturnMap: map[string]string{
-			"DOMAIN": domain,
-		},
-	}
-	testAppContext.Bind(func() context.EnvironmentGateway {
-		return &testEnvironmentGateway
-	})
-	testUuidLibrary := TestUuidLibrary{
-		GenerateReturnUuid: uuid,
-	}
-	testAppContext.Bind(func() context.UuidLibrary {
-		return &testUuidLibrary
-	})
-
-	description := "description"
-
-	actualConcealedEmail, err := usecase.Add("valid-email@dogcow.com", &description)
-
-	if err != nil {
-		t.Error("Expected no error to be returned from concealing the e-mail usecase, but there was one")
-	}
-
-	expectedConcealedEmail := fmt.Sprintf("%s@%s", uuid, domain)
-	if actualConcealedEmail != expectedConcealedEmail {
-		t.Errorf("The generated concealed e-mail %s was supposed to be %s", actualConcealedEmail, expectedConcealedEmail)
-	}
-}
-
-func TestConcealEmailSuccessWithNoDescription(t *testing.T) {
-	uuid := "moof-uuid"
-	domain := "dogcow.com"
-
-	testEnvironmentGateway := TestEnvironmentGateway{
-		GetReturnMap: map[string]string{
-			"DOMAIN": domain,
-		},
-	}
-	testAppContext.Bind(func() context.EnvironmentGateway {
-		return &testEnvironmentGateway
-	})
-	testUuidLibrary := TestUuidLibrary{
-		GenerateReturnUuid: uuid,
-	}
-	testAppContext.Bind(func() context.UuidLibrary {
-		return &testUuidLibrary
-	})
-
-	actualConcealedEmail, err := usecase.Add("valid-email@dogcow.com", nil)
-
-	if err != nil {
-		t.Error("Expected no error to be returned from concealing the e-mail usecase, but there was one")
-	}
-
-	expectedConcealedEmail := fmt.Sprintf("%s@%s", uuid, domain)
-	if actualConcealedEmail != expectedConcealedEmail {
-		t.Errorf("The generated concealed e-mail %s was supposed to be %s", actualConcealedEmail, expectedConcealedEmail)
-	}
-}
-
-func TestConcealEmailBadEmail(t *testing.T) {
-	description := "description"
-
-	_, err := usecase.Add("in[valid-email@dogcow.com", &description)
-
-	if err == nil {
-		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
-	}
-}
-
-func TestConcealEmailGatewayFailed(t *testing.T) {
-
-	testGateway := TestConcealEmailGateway{
-		AddReturnError: errors.New("oops"),
-	}
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &testGateway
-	})
-
-	description := "description"
-
-	_, err := usecase.Add("moof@dogcow.com", &description)
-
-	if err == nil {
-		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
-	}
-}
-
-func TestConcealEmailBadDescription(t *testing.T) {
-	testGateway := TestConcealEmailGateway{
-		AddReturnError: errors.New("oops"),
-	}
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &testGateway
-	})
-
-	description := ""
-
-	_, err := usecase.Add("moof@dogcow.com", &description)
-
-	if err == nil {
-		t.Error("Expected an error to be returned from concealing the e-mail usecase, but there wasn't one")
-	}
-}
-
-func TestDeleteConcealEmailSuccess(t *testing.T) {
-
-	err := usecase.Delete("some_prefix")
-
-	if err != nil {
-		t.Error("Expected no error to be returned from the delete conceal usecase, but there was one")
-	}
-}
-
-func TestDeleteConcealEmailNegative(t *testing.T) {
-
-	testGateway := TestConcealEmailGateway{
-		DeleteReturnError: errors.New("it failed"),
-	}
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &testGateway
-	})
-
-	err := usecase.Delete("some_prefix")
-
-	if err == nil {
-		t.Error("Expected an error to be returned from the delete conceal usecase, but there wasn't one")
-	}
-}
-
-func TestAddDescriptionFailsForEntityError(t *testing.T) {
-
-	err := usecase.AddDescriptionToExistingEmail("some_prefix", "")
-
-	if err == nil {
-		t.Error("Expected an error to be returned from the update conceal usecase, but there wasn't one")
-	}
-}
-
-func TestAddDescriptionFailsForGatewayFailure(t *testing.T) {
-
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &TestConcealEmailGateway{
-			UpdateReturnError: errors.New("an error"),
-		}
-	})
-
-	err := usecase.AddDescriptionToExistingEmail("some_prefix", "a description")
-
-	if err == nil {
-		t.Error("Expected an error to be returned from the update conceal usecase, but there wasn't one")
-	}
-}
-
-func TestAddDescriptionSuccess(t *testing.T) {
-
-	testGateway := TestConcealEmailGateway{}
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &testGateway
-	})
-
-	prefix := "some_prefix"
-	description := "a description"
-	err := usecase.AddDescriptionToExistingEmail(prefix, description)
-
-	if err != nil {
-		t.Error("An error was returned from the add description usecase, but it wasn't expected")
-	}
-
-	if testGateway.UpdateReceiveConcealPrefix != prefix {
-		t.Errorf("The update gateway wasn't called with the prefix %s, instead it was called with %s", prefix, testGateway.UpdateReceiveConcealPrefix)
-	}
-
-	if *testGateway.UpdateReceiveDescription != description {
-		t.Errorf("The update gateway wasn't called with the description %s, instead it was called with %s", description, *testGateway.UpdateReceiveDescription)
-	}
-}
-
-func TestDeleteDescriptionFailed(t *testing.T) {
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &TestConcealEmailGateway{
-			UpdateReturnError: errors.New("an error"),
-		}
-	})
-
-	err := usecase.DeleteDescriptionFromExistingEmail("some_prefix")
-
-	if err == nil {
-		t.Error("An error wasn't returned from the delete description usecase, but it was supposed to")
-	}
-}
-
-func TestDeleteDescriptionSuccess(t *testing.T) {
-	testGateway := TestConcealEmailGateway{}
-	testAppContext.Bind(func() ConcealEmailGateway {
-		return &testGateway
-	})
-
-	prefix := "some_prefix"
-	err := usecase.DeleteDescriptionFromExistingEmail(prefix)
-
-	if err != nil {
-		t.Error("An error was returned from the delete description usecase, but it wasn't expected")
-	}
-
-	if testGateway.UpdateReceiveConcealPrefix != prefix {
-		t.Errorf("The update gateway wasn't called with the prefix %s, instead it was called with %s", prefix, testGateway.UpdateReceiveConcealPrefix)
-	}
-
-	if testGateway.UpdateReceiveDescription != nil {
-		t.Errorf("The update gateway wasn't called with a nil description, instead it was called with %s", *testGateway.UpdateReceiveDescription)
-	}
+func TestConcealEmailTestSuite(t *testing.T) {
+	suite.Run(t, new(ConcealEmailTestSuite))
 }
