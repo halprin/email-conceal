@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
+	"github.com/halprin/email-conceal/src/usecases/actualEmail"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -105,6 +106,49 @@ func (suite *ConcealEmailTestSuite) TestAddConcealEmailSuccessWithNoDescription(
 
 	expectedConcealedEmail := fmt.Sprintf("%s@%s", uuid, domain)
 	suite.Assert().Equal(expectedConcealedEmail, actualConcealedEmail)
+}
+
+func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToUnverifiedActualEmail() {
+	testConcealGateway := TestConcealEmailGateway{
+		GetActualEmailDetails_ReturnIsVerified: false,
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testConcealGateway
+	})
+	usecase.Init()
+
+	_, err := usecase.Add("valid-email@dogcow.com", nil)
+
+	suite.Assert().ErrorIs(err, ActualEmailIsUnverified)
+}
+
+func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToActualEmailNotExist() {
+	testConcealGateway := TestConcealEmailGateway{
+		GetActualEmailDetails_ReturnError: actualEmail.ActualEmailDoesNotExist,
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testConcealGateway
+	})
+	usecase.Init()
+
+	_, err := usecase.Add("valid-email@dogcow.com", nil)
+
+	suite.Assert().ErrorIs(err, ActualEmailIsUnverified)
+}
+
+func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToSomeError() {
+	someOtherError := errors.New("some other error")
+	testConcealGateway := TestConcealEmailGateway{
+		GetActualEmailDetails_ReturnError: someOtherError,
+	}
+	testAppContext.Bind(func() ConcealEmailGateway {
+		return &testConcealGateway
+	})
+	usecase.Init()
+
+	_, err := usecase.Add("valid-email@dogcow.com", nil)
+
+	suite.Assert().ErrorIs(err, someOtherError)
 }
 
 func (suite *ConcealEmailTestSuite) TestAddConcealFailedForBadEmail() {
