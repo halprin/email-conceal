@@ -13,7 +13,7 @@ import (
 
 var applicationContext = context.ApplicationContext{}
 
-type ConcealEmailController struct {}
+type ConcealEmailController struct{}
 
 func (receiver ConcealEmailController) Add(arguments map[string]interface{}) (int, map[string]string) {
 	sourceEmail, sourceEmailValid := arguments["email"].(string)
@@ -59,6 +59,13 @@ func (receiver ConcealEmailController) Add(arguments map[string]interface{}) (in
 		}
 		return http.StatusBadRequest, jsonMap
 	} else if errors.Is(err, entities.DescriptionTooShortError) || errors.Is(err, entities.DescriptionTooLongError) {
+		errorString := err.Error()
+		log.Printf(errorString)
+		jsonMap := map[string]string{
+			"error": errorString,
+		}
+		return http.StatusBadRequest, jsonMap
+	} else if errors.Is(err, concealEmail.ActualEmailIsUnverified) {
 		errorString := err.Error()
 		log.Printf(errorString)
 		jsonMap := map[string]string{

@@ -13,6 +13,8 @@ var uuidLibrary context.UuidLibrary
 var concealEmailGateway ConcealEmailGateway
 var environmentGateway context.EnvironmentGateway
 
+var ActualEmailIsUnverified = errors.New("E-mail ownership has not been verified")
+
 type ConcealEmailUsecase interface {
 	Add(sourceEmail string, description *string) (string, error)
 	Delete(concealedEmailPrefix string) error
@@ -46,7 +48,7 @@ func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *str
 	if err != nil {
 		return "", errors.Wrap(err, "Unable to determine e-mail ownership due to error")
 	} else if !emailIsVerified {
-		return "", errors.New("Provided e-mail ownership has not been verified")
+		return "", ActualEmailIsUnverified
 	}
 
 	concealedEmailPrefix := uuidLibrary.GenerateRandomUuid()
@@ -63,7 +65,7 @@ func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *str
 
 func (receiver ConcealEmailUsecaseImpl) actualEmailIsVerified(sourceEmail string) (bool, error) {
 	_, verified, err := concealEmailGateway.GetActualEmailDetails(sourceEmail)
-	if err == actualEmail.ActualEmailDoesNotExist {
+	if errors.Is(err, actualEmail.ActualEmailDoesNotExist) {
 		return false, nil
 	} else if err != nil {
 		return false, errors.Wrap(err, "Unable to get the actual e-mail and determine if the e-mail is verified")
