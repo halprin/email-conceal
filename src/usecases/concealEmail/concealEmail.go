@@ -5,6 +5,7 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases/actualEmail"
 )
 
 var applicationContext = context.ApplicationContext{}
@@ -61,7 +62,14 @@ func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *str
 }
 
 func (receiver ConcealEmailUsecaseImpl) actualEmailIsVerified(sourceEmail string) (bool, error) {
-	return false, nil
+	_, verified, err := concealEmailGateway.GetActualEmailDetails(sourceEmail)
+	if err == actualEmail.ActualEmailDoesNotExist {
+		return false, nil
+	} else if err != nil {
+		return false, errors.Wrap(err, "Unable to get the actual e-mail and determine if the e-mail is verified")
+	}
+
+	return verified, nil
 }
 
 func (receiver ConcealEmailUsecaseImpl) Delete(concealedEmailPrefix string) error {

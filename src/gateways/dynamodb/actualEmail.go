@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
+	actualEmailPackage "github.com/halprin/email-conceal/src/usecases/actualEmail"
 	"log"
 	"strings"
 )
@@ -122,6 +123,29 @@ func (receiver DynamoDbGateway) ActivateActualEmail(actualEmail string) error {
 	}
 
 	return nil
+}
+
+func (receiver DynamoDbGateway) GetActualEmailDetails(actualEmail string) (string, bool, error) {
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	tableName := environmentGateway.GetEnvironmentValue("TABLE_NAME")
+
+	actualEmailKey := generateActualEmailKey(actualEmail)
+
+	rawItem, err := getItem(actualEmailKey, actualEmailKey, tableName)
+	if err != nil {
+		return "", false, err
+	} else if rawItem == nil {
+		return "", false, actualEmailPackage.ActualEmailDoesNotExist
+	}
+
+	var actualEmailEntity ActualEmailEntity
+	err = dynamodbattribute.UnmarshalMap(rawItem, &actualEmail)
+	if err != nil {
+		return "", false, errors.Wrap(err, "Unable to unmarshal the actual e-mail to a Go object")
+	}
+
+	return actualEmailEntity.Primary, actualEmailEntity.Active, nil
 }
 
 var ownershipSecretKeyPrefix = "ownershipSecret#"
