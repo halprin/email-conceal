@@ -111,6 +111,28 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerUnknownE
 	suite.Assert().Equal(http.StatusInternalServerError, status)
 }
 
+func (suite *ConcealEmailControllerTestSuite) TestAddFailsWithActualEmailUnverified() {
+
+	testUsecase := TestConcealEmailUsecase{
+		AddReturnError: concealEmail.ActualEmailIsUnverified,
+	}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"email": "dogcow@apple.com",
+	}
+
+	status, body := controller.Add(arguments)
+
+	suite.Assert().Equal(http.StatusBadRequest, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
 func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerSuccess() {
 
 	var arguments = map[string]interface{}{
