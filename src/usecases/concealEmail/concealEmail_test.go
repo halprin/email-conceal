@@ -13,11 +13,11 @@ import (
 var usecase = ConcealEmailUsecaseImpl{}
 var testAppContext = context.ApplicationContext{}
 
-type ConcealEmailTestSuite struct {
+type ConcealEmailUsecaseTestSuite struct {
 	suite.Suite
 }
 
-func (suite *ConcealEmailTestSuite) SetupTest() {
+func (suite *ConcealEmailUsecaseTestSuite) SetupTest() {
 	//defaults each test to a dummy set of values
 	testAppContext.Reset()
 	testAppContext.Bind(func() ConcealEmailGateway {
@@ -38,7 +38,7 @@ func (suite *ConcealEmailTestSuite) SetupTest() {
 	usecase.Init()
 }
 
-func (suite *ConcealEmailTestSuite) TestAddConcealEmailSuccess() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddConcealEmailSuccess() {
 	uuid := "moof-uuid"
 	domain := "dogcow.com"
 
@@ -74,7 +74,7 @@ func (suite *ConcealEmailTestSuite) TestAddConcealEmailSuccess() {
 	suite.Assert().Equal(expectedConcealedEmail, actualConcealedEmail)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddConcealEmailSuccessWithNoDescription() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddConcealEmailSuccessWithNoDescription() {
 	uuid := "moof-uuid"
 	domain := "dogcow.com"
 
@@ -108,7 +108,7 @@ func (suite *ConcealEmailTestSuite) TestAddConcealEmailSuccessWithNoDescription(
 	suite.Assert().Equal(expectedConcealedEmail, actualConcealedEmail)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToUnverifiedActualEmail() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddConcealEmailFailsDueToUnverifiedActualEmail() {
 	testConcealGateway := TestConcealEmailGateway{
 		GetActualEmailDetails_ReturnIsVerified: false,
 	}
@@ -122,7 +122,7 @@ func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToUnverifiedActua
 	suite.Assert().ErrorIs(err, ActualEmailIsUnverified)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToActualEmailNotExist() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddConcealEmailFailsDueToActualEmailNotExist() {
 	testConcealGateway := TestConcealEmailGateway{
 		GetActualEmailDetails_ReturnError: actualEmail.ActualEmailDoesNotExist,
 	}
@@ -136,7 +136,7 @@ func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToActualEmailNotE
 	suite.Assert().ErrorIs(err, ActualEmailIsUnverified)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToSomeError() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddConcealEmailFailsDueToSomeError() {
 	someOtherError := errors.New("some other error")
 	testConcealGateway := TestConcealEmailGateway{
 		GetActualEmailDetails_ReturnError: someOtherError,
@@ -151,7 +151,7 @@ func (suite *ConcealEmailTestSuite) TestAddConcealEmailFailsDueToSomeError() {
 	suite.Assert().ErrorIs(err, someOtherError)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddConcealFailedForBadEmail() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddConcealFailedForBadEmail() {
 
 	description := "description"
 
@@ -160,7 +160,7 @@ func (suite *ConcealEmailTestSuite) TestAddConcealFailedForBadEmail() {
 	suite.Assert().ErrorIs(err, entities.InvalidEmailAddressError)
 }
 
-func (suite *ConcealEmailTestSuite) TestFailedToAddTheMapping() {
+func (suite *ConcealEmailUsecaseTestSuite) TestFailedToAddTheMapping() {
 	expectedError := errors.New("oops")
 	testGateway := TestConcealEmailGateway{
 		GetActualEmailDetails_ReturnIsVerified: true,
@@ -178,7 +178,7 @@ func (suite *ConcealEmailTestSuite) TestFailedToAddTheMapping() {
 	suite.Assert().ErrorIs(err, expectedError)
 }
 
-func (suite *ConcealEmailTestSuite) TestConcealEmailBadDescription() {
+func (suite *ConcealEmailUsecaseTestSuite) TestConcealEmailBadDescription() {
 
 	testGateway := TestConcealEmailGateway{
 		GetActualEmailDetails_ReturnIsVerified: true,
@@ -196,13 +196,13 @@ func (suite *ConcealEmailTestSuite) TestConcealEmailBadDescription() {
 	suite.Assert().ErrorIs(err, entities.DescriptionTooShortError)
 }
 
-func (suite *ConcealEmailTestSuite) TestDeleteConcealEmailSuccess() {
+func (suite *ConcealEmailUsecaseTestSuite) TestDeleteConcealEmailSuccess() {
 	err := usecase.Delete("some_prefix")
 
 	suite.Assert().Nil(err)
 }
 
-func (suite *ConcealEmailTestSuite) TestDeleteConcealEmailNegative() {
+func (suite *ConcealEmailUsecaseTestSuite) TestDeleteConcealEmailNegative() {
 	expectedError := errors.New("it failed")
 	testGateway := TestConcealEmailGateway{
 		DeleteReturnError: expectedError,
@@ -217,14 +217,14 @@ func (suite *ConcealEmailTestSuite) TestDeleteConcealEmailNegative() {
 	suite.Assert().ErrorIs(err, expectedError)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddDescriptionFailsForEntityError() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddDescriptionFailsForEntityError() {
 
 	err := usecase.AddDescriptionToExistingEmail("some_prefix", "")
 
 	suite.Assert().ErrorIs(err, entities.DescriptionTooShortError)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddDescriptionFailsForGatewayFailure() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddDescriptionFailsForGatewayFailure() {
 	expectedError := errors.New("an error")
 	testAppContext.Bind(func() ConcealEmailGateway {
 		return &TestConcealEmailGateway{
@@ -238,7 +238,7 @@ func (suite *ConcealEmailTestSuite) TestAddDescriptionFailsForGatewayFailure() {
 	suite.Assert().ErrorIs(err, expectedError)
 }
 
-func (suite *ConcealEmailTestSuite) TestAddDescriptionSuccess() {
+func (suite *ConcealEmailUsecaseTestSuite) TestAddDescriptionSuccess() {
 	testGateway := TestConcealEmailGateway{}
 	testAppContext.Bind(func() ConcealEmailGateway {
 		return &testGateway
@@ -256,7 +256,7 @@ func (suite *ConcealEmailTestSuite) TestAddDescriptionSuccess() {
 	suite.Assert().Equal(description, *testGateway.UpdateReceiveDescription)
 }
 
-func (suite *ConcealEmailTestSuite) TestDeleteDescriptionFailed() {
+func (suite *ConcealEmailUsecaseTestSuite) TestDeleteDescriptionFailed() {
 	expectedError := errors.New("an error")
 	testAppContext.Bind(func() ConcealEmailGateway {
 		return &TestConcealEmailGateway{
@@ -270,7 +270,7 @@ func (suite *ConcealEmailTestSuite) TestDeleteDescriptionFailed() {
 	suite.Assert().ErrorIs(err, expectedError)
 }
 
-func (suite *ConcealEmailTestSuite) TestDeleteDescriptionSuccess() {
+func (suite *ConcealEmailUsecaseTestSuite) TestDeleteDescriptionSuccess() {
 	testGateway := TestConcealEmailGateway{}
 	testAppContext.Bind(func() ConcealEmailGateway {
 		return &testGateway
@@ -352,6 +352,6 @@ func (testLibrary *TestUuidLibrary) GenerateRandomUuid() string {
 
 //Start the test suite
 
-func TestConcealEmailTestSuite(t *testing.T) {
-	suite.Run(t, new(ConcealEmailTestSuite))
+func TestConcealEmailUsecaseTestSuite(t *testing.T) {
+	suite.Run(t, new(ConcealEmailUsecaseTestSuite))
 }
