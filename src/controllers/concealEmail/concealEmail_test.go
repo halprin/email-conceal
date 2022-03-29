@@ -46,17 +46,9 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerSuccess(
 	status, body := controller.Add(arguments)
 	actualConcealedEmail := body["concealedEmail"]
 
-	if testUsecase.AddReceiveSourceEmail != sourceEmail {
-		suite.T().Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testUsecase.AddReceiveSourceEmail, sourceEmail)
-	}
-
-	if actualConcealedEmail != testUsecase.AddReturnConcealEmail {
-		suite.T().Errorf("The concealed e-mail %s generated wasn't passed back completely, instead %s was returned", testUsecase.AddReturnConcealEmail, actualConcealedEmail)
-	}
-
-	if status != http.StatusCreated {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusCreated)
-	}
+	suite.Assert().Equal(sourceEmail, testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(concealedEmail, actualConcealedEmail)
+	suite.Assert().Equal(http.StatusCreated, status)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerBadEmailType() {
@@ -73,13 +65,8 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerBadEmail
 
 	status, _ := controller.Add(arguments)
 
-	if testUsecase.AddReceiveSourceEmail != "" {
-		suite.T().Errorf("The usecase was called, but it shouldn't have been")
-	}
-
-	if status != http.StatusBadRequest {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
+	suite.Assert().Empty(testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(http.StatusBadRequest, status)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerInvalidEmail() {
@@ -99,13 +86,8 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerInvalidE
 
 	status, _ := controller.Add(arguments)
 
-	if testUsecase.AddReceiveSourceEmail != sourceEmail {
-		suite.T().Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testUsecase.AddReceiveSourceEmail, sourceEmail)
-	}
-
-	if status != http.StatusBadRequest {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
+	suite.Assert().Equal(sourceEmail, testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(http.StatusBadRequest, status)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerUnknownError() {
@@ -125,13 +107,8 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerUnknownE
 
 	status, _ := controller.Add(arguments)
 
-	if testUsecase.AddReceiveSourceEmail != sourceEmail {
-		suite.T().Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testUsecase.AddReceiveSourceEmail, sourceEmail)
-	}
-
-	if status != http.StatusInternalServerError {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
-	}
+	suite.Assert().Equal(sourceEmail, testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(http.StatusInternalServerError, status)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerSuccess() {
@@ -142,13 +119,8 @@ func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerSu
 
 	status, body := controller.Delete(arguments)
 
-	if status != http.StatusNoContent {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusNoContent)
-	}
-
-	if len(body) != 0 {
-		suite.T().Errorf("The returned status response body wasn't empty; it should've been")
-	}
+	suite.Assert().Equal(http.StatusNoContent, status)
+	suite.Assert().Empty(body)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerBadInput() {
@@ -159,14 +131,10 @@ func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerBa
 
 	status, body := controller.Delete(arguments)
 
-	if status != http.StatusBadRequest {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
+	suite.Assert().Equal(http.StatusBadRequest, status)
 
 	_, exists := body["error"]
-	if !exists {
-		suite.T().Errorf("An error is missing from the response body; it should've been there")
-	}
+	suite.Assert().True(exists)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerFailedDelete() {
@@ -184,14 +152,10 @@ func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerFa
 
 	status, body := controller.Delete(arguments)
 
-	if status != http.StatusInternalServerError {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
-	}
+	suite.Assert().Equal(http.StatusInternalServerError, status)
 
 	_, exists := body["error"]
-	if !exists {
-		suite.T().Errorf("An error is missing from the response body; it should've been there")
-	}
+	suite.Assert().True(exists)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestUpdateConcealEmailWithNewDescription() {
@@ -203,14 +167,8 @@ func (suite *ConcealEmailControllerTestSuite) TestUpdateConcealEmailWithNewDescr
 
 	status, body := controller.Update(arguments)
 
-	if status != http.StatusOK {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusOK)
-	}
-
-	bodySize := len(body)
-	if bodySize != 0 {
-		suite.T().Errorf("There was data in the response body when there shouldn't be anything")
-	}
+	suite.Assert().Equal(http.StatusOK, status)
+	suite.Assert().Empty(body)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestTooLongDescriptionUpdate() {
@@ -228,14 +186,10 @@ func (suite *ConcealEmailControllerTestSuite) TestTooLongDescriptionUpdate() {
 
 	status, body := controller.Update(arguments)
 
-	if status != http.StatusBadRequest {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
+	suite.Assert().Equal(http.StatusBadRequest, status)
 
 	_, exists := body["error"]
-	if !exists {
-		suite.T().Errorf("An error is missing from the response body; it should've been there")
-	}
+	suite.Assert().True(exists)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateFailedForUnkownReason() {
@@ -253,21 +207,17 @@ func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateFailedForUnko
 
 	status, body := controller.Update(arguments)
 
-	if status != http.StatusInternalServerError {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
-	}
+	suite.Assert().Equal(http.StatusInternalServerError, status)
 
 	_, exists := body["error"]
-	if !exists {
-		suite.T().Errorf("An error is missing from the response body; it should've been there")
-	}
+	suite.Assert().True(exists)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateWithDelete() {
 
-	concealEmailUsecase := TestConcealEmailUsecase{}
+	testUsecase := TestConcealEmailUsecase{}
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &concealEmailUsecase
+		return &testUsecase
 	})
 	controller.Init()
 
@@ -279,18 +229,14 @@ func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateWithDelete() 
 
 	status, body := controller.Update(arguments)
 
-	if concealEmailUsecase.AddDescriptionReceiveConcealEmailPrefix != "" && concealEmailUsecase.DeleteDescriptionReceiveConcealEmailPrefix != conceaEmailId {
-		suite.T().Errorf("The wrong usecase was called.  The delete usecase should have been called.")
-	}
+	//tests that the correct usecase was called
+	suite.Assert().Empty(testUsecase.AddDescriptionReceiveConcealEmailPrefix)
+	suite.Assert().Equal(conceaEmailId, testUsecase.DeleteDescriptionReceiveConcealEmailPrefix)
 
-	if status != http.StatusOK {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusOK)
-	}
+	suite.Assert().Equal(http.StatusOK, status)
 
 	_, exists := body["error"]
-	if exists {
-		suite.T().Errorf("An error was returned in the response body; it shouldn't be there")
-	}
+	suite.Assert().False(exists)
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestUpdateFailedWithConcealEmailNotExist() {
@@ -312,14 +258,10 @@ func (suite *ConcealEmailControllerTestSuite) TestUpdateFailedWithConcealEmailNo
 
 	status, body := controller.Update(arguments)
 
-	if status != http.StatusNotFound {
-		suite.T().Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusNotFound)
-	}
+	suite.Assert().Equal(http.StatusNotFound, status)
 
 	_, exists := body["error"]
-	if !exists {
-		suite.T().Errorf("An error is missing from the response body; it should've been there")
-	}
+	suite.Assert().True(exists)
 }
 
 //dependency injection mocks
