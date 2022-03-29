@@ -5,10 +5,15 @@ import (
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/entities"
 	"github.com/halprin/email-conceal/src/external/lib/errors"
+	"github.com/halprin/email-conceal/src/usecases/actualEmail"
 )
 
-
 var applicationContext = context.ApplicationContext{}
+var uuidLibrary context.UuidLibrary
+var concealEmailGateway ConcealEmailGateway
+var environmentGateway context.EnvironmentGateway
+
+var ActualEmailIsUnverified = errors.New("E-mail ownership has not been verified")
 
 type ConcealEmailUsecase interface {
 	Add(sourceEmail string, description *string) (string, error)
@@ -17,7 +22,13 @@ type ConcealEmailUsecase interface {
 	DeleteDescriptionFromExistingEmail(concealedEmailPrefix string) error
 }
 
-type ConcealEmailUsecaseImpl struct {}
+type ConcealEmailUsecaseImpl struct{}
+
+func (receiver ConcealEmailUsecaseImpl) Init() {
+	applicationContext.Resolve(&uuidLibrary)
+	applicationContext.Resolve(&concealEmailGateway)
+	applicationContext.Resolve(&environmentGateway)
+}
 
 func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *string) (string, error) {
 	err := entities.ValidateEmail(sourceEmail)
@@ -33,27 +44,37 @@ func (receiver ConcealEmailUsecaseImpl) Add(sourceEmail string, description *str
 		}
 	}
 
-	var uuidLibrary context.UuidLibrary
-	applicationContext.Resolve(&uuidLibrary)
+	emailIsVerified, err := receiver.actualEmailIsVerified(sourceEmail)
+	if err != nil {
+		return "", errors.Wrap(err, "Unable to determine e-mail ownership due to error")
+	} else if !emailIsVerified {
+		return "", ActualEmailIsUnverified
+	}
+
 	concealedEmailPrefix := uuidLibrary.GenerateRandomUuid()
 
-	var concealEmailGateway ConcealEmailGateway
-	applicationContext.Resolve(&concealEmailGateway)
 	err = concealEmailGateway.AddConcealedEmailToActualEmailMapping(concealedEmailPrefix, sourceEmail, description)
 	if err != nil {
 		return "", errors.Wrap(err, "Unable to add conceal e-mail to actual e-mail mapping")
 	}
 
-	var environmentGateway context.EnvironmentGateway
-	applicationContext.Resolve(&environmentGateway)
 	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
 
 	return fmt.Sprintf("%s@%s", concealedEmailPrefix, domain), nil
 }
 
+func (receiver ConcealEmailUsecaseImpl) actualEmailIsVerified(sourceEmail string) (bool, error) {
+	_, verified, err := concealEmailGateway.GetActualEmailDetails(sourceEmail)
+	if errors.Is(err, actualEmail.ActualEmailDoesNotExist) {
+		return false, nil
+	} else if err != nil {
+		return false, errors.Wrap(err, "Unable to get the actual e-mail and determine if the e-mail is verified")
+	}
+
+	return verified, nil
+}
+
 func (receiver ConcealEmailUsecaseImpl) Delete(concealedEmailPrefix string) error {
-	var concealEmailGateway ConcealEmailGateway
-	applicationContext.Resolve(&concealEmailGateway)
 	err := concealEmailGateway.DeleteConcealedEmailToActualEmailMapping(concealedEmailPrefix)
 	if err != nil {
 		return errors.Wrap(err, "Unable to delete conceal e-mail to actual e-mail mapping")
@@ -68,8 +89,6 @@ func (receiver ConcealEmailUsecaseImpl) AddDescriptionToExistingEmail(concealedE
 		return err
 	}
 
-	var concealEmailGateway ConcealEmailGateway
-	applicationContext.Resolve(&concealEmailGateway)
 	err = concealEmailGateway.UpdateConcealedEmail(concealedEmailPrefix, &description)
 	if err != nil {
 		return errors.Wrap(err, "Unable to update description of conceal e-mail")
@@ -79,9 +98,6 @@ func (receiver ConcealEmailUsecaseImpl) AddDescriptionToExistingEmail(concealedE
 }
 
 func (receiver ConcealEmailUsecaseImpl) DeleteDescriptionFromExistingEmail(concealedEmailPrefix string) error {
-
-	var concealEmailGateway ConcealEmailGateway
-	applicationContext.Resolve(&concealEmailGateway)
 	err := concealEmailGateway.UpdateConcealedEmail(concealedEmailPrefix, nil)
 	if err != nil {
 		return errors.Wrap(err, "Unable to delete description of conceal e-mail")

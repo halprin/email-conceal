@@ -6,13 +6,287 @@ import (
 	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"github.com/halprin/email-conceal/src/usecases"
 	"github.com/halprin/email-conceal/src/usecases/concealEmail"
+	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
 )
 
-
 var controller = ConcealEmailController{}
 var testAppContext = context.ApplicationContext{}
+
+type ConcealEmailControllerTestSuite struct {
+	suite.Suite
+}
+
+func (suite *ConcealEmailControllerTestSuite) SetupTest() {
+	//defaults each test to a dummy set of values
+	testAppContext.Reset()
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{}
+	})
+	controller.Init()
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerSuccess() {
+	concealedEmail := "concealed@asdf.com"
+
+	testUsecase := TestConcealEmailUsecase{
+		AddReturnConcealEmail: concealedEmail,
+	}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	sourceEmail := "dogcow@apple.com"
+	var arguments = map[string]interface{}{
+		"email": sourceEmail,
+	}
+
+	status, body := controller.Add(arguments)
+	actualConcealedEmail := body["concealedEmail"]
+
+	suite.Assert().Equal(sourceEmail, testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(concealedEmail, actualConcealedEmail)
+	suite.Assert().Equal(http.StatusCreated, status)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerBadEmailType() {
+
+	testUsecase := TestConcealEmailUsecase{}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"email": 3,
+	}
+
+	status, _ := controller.Add(arguments)
+
+	suite.Assert().Empty(testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(http.StatusBadRequest, status)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerInvalidEmail() {
+
+	testUsecase := TestConcealEmailUsecase{
+		AddReturnError: entities.InvalidEmailAddressError,
+	}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	sourceEmail := "dogcow"
+	var arguments = map[string]interface{}{
+		"email": sourceEmail,
+	}
+
+	status, _ := controller.Add(arguments)
+
+	suite.Assert().Equal(sourceEmail, testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(http.StatusBadRequest, status)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerUnknownError() {
+
+	testUsecase := TestConcealEmailUsecase{
+		AddReturnError: errors.New("some other error"),
+	}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	sourceEmail := "dogcow@apple.com"
+	var arguments = map[string]interface{}{
+		"email": sourceEmail,
+	}
+
+	status, _ := controller.Add(arguments)
+
+	suite.Assert().Equal(sourceEmail, testUsecase.AddReceiveSourceEmail)
+	suite.Assert().Equal(http.StatusInternalServerError, status)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestAddFailsWithActualEmailUnverified() {
+
+	testUsecase := TestConcealEmailUsecase{
+		AddReturnError: concealEmail.ActualEmailIsUnverified,
+	}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"email": "dogcow@apple.com",
+	}
+
+	status, body := controller.Add(arguments)
+
+	suite.Assert().Equal(http.StatusBadRequest, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerSuccess() {
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "dogcow",
+	}
+
+	status, body := controller.Delete(arguments)
+
+	suite.Assert().Equal(http.StatusNoContent, status)
+	suite.Assert().Empty(body)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerBadInput() {
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": 3,
+	}
+
+	status, body := controller.Delete(arguments)
+
+	suite.Assert().Equal(http.StatusBadRequest, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerFailedDelete() {
+
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			DeleteReturnError: errors.New("moof! go boom"),
+		}
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "dogcow",
+	}
+
+	status, body := controller.Delete(arguments)
+
+	suite.Assert().Equal(http.StatusInternalServerError, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestUpdateConcealEmailWithNewDescription() {
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description":    "a new description",
+	}
+
+	status, body := controller.Update(arguments)
+
+	suite.Assert().Equal(http.StatusOK, status)
+	suite.Assert().Empty(body)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestTooLongDescriptionUpdate() {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			AddDescriptionReturnError: entities.DescriptionTooLongError,
+		}
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description":    "this value doesn't matter",
+	}
+
+	status, body := controller.Update(arguments)
+
+	suite.Assert().Equal(http.StatusBadRequest, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateFailedForUnkownReason() {
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			AddDescriptionReturnError: errors.New("Unknown error"),
+		}
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": "an ID",
+		"description":    "this value doesn't matter",
+	}
+
+	status, body := controller.Update(arguments)
+
+	suite.Assert().Equal(http.StatusInternalServerError, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateWithDelete() {
+
+	testUsecase := TestConcealEmailUsecase{}
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &testUsecase
+	})
+	controller.Init()
+
+	conceaEmailId := "an ID"
+	var arguments = map[string]interface{}{
+		"concealEmailId": conceaEmailId,
+		"description":    "", //empty on purpose
+	}
+
+	status, body := controller.Update(arguments)
+
+	//tests that the correct usecase was called
+	suite.Assert().Empty(testUsecase.AddDescriptionReceiveConcealEmailPrefix)
+	suite.Assert().Equal(conceaEmailId, testUsecase.DeleteDescriptionReceiveConcealEmailPrefix)
+
+	suite.Assert().Equal(http.StatusOK, status)
+
+	_, exists := body["error"]
+	suite.Assert().False(exists)
+}
+
+func (suite *ConcealEmailControllerTestSuite) TestUpdateFailedWithConcealEmailNotExist() {
+
+	conceaEmailId := "an ID"
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{
+			DeleteDescriptionReturnError: usecases.ConcealEmailNotExistError{
+				ConcealEmailId: conceaEmailId,
+			},
+		}
+	})
+	controller.Init()
+
+	var arguments = map[string]interface{}{
+		"concealEmailId": conceaEmailId,
+		"description":    "", //empty on purpose
+	}
+
+	status, body := controller.Update(arguments)
+
+	suite.Assert().Equal(http.StatusNotFound, status)
+
+	_, exists := body["error"]
+	suite.Assert().True(exists)
+}
+
+//dependency injection mocks
 
 type TestConcealEmailUsecase struct {
 	AddReceiveSourceEmail string
@@ -53,299 +327,8 @@ func (testUsecase *TestConcealEmailUsecase) DeleteDescriptionFromExistingEmail(c
 	return testUsecase.DeleteDescriptionReturnError
 }
 
-func TestConcealEmailControllerSuccess(t *testing.T) {
-	concealedEmail := "concealed@asdf.com"
+//Start the test suite
 
-	testUsecase := TestConcealEmailUsecase{
-		AddReturnConcealEmail: concealedEmail,
-	}
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &testUsecase
-	})
-
-	sourceEmail := "dogcow@apple.com"
-	var arguments = map[string]interface{}{
-		"email": sourceEmail,
-	}
-
-	status, body := controller.Add(arguments)
-	actualConcealedEmail := body["concealedEmail"]
-
-	if testUsecase.AddReceiveSourceEmail != sourceEmail {
-		t.Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testUsecase.AddReceiveSourceEmail, sourceEmail)
-	}
-
-	if actualConcealedEmail != testUsecase.AddReturnConcealEmail {
-		t.Errorf("The concealed e-mail %s generated wasn't passed back completely, instead %s was returned", testUsecase.AddReturnConcealEmail, actualConcealedEmail)
-	}
-
-	if status != http.StatusCreated {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusCreated)
-	}
-}
-
-func TestConcealEmailControllerBadEmailType(t *testing.T) {
-
-	testUsecase := TestConcealEmailUsecase{}
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &testUsecase
-	})
-
-	var arguments = map[string]interface{}{
-		"email": 3,
-	}
-
-	status, _ := controller.Add(arguments)
-
-	if testUsecase.AddReceiveSourceEmail != "" {
-		t.Errorf("The usecase was called, but it shouldn't have been")
-	}
-
-	if status != http.StatusBadRequest {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
-}
-
-func TestConcealEmailControllerInvalidEmail(t *testing.T) {
-
-	testUsecase := TestConcealEmailUsecase{
-		AddReturnError: entities.InvalidEmailAddressError,
-	}
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &testUsecase
-	})
-
-	sourceEmail := "dogcow"
-	var arguments = map[string]interface{}{
-		"email": sourceEmail,
-	}
-
-	status, _ := controller.Add(arguments)
-
-	if testUsecase.AddReceiveSourceEmail != sourceEmail {
-		t.Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testUsecase.AddReceiveSourceEmail, sourceEmail)
-	}
-
-	if status != http.StatusBadRequest {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
-}
-
-func TestConcealEmailControllerUnknownError(t *testing.T) {
-
-	testUsecase := TestConcealEmailUsecase{
-		AddReturnError: errors.New("some other error"),
-	}
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &testUsecase
-	})
-
-	sourceEmail := "dogcow@apple.com"
-	var arguments = map[string]interface{}{
-		"email": sourceEmail,
-	}
-
-	status, _ := controller.Add(arguments)
-
-	if testUsecase.AddReceiveSourceEmail != sourceEmail {
-		t.Errorf("The parsed source e-mail %s was not the passed in e-mail %s", testUsecase.AddReceiveSourceEmail, sourceEmail)
-	}
-
-	if status != http.StatusInternalServerError {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
-	}
-}
-
-func TestDeleteConcealEmailControllerSuccess(t *testing.T) {
-
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": "dogcow",
-	}
-
-	status, body := controller.Delete(arguments)
-
-	if status != http.StatusNoContent {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusNoContent)
-	}
-
-	if len(body) != 0 {
-		t.Errorf("The returned status response body wasn't empty; it should've been")
-	}
-}
-
-func TestDeleteConcealEmailControllerBadInput(t *testing.T) {
-
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": 3,
-	}
-
-	status, body := controller.Delete(arguments)
-
-	if status != http.StatusBadRequest {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
-
-	_, exists := body["error"]
-	if !exists {
-		t.Errorf("An error is missing from the response body; it should've been there")
-	}
-}
-
-func TestDeleteConcealEmailControllerFailedDelete(t *testing.T) {
-
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{
-			DeleteReturnError: errors.New("moof! go boom"),
-		}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": "dogcow",
-	}
-
-	status, body := controller.Delete(arguments)
-
-	if status != http.StatusInternalServerError {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
-	}
-
-	_, exists := body["error"]
-	if !exists {
-		t.Errorf("An error is missing from the response body; it should've been there")
-	}
-}
-
-func TestUpdateConcealEmailWithNewDescription(t *testing.T) {
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": "an ID",
-		"description": "a new description",
-	}
-
-	status, body := controller.Update(arguments)
-
-	if status != http.StatusOK {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusOK)
-	}
-
-	bodySize := len(body)
-	if bodySize != 0 {
-		t.Errorf("There was data in the response body when there shouldn't be anything")
-	}
-}
-
-func TestTooLongDescriptionUpdate(t *testing.T) {
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{
-			AddDescriptionReturnError: entities.DescriptionTooLongError,
-		}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": "an ID",
-		"description": "this value doesn't matter",
-	}
-
-	status, body := controller.Update(arguments)
-
-	if status != http.StatusBadRequest {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusBadRequest)
-	}
-
-	_, exists := body["error"]
-	if !exists {
-		t.Errorf("An error is missing from the response body; it should've been there")
-	}
-}
-
-func TestDescriptionUpdateFailedForUnkownReason(t *testing.T) {
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{
-			AddDescriptionReturnError: errors.New("Unknown error"),
-		}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": "an ID",
-		"description": "this value doesn't matter",
-	}
-
-	status, body := controller.Update(arguments)
-
-	if status != http.StatusInternalServerError {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusInternalServerError)
-	}
-
-	_, exists := body["error"]
-	if !exists {
-		t.Errorf("An error is missing from the response body; it should've been there")
-	}
-}
-
-func TestDescriptionUpdateWithDelete(t *testing.T) {
-
-	concealEmailUsecase := TestConcealEmailUsecase{}
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &concealEmailUsecase
-	})
-
-	conceaEmailId := "an ID"
-	var arguments = map[string]interface{}{
-		"concealEmailId": conceaEmailId,
-		"description": "",  //empty on purpose
-	}
-
-	status, body := controller.Update(arguments)
-
-	if concealEmailUsecase.AddDescriptionReceiveConcealEmailPrefix != "" && concealEmailUsecase.DeleteDescriptionReceiveConcealEmailPrefix != conceaEmailId {
-		t.Errorf("The wrong usecase was called.  The delete usecase should have been called.")
-	}
-
-	if status != http.StatusOK {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusOK)
-	}
-
-	_, exists := body["error"]
-	if exists {
-		t.Errorf("An error was returned in the response body; it shouldn't be there")
-	}
-}
-
-func TestUpdateFailedWithConcealEmailNotExist(t *testing.T) {
-
-	conceaEmailId := "an ID"
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{
-			DeleteDescriptionReturnError: usecases.ConcealEmailNotExistError{
-				ConcealEmailId: conceaEmailId,
-			},
-		}
-	})
-
-	var arguments = map[string]interface{}{
-		"concealEmailId": conceaEmailId,
-		"description": "",  //empty on purpose
-	}
-
-	status, body := controller.Update(arguments)
-
-	if status != http.StatusNotFound {
-		t.Errorf("The returned status %d didn't equal the expected status of %d", status, http.StatusNotFound)
-	}
-
-	_, exists := body["error"]
-	if !exists {
-		t.Errorf("An error is missing from the response body; it should've been there")
-	}
+func TestConcealEmailControllerTestSuite(t *testing.T) {
+	suite.Run(t, new(ConcealEmailControllerTestSuite))
 }
