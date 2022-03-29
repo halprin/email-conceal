@@ -19,7 +19,12 @@ type ConcealEmailControllerTestSuite struct {
 }
 
 func (suite *ConcealEmailControllerTestSuite) SetupTest() {
-
+	//defaults each test to a dummy set of values
+	testAppContext.Reset()
+	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
+		return &TestConcealEmailUsecase{}
+	})
+	controller.Init()
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerSuccess() {
@@ -31,6 +36,7 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerSuccess(
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
+	controller.Init()
 
 	sourceEmail := "dogcow@apple.com"
 	var arguments = map[string]interface{}{
@@ -59,6 +65,7 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerBadEmail
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
+	controller.Init()
 
 	var arguments = map[string]interface{}{
 		"email": 3,
@@ -83,6 +90,7 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerInvalidE
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
+	controller.Init()
 
 	sourceEmail := "dogcow"
 	var arguments = map[string]interface{}{
@@ -108,6 +116,7 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerUnknownE
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &testUsecase
 	})
+	controller.Init()
 
 	sourceEmail := "dogcow@apple.com"
 	var arguments = map[string]interface{}{
@@ -127,10 +136,6 @@ func (suite *ConcealEmailControllerTestSuite) TestConcealEmailControllerUnknownE
 
 func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerSuccess() {
 
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{}
-	})
-
 	var arguments = map[string]interface{}{
 		"concealEmailId": "dogcow",
 	}
@@ -147,10 +152,6 @@ func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerSu
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerBadInput() {
-
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{}
-	})
 
 	var arguments = map[string]interface{}{
 		"concealEmailId": 3,
@@ -175,6 +176,7 @@ func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerFa
 			DeleteReturnError: errors.New("moof! go boom"),
 		}
 	})
+	controller.Init()
 
 	var arguments = map[string]interface{}{
 		"concealEmailId": "dogcow",
@@ -193,9 +195,6 @@ func (suite *ConcealEmailControllerTestSuite) TestDeleteConcealEmailControllerFa
 }
 
 func (suite *ConcealEmailControllerTestSuite) TestUpdateConcealEmailWithNewDescription() {
-	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
-		return &TestConcealEmailUsecase{}
-	})
 
 	var arguments = map[string]interface{}{
 		"concealEmailId": "an ID",
@@ -220,6 +219,7 @@ func (suite *ConcealEmailControllerTestSuite) TestTooLongDescriptionUpdate() {
 			AddDescriptionReturnError: entities.DescriptionTooLongError,
 		}
 	})
+	controller.Init()
 
 	var arguments = map[string]interface{}{
 		"concealEmailId": "an ID",
@@ -244,6 +244,7 @@ func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateFailedForUnko
 			AddDescriptionReturnError: errors.New("Unknown error"),
 		}
 	})
+	controller.Init()
 
 	var arguments = map[string]interface{}{
 		"concealEmailId": "an ID",
@@ -268,6 +269,7 @@ func (suite *ConcealEmailControllerTestSuite) TestDescriptionUpdateWithDelete() 
 	testAppContext.Bind(func() concealEmail.ConcealEmailUsecase {
 		return &concealEmailUsecase
 	})
+	controller.Init()
 
 	conceaEmailId := "an ID"
 	var arguments = map[string]interface{}{
@@ -301,6 +303,7 @@ func (suite *ConcealEmailControllerTestSuite) TestUpdateFailedWithConcealEmailNo
 			},
 		}
 	})
+	controller.Init()
 
 	var arguments = map[string]interface{}{
 		"concealEmailId": conceaEmailId,

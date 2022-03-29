@@ -72,4 +72,5 @@ func Init() {
 	dynamoDbGateway.Init()
 	actualEmailUsecaseInstance.Init()
 	concealEmailUsecaseInstance.Init()
+	concealEmailControllerInstance.Init()
 }
