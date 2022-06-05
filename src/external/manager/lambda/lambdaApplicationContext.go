@@ -2,13 +2,14 @@ package lambda
 
 import (
 	"github.com/halprin/email-conceal/src/context"
+	accountController "github.com/halprin/email-conceal/src/controllers/account"
 	actualEmailController "github.com/halprin/email-conceal/src/controllers/actualEmail"
 	concealEmailController "github.com/halprin/email-conceal/src/controllers/concealEmail"
 	"github.com/halprin/email-conceal/src/external/lib"
 	"github.com/halprin/email-conceal/src/gateways/awsSesSendEmail"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
-	"github.com/halprin/email-conceal/src/usecases/account"
+	accountUsecase "github.com/halprin/email-conceal/src/usecases/account"
 	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
 	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
@@ -20,6 +21,7 @@ func Init() {
 	//controllers
 	concealEmailControllerInstance := concealEmailController.ConcealEmailController{}
 	actualEmailControllerInstance := actualEmailController.ActualEmailController{}
+	accountControllerInstance := accountController.AccountController{}
 
 	applicationContext.Bind(func() concealEmailController.ConcealEmailController {
 		return concealEmailControllerInstance
@@ -29,10 +31,14 @@ func Init() {
 		return actualEmailControllerInstance
 	})
 
+	applicationContext.Bind(func() accountController.AccountController {
+		return accountControllerInstance
+	})
+
 	//usecases
 	concealEmailUsecaseInstance := concealEmailUsecase.ConcealEmailUsecaseImpl{}
 	actualEmailUsecaseInstance := actualEmailUsecase.ActualEmailUsecaseImpl{}
-	accountUsecaseInstance := account.AccountUsecaseImpl{}
+	accountUsecaseInstance := accountUsecase.AccountUsecaseImpl{}
 
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
 		return concealEmailUsecaseInstance
@@ -42,7 +48,7 @@ func Init() {
 		return actualEmailUsecaseInstance
 	})
 
-	applicationContext.Bind(func() account.AccountUsecase {
+	applicationContext.Bind(func() accountUsecase.AccountUsecase {
 		return accountUsecaseInstance
 	})
 
@@ -80,4 +86,5 @@ func Init() {
 	concealEmailUsecaseInstance.Init()
 	concealEmailControllerInstance.Init()
 	accountUsecaseInstance.Init()
+	accountControllerInstance.Init()
 }
