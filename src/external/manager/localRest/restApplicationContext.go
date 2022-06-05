@@ -13,7 +13,16 @@ import (
 	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
 	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
+	"log"
 )
+
+type name struct {
+}
+
+func (n name) AddAccount(emailUsername string, passwordHash string) error {
+	log.Printf("emailUsername=%s, passwordHash=%s", emailUsername, passwordHash)
+	return nil
+}
 
 func Init() {
 	applicationContext := context.ApplicationContext{}
@@ -55,6 +64,7 @@ func Init() {
 	//gateways
 	dynamoDbGateway := dynamodb.DynamoDbGateway{}
 	environmentGateway := osEnvironmentVariable.OsEnvironmentGateway{}
+	namage := name{}
 
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailGateway {
 		return dynamoDbGateway
@@ -70,6 +80,10 @@ func Init() {
 
 	applicationContext.Bind(func() context.EnvironmentGateway {
 		return environmentGateway
+	})
+
+	applicationContext.Bind(func() accountUsecase.AccountConfigurationGateway {
+		return namage
 	})
 
 	//libraries

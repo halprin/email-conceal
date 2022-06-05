@@ -35,6 +35,8 @@ func (receiver ActualEmailUsecaseImpl) Init() {
 }
 
 func (receiver ActualEmailUsecaseImpl) Add(actualEmail string) error {
+	log.Println("Creating a new actual e-mail")
+
 	err := entities.ValidateEmail(actualEmail)
 	if err != nil {
 		return err

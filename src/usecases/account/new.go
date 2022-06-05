@@ -6,6 +6,7 @@ import (
 	"github.com/halprin/email-conceal/src/external/lib/errors"
 	"github.com/halprin/email-conceal/src/usecases/actualEmail"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 var applicationContext = context.ApplicationContext{}
@@ -25,6 +26,8 @@ func (receiver AccountUsecaseImpl) Init() {
 }
 
 func (receiver AccountUsecaseImpl) Create(emailUsername string, password string) error {
+	log.Println("Creating a new account")
+
 	err := entities.ValidateEmail(emailUsername)
 	if err != nil {
 		return err
@@ -50,7 +53,7 @@ func (receiver AccountUsecaseImpl) Create(emailUsername string, password string)
 
 func hashPassword(password string) (string, error) {
 	passwordBytes := []byte(password)
-	cipherText, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.MaxCost)
+	cipherText, err := bcrypt.GenerateFromPassword(passwordBytes, 13)
 	if err != nil {
 		return "", err
 	}

@@ -3,6 +3,7 @@ package localRest
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/halprin/email-conceal/src/context"
+	"github.com/halprin/email-conceal/src/controllers/account"
 	"github.com/halprin/email-conceal/src/controllers/actualEmail"
 	"github.com/halprin/email-conceal/src/controllers/concealEmail"
 )
@@ -26,6 +27,9 @@ func RestConfiguration() *gin.Engine {
 	//actual e-mail
 	v1.POST("/actualEmail", createActualEmail)
 	v1.GET("/activateRegistration/:secret", activateActualEmail)
+
+	//account
+	v1.POST("/account", createAccount)
 
 	return router
 }
@@ -96,6 +100,21 @@ func activateActualEmail(context *gin.Context) {
 	var actualEmailController actualEmail.ActualEmailController
 	applicationContext.Resolve(&actualEmailController)
 	httpStatus, jsonMap := actualEmailController.Activate(secret)
+
+	context.JSON(httpStatus, jsonMap)
+}
+
+func createAccount(context *gin.Context) {
+	var genericMap map[string]interface{}
+
+	err := context.BindJSON(&genericMap)
+	if err != nil {
+		return
+	}
+
+	var accountController account.AccountController
+	applicationContext.Resolve(&accountController)
+	httpStatus, jsonMap := accountController.New(genericMap)
 
 	context.JSON(httpStatus, jsonMap)
 }
