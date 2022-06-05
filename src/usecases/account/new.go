@@ -40,12 +40,12 @@ func (receiver AccountUsecaseImpl) Create(emailUsername string, password string)
 
 	err = accountConfigurationGateway.AddAccount(emailUsername, hashedPassword)
 	if err != nil {
-		return errors.Wrap(err, "Unable to add your new user account")
+		return errors.Wrap(err, "Unable to add the new user account")
 	}
 
 	err = actualEmailUsecase.Add(emailUsername)
 	if err != nil {
-		return errors.Wrap(err, "Wasn't able to register your e-mail address to forward e-mails to.  Please login and try again")
+		return errors.Wrap(err, "Wasn't able to register the e-mail address to forward e-mails to")
 	}
 
 	return nil
