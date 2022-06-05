@@ -8,6 +8,7 @@ import (
 	"github.com/halprin/email-conceal/src/gateways/awsSesSendEmail"
 	"github.com/halprin/email-conceal/src/gateways/dynamodb"
 	"github.com/halprin/email-conceal/src/gateways/osEnvironmentVariable"
+	"github.com/halprin/email-conceal/src/usecases/account"
 	actualEmailUsecase "github.com/halprin/email-conceal/src/usecases/actualEmail"
 	concealEmailUsecase "github.com/halprin/email-conceal/src/usecases/concealEmail"
 	forwardEmailUsecase "github.com/halprin/email-conceal/src/usecases/forwardEmail"
@@ -31,6 +32,7 @@ func Init() {
 	//usecases
 	concealEmailUsecaseInstance := concealEmailUsecase.ConcealEmailUsecaseImpl{}
 	actualEmailUsecaseInstance := actualEmailUsecase.ActualEmailUsecaseImpl{}
+	accountUsecaseInstance := account.AccountUsecaseImpl{}
 
 	applicationContext.Bind(func() concealEmailUsecase.ConcealEmailUsecase {
 		return concealEmailUsecaseInstance
@@ -38,6 +40,10 @@ func Init() {
 
 	applicationContext.Bind(func() actualEmailUsecase.ActualEmailUsecase {
 		return actualEmailUsecaseInstance
+	})
+
+	applicationContext.Bind(func() account.AccountUsecase {
+		return accountUsecaseInstance
 	})
 
 	//gateways
@@ -73,4 +79,5 @@ func Init() {
 	actualEmailUsecaseInstance.Init()
 	concealEmailUsecaseInstance.Init()
 	concealEmailControllerInstance.Init()
+	accountUsecaseInstance.Init()
 }
