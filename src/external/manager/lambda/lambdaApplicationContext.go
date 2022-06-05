@@ -72,6 +72,10 @@ func Init() {
 		return environmentGateway
 	})
 
+	applicationContext.Bind(func() accountUsecase.AccountConfigurationGateway {
+		return dynamoDbGateway
+	})
+
 	//libraries
 	googleUuid := lib.GoogleUuid{}
 

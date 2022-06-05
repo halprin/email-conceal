@@ -20,6 +20,8 @@ test:
 	go test ./...
 
 runLocally:
+	docker-compose rm --stop --force
+	docker-compose down --rmi local
 	docker-compose up
 
 devDeploy: compileForLinux
