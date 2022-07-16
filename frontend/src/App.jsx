@@ -1,9 +1,11 @@
 import Navigation from './components/navigation/Navigation';
+import ConcealEmail from './pages/ConcealEmail';
 
-function App() {
+const App = () => {
     return (
         <div className='container'>
             <Navigation />
+            <ConcealEmail />
         </div>
     );
 }
