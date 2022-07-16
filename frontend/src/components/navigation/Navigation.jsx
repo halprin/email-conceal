@@ -10,13 +10,7 @@ const Navigation = () => {
             <div className='collapse navbar-collapse' id='navbarSupportedContent'>
                 <ul className='navbar-nav'>
                     <li className='nav-item'>
-                        <a className='nav-link' href='./create-conceal-email'>Create Concealed E-mail</a>
-                    </li>
-                    <li className='nav-item'>
-                        <a className='nav-link' href='./update-conceal-email'>Update Concealed E-mail</a>
-                    </li>
-                    <li className='nav-item'>
-                        <a className='nav-link' href='./delete-conceal-email'>Delete Concealed E-mail</a>
+                        <a className='nav-link' href='./conceal-email'>Concealed E-mails</a>
                     </li>
                     <li className='nav-item'>
                         <a className='nav-link' href='./login'>Login</a>

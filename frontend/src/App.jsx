@@ -1,11 +1,11 @@
 import Navigation from './components/navigation/Navigation';
-import ConcealEmail from './pages/ConcealEmail';
+import { Outlet } from 'react-router-dom';
 
 const App = () => {
     return (
         <div className='container'>
             <Navigation />
-            <ConcealEmail />
+            <Outlet />
         </div>
     );
 }
