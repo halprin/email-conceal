@@ -8,7 +8,7 @@ const Navigation = () => {
         </button>
         <div className='collapse navbar-collapse' id='navbarSupportedContent'>
             <div className='navbar-nav'>
-                <a className='nav-link' href='./login' target='_blank'>Login</a>
+                <a className='nav-link' href='./login' >Login</a>
             </div>
         </div>
     </nav>;
