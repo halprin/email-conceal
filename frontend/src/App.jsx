@@ -1,11 +1,14 @@
 import Navigation from './components/navigation/Navigation';
-import { Outlet } from 'react-router-dom';
+import Welcome from './pages/Welcome';
+import { useOutlet } from 'react-router-dom';
 
 const App = () => {
+    const outlet = useOutlet();
+    const welcome = <Welcome />;
     return (
         <div className='container'>
             <Navigation />
-            <Outlet />
+            {outlet || welcome}
         </div>
     );
 }
