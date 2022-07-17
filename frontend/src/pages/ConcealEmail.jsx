@@ -5,12 +5,12 @@ const ConcealEmail = () => {
                 <h1>Create</h1>
                 <form>
                     <div className='mb-3'>
-                        <label htmlFor='actualEmailAddress' className='form-label'>Actual E-mail Address</label>
+                        <label htmlFor='actualEmailAddress' className='form-label'>Real E-mail Address</label>
                         <input type='email' className='form-control' id='actualEmailAddress' />
                     </div>
                     <div className='mb-3'>
                         <label htmlFor='concealEmailDescriptionForAdd' className='form-label'>Description</label>
-                        <input type='email' className='form-control' id='concealEmailDescriptionForAdd' />
+                        <input type='text' className='form-control' id='concealEmailDescriptionForAdd' />
                     </div>
                     <button type='submit' className='btn btn-primary'>Create</button>
                 </form>
@@ -25,7 +25,7 @@ const ConcealEmail = () => {
                     </div>
                     <div className='mb-3'>
                         <label htmlFor='concealEmailDescriptionForUpdate' className='form-label'>Description</label>
-                        <input type='email' className='form-control' id='concealEmailDescriptionForUpdate' />
+                        <input type='text' className='form-control' id='concealEmailDescriptionForUpdate' />
                     </div>
                     <button type='submit' className='btn btn-primary'>Update</button>
                 </form>
