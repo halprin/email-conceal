@@ -1,8 +1,27 @@
+import { useSelector, useDispatch } from 'react-redux';
+import { setConcealedEmailAddress, setConcealedEmailDescription } from './concealEmailSlice';
+
 const ConcealEmail = () => {
+    const dispatch = useDispatch();
+    const concealedEmailAddress = useSelector(state => state.concealedEmail.address);
+    const concealedEmailDescription = useSelector(state => state.concealedEmail.description);
+
     return (
         <div className='container'>
             <div className='row'>
-                <h1>Create</h1>
+                <h1>Concealed E-mails</h1>
+            </div>
+
+            <div className='row'>
+                <h2>Concealed E-mail State</h2>
+                <h3>E-mail Address:</h3>
+                <span>{concealedEmailAddress}</span>
+                <h3>Description:</h3>
+                <span>{concealedEmailDescription}</span>
+            </div>
+
+            <div className='row'>
+                <h2>Create</h2>
                 <form>
                     <div className='mb-3'>
                         <label htmlFor='actualEmailAddress' className='form-label'>Real E-mail Address</label>
@@ -17,7 +36,7 @@ const ConcealEmail = () => {
             </div>
 
             <div className='row'>
-                <h1>Update</h1>
+                <h2>Update</h2>
                 <form>
                     <div className='mb-3'>
                         <label htmlFor='concealEmailForUpdate' className='form-label'>Conceal E-mail Address</label>
@@ -32,7 +51,7 @@ const ConcealEmail = () => {
             </div>
 
             <div className='row'>
-                <h1>Delete</h1>
+                <h2>Delete</h2>
                 <form>
                     <div className='mb-3'>
                         <label htmlFor='concealEmailForDelete' className='form-label'>Conceal E-mail Address</label>

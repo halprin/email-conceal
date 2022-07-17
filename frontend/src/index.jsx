@@ -2,26 +2,32 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 
+import { Provider } from 'react-redux'
+
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import App from './App';
-import ConcealEmail from './pages/ConcealEmail';
+import ConcealEmail from './pages/concealEmail/ConcealEmail';
 import Login from './pages/Login';
+
+import store from './store';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route path='/' element={<App />}>
-                    <Route path='conceal-email' element={<ConcealEmail />} />
-                    <Route path='login' element={<Login />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
+        <Provider store={store}>
+            <BrowserRouter>
+                <Routes>
+                    <Route path='/' element={<App />}>
+                        <Route path='conceal-email' element={<ConcealEmail />} />
+                        <Route path='login' element={<Login />} />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </Provider>
     </React.StrictMode>
 );
 
