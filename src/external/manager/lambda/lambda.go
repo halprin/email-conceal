@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/halprin/email-conceal/src/external/manager/localRest"
 )
 
@@ -11,6 +12,7 @@ var ginLambda *ginadapter.GinLambda
 
 func PrepareLambda() {
 	ginRouter := localRest.RestConfiguration()
+	gin.SetMode(gin.ReleaseMode)
 
 	ginLambda = ginadapter.New(ginRouter)
 }

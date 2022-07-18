@@ -1,10 +1,12 @@
 package localRest
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/halprin/email-conceal/src/context"
 	"github.com/halprin/email-conceal/src/controllers/actualEmail"
 	"github.com/halprin/email-conceal/src/controllers/concealEmail"
+	"strings"
 )
 
 var applicationContext = context.ApplicationContext{}
@@ -15,6 +17,19 @@ func Rest() {
 
 func RestConfiguration() *gin.Engine {
 	router := gin.Default()
+
+	var environmentGateway context.EnvironmentGateway
+	applicationContext.Resolve(&environmentGateway)
+	domain := environmentGateway.GetEnvironmentValue("DOMAIN")
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOriginFunc = func(origin string) bool {
+		allowedDomainWithoutPort := strings.Split(domain, ":")[0]
+		originWithoutProtocolAndPort := strings.TrimLeft(strings.Split(origin, ":")[1], "/")
+
+		return originWithoutProtocolAndPort == allowedDomainWithoutPort
+	}
+	router.Use(cors.New(corsConfig))
 
 	v1 := router.Group("/v1")
 
