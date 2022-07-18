@@ -1,5 +1,4 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { setConcealedEmailAddress, setConcealedEmailDescription } from './concealEmailSlice';
 import {createConcealedEmail} from './logic';
 
 const ConcealEmail = () => {
@@ -32,7 +31,7 @@ const ConcealEmail = () => {
                         <label htmlFor='concealEmailDescriptionForAdd' className='form-label'>Description</label>
                         <input type='text' className='form-control' id='concealEmailDescriptionForAdd' />
                     </div>
-                    <button type='button' className='btn btn-primary' onClick={() => dispatch(createConcealedEmail)}>Create</button>
+                    <button type='button' className='btn btn-primary' onClick={(event) => dispatch(createConcealedEmail(event.target.form.actualEmailAddress.value, event.target.form.concealEmailDescriptionForAdd.value))}>Create</button>
                 </form>
             </div>
 
