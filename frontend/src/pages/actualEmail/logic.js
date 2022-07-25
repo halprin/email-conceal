@@ -1,5 +1,4 @@
 import { setActualEmailAddress } from './actualEmailSlice';
-import axios from 'axios';
 import { callBackend } from '../../helpers/backend'
 
 export const createActualEmail = (actualEmailAddress) => {
