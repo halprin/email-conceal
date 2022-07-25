@@ -11,6 +11,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import App from './App';
 import ConcealEmail from './pages/concealEmail/ConcealEmail';
+import ActualEmail from './pages/actualEmail/ActualEmail';
 import Login from './pages/Login';
 
 import store from './store';
@@ -23,6 +24,7 @@ root.render(
                 <Routes>
                     <Route path='/' element={<App />}>
                         <Route path='conceal-email' element={<ConcealEmail />} />
+                        <Route path='actual-email' element={<ActualEmail />} />
                         <Route path='login' element={<Login />} />
                     </Route>
                 </Routes>

@@ -1,3 +1,5 @@
+import {Link} from 'react-router-dom';
+
 const Navigation = () => {
     return (
         <nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
@@ -10,10 +12,13 @@ const Navigation = () => {
             <div className='collapse navbar-collapse' id='navbarSupportedContent'>
                 <ul className='navbar-nav'>
                     <li className='nav-item'>
-                        <a className='nav-link' href='./conceal-email'>Concealed E-mails</a>
+                        <Link className='nav-link' to='./actual-email'>Actual E-mails</Link>
                     </li>
                     <li className='nav-item'>
-                        <a className='nav-link' href='./login'>Login</a>
+                        <Link className='nav-link' to='./conceal-email'>Concealed E-mails</Link>
+                    </li>
+                    <li className='nav-item'>
+                        <Link className='nav-link' to='./login'>Login</Link>
                     </li>
                 </ul>
             </div>
