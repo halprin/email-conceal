@@ -41,11 +41,11 @@ const createConcealEmailInBackend = async (actualEmailAddress, description) => {
 };
 
 const updateConcealEmailInBackend = async (concealedEmailAddress, description) => {
-    return await callBackend(`/v1/concealEmail/${concealedEmailAddress}`, 'put', {
+    await callBackend(`/v1/concealEmail/${concealedEmailAddress}`, 'put', {
         description,
     });
 };
 
 const deleteConcealEmailInBackend = async (concealedEmailAddress) => {
-    return await callBackend(`/v1/concealEmail/${concealedEmailAddress}`, 'delete');
+    await callBackend(`/v1/concealEmail/${concealedEmailAddress}`, 'delete');
 };

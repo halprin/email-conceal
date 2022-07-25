@@ -1,5 +1,6 @@
 import { setActualEmailAddress } from './actualEmailSlice';
 import axios from 'axios';
+import { callBackend } from '../../helpers/backend'
 
 export const createActualEmail = (actualEmailAddress) => {
     return async (dispatch, getState) => {
@@ -11,7 +12,7 @@ export const createActualEmail = (actualEmailAddress) => {
 };
 
 const createActualEmailInBackend = async (actualEmailAddress) => {
-    await axios.post(`http://localhost:8000/v1/actualEmail`, {
+    await callBackend('/v1/actualEmail', 'post', {
         email: actualEmailAddress,
     });
 };
