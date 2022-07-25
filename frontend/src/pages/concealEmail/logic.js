@@ -1,6 +1,6 @@
 import { setConcealedEmailAddress, setConcealedEmailDescription } from './concealEmailSlice';
 import { extractUserFromEmailAddress } from '../../helpers/email';
-import axios from 'axios';
+import { callBackend } from '../../helpers/backend'
 
 export const createConcealedEmail = (actualEmailAddress, description) => {
     return async (dispatch, getState) => {
@@ -33,21 +33,19 @@ export const deleteConcealedEmail = (concealedEmailAddress) => {
     };
 };
 
-const updateConcealEmailInBackend = async (concealedEmailAddress, description) => {
-    await axios.put(`http://localhost:8000/v1/concealEmail/${concealedEmailAddress}`, {
-        description,
-    });
-};
-
 const createConcealEmailInBackend = async (actualEmailAddress, description) => {
-    const response = await axios.post(`http://localhost:8000/v1/concealEmail`, {
+    return (await callBackend('/v1/concealEmail', 'post', {
         email: actualEmailAddress,
         description,
-    });
+    })).concealedEmail;
+};
 
-    return response.data.concealedEmail;
+const updateConcealEmailInBackend = async (concealedEmailAddress, description) => {
+    return await callBackend(`/v1/concealEmail/${concealedEmailAddress}`, 'put', {
+        description,
+    });
 };
 
 const deleteConcealEmailInBackend = async (concealedEmailAddress) => {
-    await axios.delete(`http://localhost:8000/v1/concealEmail/${concealedEmailAddress}`);
+    return await callBackend(`/v1/concealEmail/${concealedEmailAddress}`, 'delete');
 };
