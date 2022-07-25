@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import {createConcealedEmail} from './logic';
+import {createConcealedEmail, deleteConcealedEmail, updateConcealedEmail} from './logic';
 
 const ConcealEmail = () => {
     const dispatch = useDispatch();
@@ -46,7 +46,7 @@ const ConcealEmail = () => {
                         <label htmlFor='concealEmailDescriptionForUpdate' className='form-label'>Description</label>
                         <input type='text' className='form-control' id='concealEmailDescriptionForUpdate' />
                     </div>
-                    <button type='button' className='btn btn-primary'>Update</button>
+                    <button type='button' className='btn btn-primary' onClick={(event) => dispatch(updateConcealedEmail(event.target.form.concealEmailForUpdate.value, event.target.form.concealEmailDescriptionForUpdate.value))}>Update</button>
                 </form>
             </div>
 
@@ -57,7 +57,7 @@ const ConcealEmail = () => {
                         <label htmlFor='concealEmailForDelete' className='form-label'>Conceal E-mail Address</label>
                         <input type='email' className='form-control' id='concealEmailForDelete' />
                     </div>
-                    <button type='button' className='btn btn-primary'>Delete</button>
+                    <button type='button' className='btn btn-primary' onClick={(event) => dispatch(deleteConcealedEmail(event.target.form.concealEmailForDelete.value))}>Delete</button>
                 </form>
             </div>
         </div>
